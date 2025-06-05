@@ -8,15 +8,15 @@ export const ThemeContextProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    const htmlEle = window.document.documentElement;
 
     const applyTheme = (mode) => {
-      root.classList.remove("light", "dark");
+      htmlEle.classList.remove("light", "dark");
       if (mode === "system") {
         const isSystemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        root.classList.add(isSystemDark ? "dark" : "light");
+        htmlEle.classList.add(isSystemDark ? "dark" : "light");
       } else {
-        root.classList.add(mode);
+        htmlEle.classList.add(mode);
       }
     };
 
