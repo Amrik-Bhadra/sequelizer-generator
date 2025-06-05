@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { ThemeContextProvider, AuthContextProvider } from "./contexts";
+import { ThemeContextProvider } from "./contexts/ThemeContext";
+import { AuthContextProvider } from "./contexts/AuthContext";
 import AuthLayout from "./layouts/AuthLayout";
 import Login from "../src/pages/auth/Login";
 import Registration from "../src/pages/auth/Registration";
