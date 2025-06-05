@@ -40,7 +40,7 @@ const AuthLayout = () => {
         className="relative w-full md:w-[50%] lg:w-[35%] flex flex-col justify-center items-center bg-white dark:bg-[#222]"
       >
         {/* Put the ThemeButton at top-right */}
-        <div className="absolute top-4 right-5 z-50">
+        <div className="absolute top-3 right-4 z-50">
           <ThemeButton />
         </div>
 
