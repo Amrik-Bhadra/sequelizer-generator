@@ -1,5 +1,4 @@
 const db = require('../config/db');
-
 const getUserData = async(user_id) => {
     const [rows] = await db.execute('SELECT * FROM users WHERE user_id = ?', [user_id]);
     return rows[0];

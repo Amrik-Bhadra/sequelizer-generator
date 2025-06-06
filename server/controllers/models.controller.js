@@ -90,6 +90,7 @@ const getAllModels = async (req, res) => {
 
   try {
     const models = await getAllModelsForUser(userId);
+    console.log(models);
     res.status(200).json(models);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching models', error: err.message });
