@@ -24,22 +24,29 @@ async function updateModelAssociation(userId, modelName, targetModel, type, fore
     } else {
         association = `${modelName}.${type}(models.${targetModel}, { foreignKey: '${foreignKey}', as: '${as}' });`;
     }
-
+    console.log(`Adding association: ${association}`);
     if (code.includes("static associate(models)")) {
-        if (!code.includes(association)) {
-            code = code.replace(
-                /static associate\(models\) \{([\s\S]*?)\}/,
-                (match, inner) => {
-                    return `static associate(models) {\n${inner.trim()}\n${association}\n  }`;
+        code = code.replace(
+            /static associate\(models\) \{([\s\S]*?)\n\s*\}/,
+            (match, inner) => {
+                const lines = inner.trim().split('\n').map(line => line.trim()).filter(Boolean);
+
+                if (!lines.includes(association)) {
+                    lines.push(association); 
                 }
-            );
-        }
+
+                const newInner = lines.map(line => `  ${line}`).join('\n');
+
+                return `static associate(models) {\n${newInner}\n  }`;
+            }
+        );
     } else {
         code = code.replace(
             new RegExp(`class\\s+${modelName}\\s+extends\\s+Model\\s+\\{`),
-            (match) => `${match}\n  static associate(models) {\n${association}\n  }`
+            (match) => `${match}\n  static associate(models) {\n    ${association}\n  }`
         );
     }
+
 
     if (!metadata.association) {
         metadata.association = [];

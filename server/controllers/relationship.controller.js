@@ -29,77 +29,127 @@ const updateRelationship = async (req, res) => {
 
 
 const deleteRelationship = async (req, res) => {
-  try {
-    const { userId, modelName, targetModel, foreignKey } = req.body;
+    try {
+        const { userId, fromModel, toModel, relationshipType, foreignKey } = req.body;
 
-    const [rows] = await db.execute(
-      `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
-      [userId, modelName]
-    );
+        const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Model not found" });
-    }
+        const [rowsFrom] = await db.execute(
+            `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+            [userId, fromModel]
+        );
 
-    const model = rows[0];
-    let code = model.code;
-    const metadata = typeof model.metadata === 'string'
-      ? JSON.parse(model.metadata)
-      : model.metadata;
-
-    const assocToDelete = metadata.association.find(
-      a => a.target === targetModel && a.foreignKey === foreignKey
-    );
-
-    if (!assocToDelete) {
-      return res.status(404).json({ message: "Association not found" });
-    }
-
-    // Build a robust regex pattern
-    const safeModelName = modelName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const safeTargetModel = targetModel.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const safeForeignKey = foreignKey.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-
-    const associationRegex = new RegExp(
-      `${safeModelName}\\.${assocToDelete.type}\\(models\\.${safeTargetModel},\\s*{[^}]*foreignKey:\\s*['"]${safeForeignKey}['"][^}]*}\\);?`,
-      'g'
-    );
-
-    if (code.includes("static associate(models)")) {
-      code = code.replace(
-        /static associate\(models\) \{([\s\S]*?)\}/,
-        (match, inner) => {
-          const updated = inner.replace(associationRegex, '').trim();
-          return `static associate(models) {\n${updated}\n  }`;
+        if (rowsFrom.length === 0) {
+            return res.status(404).json({ message: "From Model not found" });
         }
-      );
-    } else {
-      code = code.replace(associationRegex, '');
+
+        let codeFrom = rowsFrom[0].code;
+        let metadataFrom = typeof rowsFrom[0].metadata === 'string'
+            ? JSON.parse(rowsFrom[0].metadata)
+            : rowsFrom[0].metadata;
+
+        let forwardAssoc = metadataFrom.association?.find(assoc =>
+            assoc.type === forwardMethod &&
+            assoc.target === toModel &&
+            assoc.foreignKey === foreignKey
+        );
+
+        let forwardAs = forwardAssoc?.as || null;
+
+        let forwardAssociationPattern;
+        if (!forwardAs) {
+            forwardAssociationPattern = `${fromModel}\\.${forwardMethod}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}' \\}\\);`;
+        } else {
+            forwardAssociationPattern = `${fromModel}\\.${forwardMethod}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}', as: '${forwardAs}' \\}\\);`;
+        }
+        const forwardRegex = new RegExp(forwardAssociationPattern, 'g');
+        codeFrom = codeFrom.replace(forwardRegex, '');
+        codeFrom = codeFrom.replace(/\n\s*\n/g, '\n');
+
+        if (metadataFrom.association) {
+            metadataFrom.association = metadataFrom.association.filter(assoc => {
+                return !(
+                    assoc.type === forwardMethod &&
+                    assoc.target === toModel &&
+                    assoc.foreignKey === foreignKey
+                );
+            });
+        }
+
+        const cleanMetadataFrom = JSON.parse(JSON.stringify(metadataFrom));
+
+        await db.execute(
+            `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+            [codeFrom, JSON.stringify(cleanMetadataFrom), userId, fromModel]
+        );
+
+        const [rowsTo] = await db.execute(
+            `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+            [userId, toModel]
+        );
+
+        if (rowsTo.length === 0) {
+            return res.status(404).json({ message: "To Model not found" });
+        }
+
+        let codeTo = rowsTo[0].code;
+        let metadataTo = typeof rowsTo[0].metadata === 'string'
+            ? JSON.parse(rowsTo[0].metadata)
+            : rowsTo[0].metadata;
+        console.log("Metadata To:", metadataTo);
+        console.log(reverseMethod, fromModel, foreignKey);
+        let reverseAssoc = metadataTo.association?.find(assoc =>
+            assoc.type === reverseMethod &&
+            assoc.target === fromModel &&
+            assoc.foreignKey === foreignKey 
+        );
+
+        let reverseAs = reverseAssoc?.as || null;
+        let reverseAssociationPattern;
+        if (!reverseAs) {
+            reverseAssociationPattern = `${toModel}\\.${reverseMethod}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}' \\}\\);`;
+        } else {
+            reverseAssociationPattern = `${toModel}\\.${reverseMethod}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', as: '${reverseAs}' \\}\\);`;
+        }
+        const reverseRegex = new RegExp(reverseAssociationPattern, 'g');
+        codeTo = codeTo.replace(reverseRegex, '');
+        codeTo = codeTo.replace(/\n\s*\n/g, '\n');
+        if (metadataTo.association) {
+            metadataTo.association = metadataTo.association.filter(assoc => {
+                return !(
+                    assoc.type === reverseMethod &&
+                    assoc.target === fromModel &&
+                    assoc.foreignKey === foreignKey
+                );
+            });
+        }
+
+        const cleanMetadataTo = JSON.parse(JSON.stringify(metadataTo));
+
+        await db.execute(
+            `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+            [codeTo, JSON.stringify(cleanMetadataTo), userId, toModel]
+        );
+
+        return res.status(200).json({
+            message: "Relationship deleted successfully (both directions)",
+            forward: {
+                code: codeFrom,
+                metadata: metadataFrom
+            },
+            reverse: {
+                code: codeTo,
+                metadata: metadataTo
+            }
+        });
+
+    } catch (error) {
+        console.error("Error deleting relationship:", error);
+        return res.status(500).json({ message: "Internal server error", error: error.message });
     }
-
-    metadata.association = metadata.association.filter(
-      a => !(a.target === targetModel && a.foreignKey === foreignKey)
-    );
-
-    const metadataString = JSON.stringify(metadata);
-    const [result] = await db.execute(
-      `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
-      [code, metadataString, userId, modelName]
-    );
-
-    return res.status(200).json({
-      message: "Relationship deleted successfully",
-      code,
-      metadata
-    });
-
-  } catch (error) {
-    console.error("Error deleting relationship:", error);
-    return res.status(500).json({ message: "Internal server error", error: error.message });
-  }
 };
 
-
 module.exports = {
-    updateRelationship
+    updateRelationship,
+    deleteRelationship
 }
