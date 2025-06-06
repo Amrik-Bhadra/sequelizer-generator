@@ -8,6 +8,8 @@ import Registration from "../src/pages/auth/Registration";
 import ForgotPassword from "../src/pages/auth/ForgotPassword";
 import ResetPassword from "../src/pages/auth/ResetPassword";
 import VerifyOTP from "../src/pages/auth/VerifyOTP";
+import UserLayout from "./layouts/UserLayout";
+import Dashboard from "./pages/main/Dashboard";
 
 export default function App() {
   const routes = createBrowserRouter([
@@ -42,6 +44,17 @@ export default function App() {
         },
       ],
     },
+    {
+      path: "/",
+      element: <UserLayout/>,
+      children: [
+        {
+          path: "",
+          element: <Dashboard/>,
+          handle: { title: "Dashboard | Sequeelizer" },
+        }
+      ]
+    }
   ]);
 
   return (
