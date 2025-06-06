@@ -19,4 +19,30 @@ const deleteUser = async (id) => {
     return result;
 };
 
-module.exports = { createUser, findUserByEmail, deleteUser }
+const updateUserOtp = async (id, otp) => {
+    await db.query('UPDATE users SET otp = ? WHERE user_id = ?', [otp, id]);
+};
+
+const clearUserOtp = async (id) => {
+    await db.query('UPDATE users SET otp = NULL WHERE user_id = ?', [id]);
+}
+
+const getUserById = async (userId) => {
+    const [rows] = await db.query('SELECT * FROM users WHERE user_id = ?', [userId]);
+    return rows[0];
+};
+
+const updateUserPassword = async (userId, password) => {
+    await db.query('UPDATE users SET password = ? WHERE user_id = ?', [password, userId]);
+}
+
+
+module.exports = { 
+    createUser, 
+    findUserByEmail, 
+    deleteUser, 
+    updateUserOtp, 
+    clearUserOtp, 
+    getUserById,
+    updateUserPassword
+}
