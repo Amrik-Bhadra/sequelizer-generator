@@ -1,29 +1,60 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
+import toast from "react-hot-toast"
 
 const AuthContext = createContext({
   user: null,
   setUser: () => {},
   logout: () => {},
+  fetchUser: async () => {},
 });
 
 export const AuthContextProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user, setUser] = useState({});
 
-  const updateUser = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/api/auth/me", {
+        withCredentials: true,
+      });
+
+      if (res.status === 200) {
+        setUser(res.data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      console.log(err);
+      setUser(null);
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const logout = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status === 200) {
+        toast.success("Logout Successful!");
+        setUser(null);
+      } else {
+        toast.error("Logout error");
+      }
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser: updateUser, logout }}>
+    <AuthContext.Provider value={{ user, setUser, logout, fetchUser }}>
       {children}
     </AuthContext.Provider>
   );
