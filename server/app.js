@@ -1,10 +1,13 @@
 require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
 const app = express();
 const cors = require('cors');
 const cookieparser = require('cookie-parser');
 
 const authRoutes = require('./routes/auth.routes');
+const modelRoutes = require('./routes/models.routes');
+console.log('modelRoutes:', typeof modelRoutes);
 
 // cors setup
 const corsOption = {
@@ -37,7 +40,7 @@ app.use(session({
 
 
 app.use('/api/auth', authRoutes);
-
+app.use('/api/models', modelRoutes);
 
 //listen to server
 app.listen(port, ()=>{
