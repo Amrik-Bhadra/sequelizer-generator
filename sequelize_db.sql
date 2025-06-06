@@ -5,6 +5,8 @@ CREATE TABLE Users (
     username VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    authProvider VARCHAR(255),
+    uid VARCHAR(255),
     otp VARCHAR(10)
 );
 

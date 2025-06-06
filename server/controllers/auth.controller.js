@@ -1,5 +1,5 @@
 const md5 = require('md5');
-const { createUser, findUserByEmail, updateUserOtp, getUserById, clearUserOtp, updateUserPassword } = require('../models/User.model');
+const { createUser, findUserByEmail, updateUserOtp, getUserById, clearUserOtp, updateUserPassword, findUserByEmailUid, createUserGoogleAuth, getUserData } = require('../models/User.model');
 const sendEmail = require('../utils/emailService');
 const { otpEmailTemplate, welcomeEmailTemplate } = require('../utils/emailTemplates');
 
@@ -7,15 +7,33 @@ function generateOTP() {
     return Math.floor(10000 + Math.random() * 90000).toString();
 }
 
+const getUserDetails = async (req, res) => {
+    try {
+        const { id } = req.session.user;
+        const user = await getUserData(id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({
+            user: user,
+        });
+    } catch (error) {
+        console.error("Error in /api/auth/me:", error);
+        return res.status(401).json({ message: "Invalid or expired token" });
+    }
+}
+
 const register = async (req, res) => {
     try {
-        const { email, username, password } = req.body;
+        const { email, username, password, uid } = req.body;
         const user = await findUserByEmail(email);
 
         if (user) return res.status(409).json({ message: 'Email Already Exists' });
 
         const hashedPassword = md5(password);
-        await createUser(username, email, hashedPassword);
+        await createUser(username, email, hashedPassword, uid);
 
         const emailStatus = await sendEmail(email, 'Welcome To Sequelizer', welcomeEmailTemplate(username));
 
@@ -26,6 +44,27 @@ const register = async (req, res) => {
         res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
         console.error('Error in forgotPassword:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
+const googleRegister = async (req, res) => {
+    try {
+        const { uid, email, username } = req.body;
+        const user = await findUserByEmail(email);
+
+        if (user) return res.status(409).json({ message: 'Email Already Exists' });
+        await createUserGoogleAuth(uid, email, username);
+
+        const emailStatus = await sendEmail(email, 'Welcome To Sequelizer', welcomeEmailTemplate(username));
+
+        if (!emailStatus.success) {
+            return res.status(500).json({ message: 'Failed to send OTP email.' });
+        }
+
+        res.status(201).json({ message: "User registered successfully" });
+    } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'Server error' });
     }
 }
@@ -60,6 +99,29 @@ const login = async (req, res) => {
     }
 };
 
+const googleLogin = async (req, res) => {
+    try {
+        const { email, uid } = req.body;
+        const user = await findUserByEmailUid(email, uid);
+        if (!user) {
+            return res.status(401).json({ message: "User Not Found!" });
+        }
+
+        const otp = generateOTP();
+        await updateUserOtp(user.user_id, otp);
+
+        const emailStatus = await sendEmail(user.email, 'Your OTP for Login', otpEmailTemplate(otp));
+
+        if (!emailStatus.success) {
+            return res.status(500).json({ message: 'Failed to send OTP email.' });
+        }
+
+        res.status(200).json({ message: 'OTP sent to your email.', user_id: user.user_id });
+    } catch (error) {
+        console.error('Error in forgotPassword:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
 
 const verifyOtp = async (req, res) => {
     try {
@@ -83,6 +145,7 @@ const verifyOtp = async (req, res) => {
                 username: user.username,
                 email: user.email
             };
+
             return res.status(200).json({ message: 'OTP verified, login successful.', user: req.session.user });
         }
 
@@ -153,5 +216,5 @@ const logout = (req, res) => {
 };
 
 module.exports = {
-    login, register, verifyOtp, forgotPassword, resetPassword, logout
+    login, register, googleRegister, verifyOtp, forgotPassword, resetPassword, googleLogin, logout, getUserDetails
 }
