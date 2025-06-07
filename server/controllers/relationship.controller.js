@@ -10,7 +10,7 @@ const updateRelationship = async (req, res) => {
             const { fromModel, toModel, relationshipType, foreignKey, as } = relation;
 
             const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
-
+            
             await updateModelAssociation(userId, fromModel, toModel, forwardMethod, foreignKey, as);
 
             const reverseAs = as ? `reverse_${as}` : fromModel.toLowerCase();
