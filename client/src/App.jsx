@@ -10,9 +10,15 @@ import ResetPassword from "../src/pages/auth/ResetPassword";
 import VerifyOTP from "../src/pages/auth/VerifyOTP";
 import UserLayout from "./layouts/UserLayout";
 import Dashboard from "./pages/main/Dashboard";
+import LandingPage from "./pages/LandingPage";
 
 export default function App() {
   const routes = createBrowserRouter([
+    {
+      path: "/",
+      element: <LandingPage/>,
+      handle: {title: "Sequelizer"}
+    },
     {
       path: "/auth",
       element: <AuthLayout />,
@@ -45,11 +51,11 @@ export default function App() {
       ],
     },
     {
-      path: "/",
+      path: "/seq",
       element: <UserLayout/>,
       children: [
         {
-          path: "",
+          path: "dashboard",
           element: <Dashboard/>,
           handle: { title: "Dashboard | Sequeelizer" },
         }
