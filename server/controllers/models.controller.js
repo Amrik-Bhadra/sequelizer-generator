@@ -3,6 +3,10 @@
 const db = require('../config/db'); 
 
 // SQL Helpers
+const getModelById = (id) => {
+  return db.execute(`SELECT * FROM Models WHERE id = ?`, [id]);
+};
+
 const insertModel = async (name, code, metadata, userId) => {
   const [result] = await db.execute(
     `INSERT INTO Models (name, code, metadata, user_id) VALUES (?, ?, ?, ?)`,
@@ -11,10 +15,10 @@ const insertModel = async (name, code, metadata, userId) => {
   return result;
 };
 
-const updateModelCode = async (id, code, metadata) => {
+const updateModelCode = async (id, regeneratedCode, updatedMetadata) => {
   const [result] = await db.execute(
     `UPDATE Models SET code = ?, metadata = ? WHERE id = ?`,
-    [code, JSON.stringify(metadata), id]
+    [regeneratedCode, JSON.stringify(updatedMetadata), id]
   );
   return result;
 };
@@ -49,9 +53,10 @@ const generateModelCode = (modelName, attributes) => {
     attrString += line;
   }
 
-  return `const { DataTypes } = require('sequelize');\nconst sequelize = require('../config/db');\n\n` +
-    `const ${modelName} = sequelize.define('${modelName}', {\n${attrString}}, {\n` +
-    `  tableName: '${modelName.toLowerCase()}s',\n  timestamps: false\n});\n\n` +
+  return `const { Model, DataTypes } = require('sequelize');\nconst sequelize = require('../config/db');\n\n` +
+    `class ${modelName} extends Model {}\n\n` +
+    `${modelName}.init({\n${attrString}}, {\n` +
+    `  sequelize,\n  modelName: '${modelName}',\n  tableName: '${modelName.toLowerCase()}s',\n  timestamps: false\n});\n\n` +
     `module.exports = ${modelName};\n`;
 };
 
@@ -99,14 +104,34 @@ const getAllModels = async (req, res) => {
 };
 
 // UPDATE model metadata/code
+
 const updateModel = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-  const { code, metadata } = req.body;
   const id = req.params.id;
+  const { metadata } = req.body;
 
   try {
-    await updateModelCode(id, code, metadata);
-    res.status(200).json({ message: 'Model updated' });
+    // Get existing model from DB
+    const [rows] = await getModelById(id);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Model not found' });
+    }
+
+    const existingModel = rows[0];
+    const modelName = existingModel.name;
+
+    // Use new metadata or merge with old one (optional)
+    const updatedMetadata = metadata; // or deep merge if needed
+
+    // Generate updated Sequelize class-based code
+    const regeneratedCode = generateModelCode(modelName, updatedMetadata.attributes);
+
+    // Update in DB
+    await updateModelCode(id, regeneratedCode, updatedMetadata);
+
+    res.status(200).json({
+      message: 'Model updated',
+      code: regeneratedCode
+    });
   } catch (err) {
     res.status(500).json({ message: 'Error updating model', error: err.message });
   }
