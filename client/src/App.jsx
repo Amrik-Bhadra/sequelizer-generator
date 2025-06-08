@@ -26,27 +26,27 @@ export default function App() {
         {
           path: "login",
           element: <Login />,
-          handle: { title: "Login | Sequeelizer" },
+          handle: { title: "Login | Sequelizer" },
         },
         {
           path: "registration",
           element: <Registration />,
-          handle: { title: "Register | Sequeelizer" },
+          handle: { title: "Register | Sequelizer" },
         },
         {
           path: "forgotpassword",
           element: <ForgotPassword />,
-          handle: { title: "Forgot Password | Sequeelizer" },
+          handle: { title: "Forgot Password | Sequelizer" },
         },
         {
           path: "resetpassword",
           element: <ResetPassword />,
-          handle: { title: "Reset Password | Sequeelizer" },
+          handle: { title: "Reset Password | Sequelizer" },
         },
         {
           path: "verifyotp",
           element: <VerifyOTP />,
-          handle: { title: "Verify OTP | Sequeelizer" },
+          handle: { title: "Verify OTP | Sequelizer" },
         },
       ],
     },
@@ -57,7 +57,7 @@ export default function App() {
         {
           path: "dashboard",
           element: <Dashboard/>,
-          handle: { title: "Dashboard | Sequeelizer" },
+          handle: { title: "Dashboard | Sequelizer" },
         }
       ]
     }
