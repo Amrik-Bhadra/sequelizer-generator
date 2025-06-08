@@ -11,6 +11,8 @@ import { MdLogin } from "react-icons/md";
 import { FaUserLock } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
+import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { auth, googleProvider } from "../../config/firebase_config";
 import axios from "axios";
 
 const Login = () => {
@@ -30,20 +32,50 @@ const Login = () => {
     }
 
     try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
+
       const response = await axios.post(
         "http://localhost:3000/api/auth/login",
-        { email, password },
+        { email, password, uid },
         {
           withCredentials: true,
         }
       );
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         toast.success(response?.data.message);
-        navigate("/auth/verifyotp");
+        navigate("/dashboard");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed! Try again.");
+    }
+  };
+
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const user = userCredential.user;
+      const uid = user.uid;
+      const username = user.displayName;
+      const email = user.email;
+
+      // Send to your backend
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/google-login",
+        { uid, username, email },
+        { withCredentials: true }
+      );
+
+      if (response.status === 201) {
+        toast.success(response.data.message || "Google login successful");
+        navigate("/dashboard"); 
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error(error.message || "Google login failed");
     }
   };
 
@@ -120,10 +152,7 @@ const Login = () => {
           <HollowIconButton
             icon={FcGoogle}
             text="Sign in with Google"
-            onClick={() => {
-              // Trigger Google Auth here
-              console.log("Google login clicked");
-            }}
+            onClick={ handleGoogleLogin }
             className="border-gray-300 hover:bg-gray-100 text-gray-700 mt-2"
           />
 

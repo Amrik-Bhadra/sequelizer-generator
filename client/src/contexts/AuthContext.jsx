@@ -12,26 +12,26 @@ const AuthContext = createContext({
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState({});
 
-  const fetchUser = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/auth/me", {
-        withCredentials: true,
-      });
+  // const fetchUser = async () => {
+  //   try {
+  //     const res = await axios.get("http://localhost:3000/api/auth/me", {
+  //       withCredentials: true,
+  //     });
 
-      if (res.status === 200) {
-        setUser(res.data.user);
-      } else {
-        setUser(null);
-      }
-    } catch (err) {
-      console.log(err);
-      setUser(null);
-    }
-  };
+  //     if (res.status === 200) {
+  //       setUser(res.data.user);
+  //     } else {
+  //       setUser(null);
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //     setUser(null);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  // useEffect(() => {
+  //   fetchUser();
+  // }, []);
 
   const logout = async () => {
     try {
@@ -54,7 +54,7 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, fetchUser }}>
+    <AuthContext.Provider value={{ user, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   );
