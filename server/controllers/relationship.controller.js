@@ -1,31 +1,72 @@
 const db = require('../config/db');
 const { mapRelationshipType } = require('../helpers/mapRelationshipType');
+const {deleteRelationships} = require('../helpers/deleteRelationship');
 const { updateModelAssociation } = require('../helpers/updateModelAssociation');
+
 
 const updateRelationship = async (req, res) => {
     try {
         const { userId, relationships } = req.body;
-
         for (const relation of relationships) {
             const { fromModel, toModel, relationshipType, foreignKey, as } = relation;
 
             const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
-            
+            const [rows] = await db.execute(
+                `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+                [userId, fromModel]
+            );
+            if (rows.length === 0) {
+                console.warn(`Model not found: ${fromModel}`);
+                continue;
+            }
+            const model = rows[0];
+            let code = model.code;
+            const metadata = typeof model.metadata === 'string'
+                ? JSON.parse(model.metadata || '{}')
+                : model.metadata || {};
+            if (!metadata.associations) {
+                metadata.associations = [];
+            }
+            let shouldDelete = false;
+            for (const assoc of metadata.associations) {
+                if (
+                    assoc.type === forwardMethod &&
+                    assoc.target === toModel &&
+                    assoc.foreignKey === foreignKey &&
+                    assoc.as === (as || null)
+                ) {
+                    console.warn(`Association already exists: ${forwardMethod}(${toModel}) on ${fromModel}`);
+                    shouldDelete = false;
+                    break; // no need to add again
+                }
+                if (
+                    assoc.target === toModel &&
+                    assoc.type !== forwardMethod
+                ) {
+                    console.warn(`Association already exists with different type: ${assoc.type}(${toModel}) on ${fromModel}`);
+                    shouldDelete = true;
+                    break;
+                }
+            }
+            console.log("Should delete:", shouldDelete);
+            if (shouldDelete) {
+                console.log(`Deleting existing relationships for ${fromModel} to ${toModel}`);
+                await deleteRelationships(fromModel, toModel, userId);
+            }
             await updateModelAssociation(userId, fromModel, toModel, forwardMethod, foreignKey, as);
-
-            const reverseAs = as ? `reverse_${as}` : fromModel.toLowerCase();
-            await updateModelAssociation(userId, toModel, fromModel, reverseMethod, foreignKey, reverseAs);
+            await updateModelAssociation(userId, toModel, fromModel, reverseMethod, foreignKey, as ? `reverse_${as}` : fromModel.toLowerCase());
         }
-
         return res.status(200).json({
             message: "Relationships updated successfully",
-        });
-
+        })
     } catch (error) {
         console.error("Error updating relationships:", error);
-        return res.status(500).json({ message: "Internal server error", error: error.message });
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message,
+        });
     }
-};
+}
 
 
 const deleteRelationship = async (req, res) => {
@@ -101,7 +142,7 @@ const deleteRelationship = async (req, res) => {
         let reverseAssoc = metadataTo.association?.find(assoc =>
             assoc.type === reverseMethod &&
             assoc.target === fromModel &&
-            assoc.foreignKey === foreignKey 
+            assoc.foreignKey === foreignKey
         );
 
         let reverseAs = reverseAssoc?.as || null;
