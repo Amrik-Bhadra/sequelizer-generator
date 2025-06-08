@@ -11,10 +11,12 @@ import { HiUserAdd } from "react-icons/hi";
 import { MdAppRegistration } from "react-icons/md";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
+import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, googleProvider } from "../../config/firebase_config";
 import axios from "axios";
 
 const Registration = () => {
-  const [name, setName] = useState("");
+  const [username, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -23,7 +25,7 @@ const Registration = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if(!name){
+    if(!username){
         toast.error("Name field not filled!");
         return;
     }
@@ -39,19 +41,50 @@ const Registration = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/register", {
-        name,
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
+
+    const response = await axios.post("http://localhost:3000/api/auth/register", {
+      uid,
+      username,
+      email,
+      password, 
+    });
+
+    if (response.status === 201) {
+      toast.success(response.data.message);
+      navigate("/auth/login");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message);
+  }
+  };
+
+  const handleGoogleRegister = async (e) => {
+    e.preventDefault();
+
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const user = userCredential.user;
+      const uid = user.uid;
+      const username = user.displayName;
+      const email = user.email;
+
+      const response = await axios.post("http://localhost:3000/api/auth/google-register", {
+        uid,
+        username,
         email,
-        password,
+        password: null, // Optional, or handled in backend
       });
 
-      if (response.status === 200) {
-        toast.success(response?.data.message);
+      if (response.status === 201) {
+        toast.success(response.data.message || "Google registration successful");
         navigate("/auth/login");
       }
     } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Registration failed! Try again.");
+      console.error("Google registration failed:", error);
+      toast.error(error.message);
     }
   };
 
@@ -76,11 +109,11 @@ const Registration = () => {
           <InputField
             label="Name"
             type="text"
-            name="name"
-            id="name"
+            name="username"
+            id="username"
             placeholder="Enter your Name"
             icon={IoPerson}
-            value={name}
+            value={username}
             onChange={setName}
             required={true}
           />
@@ -110,6 +143,7 @@ const Registration = () => {
           <SolidIconBtn
             icon={MdAppRegistration}
             text="Register"
+            onClick={ handleRegister }
             className="bg-primary hover:bg-blue-700"
             type="submit"
           />
@@ -123,10 +157,7 @@ const Registration = () => {
           <HollowIconButton
             icon={FcGoogle}
             text="Signup with Google"
-            onClick={() => {
-              // Trigger Google Auth here
-              console.log("Google login clicked");
-            }}
+            onClick={ handleGoogleRegister }
             className="border-gray-300 hover:bg-gray-100 text-gray-700 mt-2"
           />
 
