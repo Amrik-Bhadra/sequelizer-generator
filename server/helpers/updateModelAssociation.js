@@ -1,6 +1,5 @@
 const db = require("../config/db")
 
-
 async function updateModelAssociation(userId, modelName, targetModel, type, foreignKey, as) {
     const [rows] = await db.execute(
         `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
