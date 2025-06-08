@@ -17,6 +17,12 @@ async function updateModelAssociation(userId, modelName, targetModel, type, fore
     const metadata = typeof model.metadata === 'string'
         ? JSON.parse(model.metadata)
         : model.metadata;
+    metadata.association.forEach((assoc) => {
+        if (assoc.type === type && assoc.target === targetModel && assoc.foreignKey === foreignKey && assoc.as === (as || null)) {
+            console.warn(`Association already exists: ${type}(${targetModel}) on ${modelName}`);
+            return;
+        }
+    })
 
     let association;
     if (!as) {
