@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { MdVerifiedUser } from "react-icons/md";
 import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
+import HollowIconButton from "../../components/buttons/HollowIconButton";
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
@@ -55,14 +56,17 @@ const VerifyOTP = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/verifyotp", { otp });
-      toast.success(`${response.data.message} ✅`);
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/verifyotp",
+        { otp }
+      );
+      toast.success(`${response.data.message}`);
 
       if (response.data.task === "login") {
         const { token, user } = response.data;
         setAuth({ token, user });
-      }else{
-        navigate('/auth/resetpassword');
+      } else {
+        navigate("/auth/resetpassword");
       }
     } catch (error) {
       console.error("OTP verification failed:", error);
@@ -88,20 +92,15 @@ const VerifyOTP = () => {
 
   return (
     <>
-      <div className="absolute top-0 left-0 w-full bg-white flex items-center justify-between px-8 mt-2">
-        <span>{/* Logo placeholder */}</span>
-        {/* <a href="/auth/login" className="text-link underline font-medium">
-          Create Account
-        </a> */}
-      </div>
-
-      <div className="w-full max-w-md bg-white rounded-lg p-6 flex flex-col gap-6">
+      <div className="w-full max-w-md bg-white dark:bg-transparent rounded-lg p-6 flex flex-col gap-6">
         <header className="flex flex-col items-center gap-1">
-          <div className="h-12 w-12 border border-[#e0e0e0] text-primary-txt rounded-lg flex items-center justify-center mb-5">
+          <div className="h-12 w-12 border border-[#e0e0e0] text-primary-txt rounded-lg flex items-center justify-center mb-5 dark:text-gray-light1">
             <MdOutlineVerifiedUser className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-semibold mb-2">Verify OTP</h1>
-          <p className="text-sm text-center font-light text-secondary-txt">
+          <h1 className="text-2xl font-semibold mb-2 dark:text-white">
+            Verify OTP
+          </h1>
+          <p className="text-sm text-center font-light text-secondary-txt dark:text-gray-light2">
             We have sent a 4 digit verification code to your email
           </p>
         </header>
@@ -114,7 +113,7 @@ const VerifyOTP = () => {
                 type="text"
                 maxLength="1"
                 value={digit}
-                className="border border-[#e0e0e0] rounded-md h-16 w-16 text-center text-xl outline-none"
+                className="border border-[#e0e0e0] dark:bg-transparent rounded-md h-16 w-16 text-center text-xl outline-none"
                 onInput={(e) => {
                   const input = e.target;
                   const value = input.value.replace(/[^0-9]/g, "");
@@ -137,7 +136,7 @@ const VerifyOTP = () => {
           </div>
 
           {!showResend && (
-            <p className="text-sm text-right text-primary-txt font-regular">
+            <p className="text-sm text-right text-primary-txt font-regular dark:text-gray-light1">
               {formatTime(timer)}
             </p>
           )}
@@ -150,33 +149,29 @@ const VerifyOTP = () => {
               type="submit"
             />
 
-            <p className="text-sm text-center text-primary-txt font-light">
+            <p className="text-sm text-center text-primary-txt font-light dark:text-gray-light2">
               Didn't receive the OTP?
               {showResend ? (
                 <button
                   type="button"
-                  className="text-link font-medium ml-1"
+                  className="text-link font-medium ml-2 dark:text-primary"
                   onClick={handleResendOTP}
                 >
                   Resend OTP
                 </button>
               ) : (
-                <span className="text-gray-400 ml-1">Please wait...</span>
+                <span className="text-gray-400 ml-2 dark:text-primary">
+                  Please wait...
+                </span>
               )}
             </p>
 
-            <button
-              type="button"
-              className="border hover:bg-[#f5f5f5] text-primary-txt px-4 py-2 rounded-md flex gap-2 items-center justify-center"
-              onClick={() => {
-                navigate("/auth/login");
-              }}
-            >
-              <IoMdArrowBack className="h-5 w-5" />
-              <span className="text-sm font-medium font-body">
-                Back to Login
-              </span>
-            </button>
+            <HollowIconButton
+              icon={IoMdArrowBack}
+              text="Back to Login"
+              onClick={() => navigate("/auth/login")}
+              className="border-gray-300 hover:bg-gray-100 text-gray-700"
+            />
           </div>
         </form>
       </div>

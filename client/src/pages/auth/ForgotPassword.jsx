@@ -9,6 +9,7 @@ import { IoMdArrowBack } from "react-icons/io";
 import { MdLockOpen } from "react-icons/md";
 import toast from "react-hot-toast";
 import axios from "axios";
+import HollowIconButton from "../../components/buttons/HollowIconButton";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -33,18 +34,13 @@ const ForgotPassword = () => {
 
   return (
     <>
-      <div className="absolute top-0 left-0 w-full bg-white flex items-center justify-between px-8 mt-2">
-        {/* <span>
-            <img src={images.logo} alt="logo" className="w-32" />
-        </span> */}
-      </div>
-      <div className="w-full max-w-md bg-white rounded-lg p-6 flex flex-col gap-6">
+      <div className="w-full max-w-md bg-white dark:bg-transparent rounded-lg p-6 flex flex-col gap-6">
         <header className="flex flex-col items-center gap-1">
-          <div className="h-12 w-12 border border-[#e0e0e0] text-primary-txt rounded-lg flex items-center justify-center mb-5 ">
+          <div className="h-12 w-12 border border-[#e0e0e0] dark:text-gray-light1 text-primary-txt rounded-lg flex items-center justify-center mb-5 ">
             <IoFingerPrintSharp className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-semibold mb-2">Forget Password?</h1>
-          <p className="text-sm text-center font-light text-secondary-txt">
+          <h1 className="text-2xl font-semibold mb-2 dark:text-white">Forget Password?</h1>
+          <p className="text-sm text-center font-light text-secondary-txt dark:text-gray-light2">
             Enter the email address associated with your account and we will
             send you a verification code to reset your password.
           </p>
@@ -70,15 +66,12 @@ const ForgotPassword = () => {
               onClick={handleSendOTP}
             />
 
-            <button
-              className="border hover:bg-[#f5f5f5] text-primary-txt px-4 py-2 rounded-md flex gap-2 items-center justify-center"
+            <HollowIconButton
+              icon={IoMdArrowBack}
+              text="Back to Login"
               onClick={() => navigate("/auth/login")}
-            >
-              <IoMdArrowBack className="h-5 w-5" />
-              <span className="text-sm font-medium font-body">
-                Back to Login
-              </span>
-            </button>
+              className="border-gray-300 hover:bg-gray-100 text-gray-700"
+            />
           </div>
         </form>
       </div>
