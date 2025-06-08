@@ -53,9 +53,9 @@ const PasswordField = ({
                     className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
                 {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5" />
-                ) : (
                     <FaEye className="h-5 w-5" />
+                ) : (
+                    <FaEyeSlash className="h-5 w-5" />
                 )}
                 </button>
             </div>

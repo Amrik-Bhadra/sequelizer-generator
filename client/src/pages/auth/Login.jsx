@@ -1,8 +1,8 @@
 import React from 'react'
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import InputFieldComponent from "../../components/form_components/InputField";
-import PasswordFieldComponent from "../../components/form_components/PasswordField";
+import InputField from "../../components/form_components/InputField";
+import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
 import { MdEmail } from "react-icons/md";
@@ -11,6 +11,7 @@ import { MdLogin } from "react-icons/md";
 import { FaUserLock } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -39,7 +40,7 @@ const Login = () => {
 
       if (response.status === 200) {
         toast.success(response?.data.message);
-        navigate("http://localhost:3000/auth/verifyotp");
+        navigate("/auth/verifyotp");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed! Try again.");
@@ -64,7 +65,7 @@ const Login = () => {
           </p>
         </header>
         <form className="flex flex-col gap-5" onSubmit={handleLogin}>
-          <InputFieldComponent
+          <InputField
             label="Email"
             type="email"
             name="email"
@@ -76,7 +77,7 @@ const Login = () => {
             required={true}
           />
 
-          <PasswordFieldComponent
+          <PasswordField
             label="Password"
             name="password"
             id="password"
@@ -118,7 +119,7 @@ const Login = () => {
 
           <HollowIconButton
             icon={FcGoogle}
-            text="Continue with Google"
+            text="Sign in with Google"
             onClick={() => {
               // Trigger Google Auth here
               console.log("Google login clicked");
@@ -126,14 +127,13 @@ const Login = () => {
             className="border-gray-300 hover:bg-gray-100 text-gray-700 mt-2"
           />
 
-
           <p className="text-sm text-center text-primary-txt font-light">
             Don't have an account?{" "}
             <Link
-              to="/auth/register"
+              to="/auth/registration"
               className="text-link font-medium"
             >
-              Register
+              Register here
             </Link>
           </p>
         </form>
