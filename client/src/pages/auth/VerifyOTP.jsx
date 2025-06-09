@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { MdVerifiedUser } from "react-icons/md";
 import axios from "axios";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
+import { useAuth } from "../../contexts/AuthContext";
 
 
 const VerifyOTP = () => {
@@ -17,6 +18,7 @@ const VerifyOTP = () => {
   const intervalRef = useRef(null);
   const location = useLocation();
   const state = location.state;
+  const { setUser } = useAuth();
 
   // Handle OTP input change
   const handleChange = (index, value) => {
@@ -48,34 +50,40 @@ const VerifyOTP = () => {
   };
 
   const handleVerifyOtp = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const otp = otpInputs.join("");
-    if (otp.length !== 5) {
-      toast.error("Please enter all 5 digits of the OTP.");
-      return;
+  const otp = otpInputs.join("");
+  if (otp.length !== 5) {
+    toast.error("Please enter all 5 digits of the OTP.");
+    return;
+  }
+
+  try {
+    const user_id = state.user_id;
+    const purpose = state.purpose;
+
+    const response = await axios.post(
+      "http://localhost:3000/api/auth/verifyotp",
+      { user_id, otp, purpose },
+      { withCredentials: true }
+    );
+
+    toast.success(response.data.message);
+
+    if (purpose === "login") {
+      const loggedInUser = response.data.user;
+      localStorage.setItem("user", JSON.stringify(loggedInUser));
+      setUser(loggedInUser);
+
+      navigate("/seq/dashboard");
+    } else {
+      navigate("/auth/resetpassword", { state: { user_id } });
     }
-
-    try {
-      console.log(otp);
-      const user_id = state.user_id;
-      const purpose = state.purpose;
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/verifyotp",
-        { user_id, otp, purpose }
-      );
-      toast.success(`${response.data.message}`);
-
-      if (purpose === "login") {       
-        navigate('/seq/dashboard');
-      } else {
-        navigate("/auth/resetpassword");
-      }
-    } catch (error) {
-      console.error("OTP verification failed:", error);
-      toast.error("Invalid OTP. Please try again.");
-    }
-  };
+  } catch (error) {
+    console.error("OTP verification failed:", error);
+    toast.error("Invalid OTP. Please try again.");
+  }
+};
 
   const handleResendOTP = () => {
     setTimer(90);

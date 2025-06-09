@@ -11,7 +11,7 @@ import { MdLogin } from "react-icons/md";
 import { FaUserLock } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
 import axios from "axios";
 
@@ -32,16 +32,9 @@ const Login = () => {
     }
 
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const uid = userCredential.user.uid;
-
       const response = await axios.post(
         "http://localhost:3000/api/auth/login",
-        { email, password, uid },
+        { email, password },
         {
           withCredentials: true,
         }
@@ -64,13 +57,12 @@ const Login = () => {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const user = userCredential.user;
       const uid = user.uid;
-      const username = user.displayName;
       const email = user.email;
 
       // Send to your backend
       const response = await axios.post(
         "http://localhost:3000/api/auth/google-login",
-        { uid, username, email },
+        { email, uid },
         { withCredentials: true }
       );
 

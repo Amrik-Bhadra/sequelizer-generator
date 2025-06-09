@@ -22,7 +22,7 @@ const ForgotPassword = () => {
         "http://localhost:3000/api/auth/forgotpassword",
         {
           email,
-        }
+        }, { withCredentials: true }
       );
       if (response.status === 200) {
         toast.success(response.data.message);

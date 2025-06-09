@@ -14,6 +14,8 @@ import {
   duotoneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import DropdownComponent from "../../components/common_components/DropdownComponent";
+import { RxCross2 } from "react-icons/rx";
+import toast from "react-hot-toast";
 
 const GenerateModel = () => {
   const [fields, setFields] = useState([
@@ -189,9 +191,9 @@ const GenerateModel = () => {
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(generatedCode);
-      alert("Code copied to clipboard!");
+      toast.success('Code copied to clipboard')
     } catch (err) {
-      alert("Failed to copy code.");
+      toast.error(err);
     }
   };
 
@@ -204,12 +206,12 @@ const GenerateModel = () => {
   }, [fields, modelName]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
+    <div className="p-3 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
 
       {/* Left Section */}
       <div>
         {/* Model Name */}
-        <div className="mb-4 p-4 bg-white border rounded-md shadow-md flex items-center gap-4">
+        <div className="mb-4 p-4 bg-white border rounded-md shadow-sm flex items-center gap-4">
           <label className="text-blue-600 font-semibold text-lg min-w-[100px]">
             Model Name <span className="text-red-500">*</span>
           </label>
@@ -218,12 +220,12 @@ const GenerateModel = () => {
             placeholder="Enter Model Name Here"
             value={modelName}
             onChange={(e) => setModelName(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
           />
         </div>
 
         {/* Model Attributes */}
-        <div className="mb-4 p-4 bg-white border rounded-md shadow-md flex flex-col">
+        <div className="mb-4 p-4 bg-white border rounded-md shadow-sm flex flex-col">
           <div className="flex justify-between items-center mb-4 border-b border-gray-300 pb-2">
             <h2 className="text-blue-600 text-2xl font-semibold mb-4">
               Model Attributes
@@ -249,14 +251,14 @@ const GenerateModel = () => {
           {fields.map((field) => (
             <div
               key={field.id}
-              className="relative mb-4 p-4 bg-white rounded shadow-md grid grid-cols-1 md:grid-cols-4 gap-4"
+              className="relative mb-4 p-4 bg-white rounded-md border grid grid-cols-1 md:grid-cols-4 gap-4"
             >
               <button
                 onClick={() => deleteField(field.id)}
-                className="absolute top-2 right-2 text-red-600 hover:text-red-800 font-bold text-3xl z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow"
+                className="absolute top-2 right-2 p-1 text-secondary font-bold text-xl z-10 bg-gray-light1 rounded-full flex items-center justify-center shadow"
                 title="Delete Attribute"
               >
-                ×
+                <RxCross2/>
               </button>
 
               <div className="flex flex-col gap-2 w-full">
