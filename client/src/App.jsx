@@ -12,6 +12,7 @@ import UserLayout from "./layouts/UserLayout";
 import Dashboard from "./pages/main/Dashboard";
 import Models from "./pages/main/GenerateModel";
 import LandingPage from "./pages/LandingPage";
+import RelationshipMapping from "./pages/main/RelationshipMaping";
 import ProtectedRoute from "./contexts/ProtectedRoutes";
 
 export default function App() {
@@ -74,8 +75,13 @@ export default function App() {
           ),
           handle: { title: "Models Generation | Sequeelizer" },
         },
-      ],
-    },
+        {
+          path: "relationship",
+          element: <RelationshipMapping/>,
+          handle: { title: "Relation | Sequeelizer" },
+        }
+      ]
+    }
   ]);
 
   return (
