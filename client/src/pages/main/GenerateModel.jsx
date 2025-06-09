@@ -15,7 +15,16 @@ import {
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import DropdownComponent from "../../components/common_components/DropdownComponent";
 import { RxCross2 } from "react-icons/rx";
-import toast from "react-hot-toast";
+import { copyToClipboard } from "../../utils/helperFunctions";
+import SolidIconBtn from "../../components/buttons/SolidIconBtn";
+import {
+  FiDownload,
+  MdContentCopy,
+  IoMdAdd,
+  RiSubtractLine,
+} from "../../utils/iconsProvider";
+import DownloadModal from "../../components/modals/DownloadModal";
+import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 
 const GenerateModel = () => {
   const [fields, setFields] = useState([
@@ -34,6 +43,11 @@ const GenerateModel = () => {
   ]);
   const [generatedCode, setGeneratedCode] = useState("");
   const [modelName, setModelName] = useState("");
+
+  const [downloadModal, setDownloadModalClose] = useState(false);
+  const [saveDeleteModal, setSaveDeleteModal] = useState(false);
+  const [purpose, setPurpose] = useState("");
+  const [item, setItem] = useState("");
 
   const themeOptions = {
     oneDark,
@@ -188,280 +202,303 @@ const GenerateModel = () => {
     setGeneratedCode(schema);
   };
 
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(generatedCode);
-      toast.success('Code copied to clipboard')
-    } catch (err) {
-      toast.error(err);
-    }
-  };
-
   const deleteField = (id) => {
     setFields((prev) => prev.filter((field) => field.id !== id));
   };
+
+  const handleSave = () => {
+
+  }
 
   useEffect(() => {
     generateCode();
   }, [fields, modelName]);
 
   return (
-    <div className="p-3 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
-
-      {/* Left Section */}
-      <div>
-        {/* Model Name */}
-        <div className="mb-4 p-4 bg-white border rounded-md shadow-sm flex items-center gap-4">
-          <label className="text-blue-600 font-semibold text-lg min-w-[100px]">
-            Model Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Enter Model Name Here"
-            value={modelName}
-            onChange={(e) => setModelName(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
-          />
-        </div>
-
-        {/* Model Attributes */}
-        <div className="mb-4 p-4 bg-white border rounded-md shadow-sm flex flex-col">
-          <div className="flex justify-between items-center mb-4 border-b border-gray-300 pb-2">
-            <h2 className="text-blue-600 text-2xl font-semibold mb-4">
-              Model Attributes
-            </h2>
-            <div>
-              <div className="flex gap-2">
-                <button
-                  onClick={addField}
-                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-blue-600 font-semibold"
-                >
-                  + Add
-                </button>
-                <button
-                  onClick={copyToClipboard}
-                  className="w-20 bg-gray-600 text-white px-3 py-1 rounded hover:bg-blue-600 text-lg font-semibold"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
+    <>
+      <div className="p-3 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
+        {/* Left Section */}
+        <div>
+          {/* Model Name */}
+          <div className="mb-4 p-4 bg-white border rounded-md shadow-sm flex items-center gap-4">
+            <label className="text-blue-600 font-semibold text-lg min-w-[100px]">
+              Model Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Enter Model Name Here"
+              value={modelName}
+              onChange={(e) => setModelName(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+            />
           </div>
 
-          {fields.map((field) => (
-            <div
-              key={field.id}
-              className="relative mb-4 p-4 bg-white rounded-md border grid grid-cols-1 md:grid-cols-4 gap-4"
-            >
-              <button
-                onClick={() => deleteField(field.id)}
-                className="absolute top-2 right-2 p-1 text-secondary font-bold text-xl z-10 bg-gray-light1 rounded-full flex items-center justify-center shadow"
-                title="Delete Attribute"
-              >
-                <RxCross2/>
-              </button>
+          {/* Model Attributes */}
+          <div className="mb-4 p-4 bg-white border rounded-md shadow-sm flex flex-col">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-300 pb-2">
+              <h2 className="text-blue-600 text-2xl font-semibold mb-4">
+                Model Attributes
+              </h2>
+              <div>
+                <div className="flex gap-2">
+                  <SolidIconBtn
+                    icon={IoMdAdd}
+                    text={"Add"}
+                    onClick={addField}
+                    className="bg-[#eee] hover:bg-[#ccc] text-secondary text-sm"
+                  />
 
-              <div className="flex flex-col gap-2 w-full">
-                <label className="text-sm font-medium text-primary-text">
-                  Attribute Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Attribute Name"
-                  value={field.name}
-                  onChange={(e) =>
-                    handleFieldChange(field.id, "name", e.target.value)
-                  }
-                  className="p-2 border rounded text-sm text-gray-700 focus:ring-sky focus:border-sky outline-none transition-all"
-                />
+                  <SolidIconBtn
+                    icon={null}
+                    text={"Save"}
+                    onClick={() => {
+                      setSaveDeleteModal(true);
+                      setPurpose("save");
+                      setItem("model");
+                    }}
+                    className="bg-secondary text-white text-sm"
+                  />
+                </div>
               </div>
+            </div>
 
-              <DropdownComponent
-                label="Field Type"
-                name="type"
-                selectedValue={field.type}
-                onChange={(value) => handleFieldChange(field.id, "type", value)}
-                options={[
-                  { value: "String", label: "String" },
-                  { value: "Number", label: "Number" },
-                  { value: "Boolean", label: "Boolean" },
-                  { value: "Date", label: "Date" },
-                  { value: "Array", label: "Array" },
-                  { value: "Object", label: "Object" },
-                  { value: "ObjectId", label: "ObjectId" },
-                ]}
-                required
-                placeholder="Field Type"
-              />
+            {fields.map((field) => (
+              <div
+                key={field.id}
+                className="relative mb-4 p-4 bg-white rounded-md border grid grid-cols-1 md:grid-cols-4 gap-4"
+              >
+                <button
+                  onClick={() => deleteField(field.id)}
+                  className="absolute top-2 right-2 p-1 text-secondary font-bold text-xl z-10 bg-gray-light1 rounded-full flex items-center justify-center shadow"
+                  title="Delete Attribute"
+                >
+                  <RxCross2 />
+                </button>
 
-              {/* Show arrayType dropdown only when type is Array */}
-              {field.type === "Array" && (
+                <div className="flex flex-col gap-2 w-full">
+                  <label className="text-sm font-medium text-primary-text">
+                    Attribute Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Attribute Name"
+                    value={field.name}
+                    onChange={(e) =>
+                      handleFieldChange(field.id, "name", e.target.value)
+                    }
+                    className="p-2 border rounded text-sm text-gray-700 focus:ring-sky focus:border-sky outline-none transition-all"
+                  />
+                </div>
+
                 <DropdownComponent
-                  label="Array Data Type"
-                  name="arrayType"
-                  selectedValue={field.arrayType}
+                  label="Field Type"
+                  name="type"
+                  selectedValue={field.type}
                   onChange={(value) =>
-                    handleFieldChange(field.id, "arrayType", value)
+                    handleFieldChange(field.id, "type", value)
                   }
                   options={[
                     { value: "String", label: "String" },
                     { value: "Number", label: "Number" },
                     { value: "Boolean", label: "Boolean" },
                     { value: "Date", label: "Date" },
+                    { value: "Array", label: "Array" },
+                    { value: "Object", label: "Object" },
+                    { value: "ObjectId", label: "ObjectId" },
                   ]}
-                  placeholder="Array Data Type"
+                  required
+                  placeholder="Field Type"
                 />
-              )}
 
-              <DropdownComponent
-                label="Primary Key"
-                name="primaryKey"
-                selectedValue={field.primaryKey}
-                onChange={(value) =>
-                  handleFieldChange(field.id, "primaryKey", value)
-                }
-                options={[
-                  { value: "No", label: "No" },
-                  { value: "Yes", label: "Yes" },
-                ]}
-                required
-                placeholder="Primary Key"
+                {/* Show arrayType dropdown only when type is Array */}
+                {field.type === "Array" && (
+                  <DropdownComponent
+                    label="Array Data Type"
+                    name="arrayType"
+                    selectedValue={field.arrayType}
+                    onChange={(value) =>
+                      handleFieldChange(field.id, "arrayType", value)
+                    }
+                    options={[
+                      { value: "String", label: "String" },
+                      { value: "Number", label: "Number" },
+                      { value: "Boolean", label: "Boolean" },
+                      { value: "Date", label: "Date" },
+                    ]}
+                    placeholder="Array Data Type"
+                  />
+                )}
+
+                <DropdownComponent
+                  label="Primary Key"
+                  name="primaryKey"
+                  selectedValue={field.primaryKey}
+                  onChange={(value) =>
+                    handleFieldChange(field.id, "primaryKey", value)
+                  }
+                  options={[
+                    { value: "No", label: "No" },
+                    { value: "Yes", label: "Yes" },
+                  ]}
+                  required
+                  placeholder="Primary Key"
+                />
+
+                <DropdownComponent
+                  label="Auto Increment"
+                  name="autoIncrement"
+                  selectedValue={field.autoIncrement}
+                  onChange={(value) =>
+                    handleFieldChange(field.id, "autoIncrement", value)
+                  }
+                  options={[
+                    { value: "No", label: "No" },
+                    { value: "Yes", label: "Yes" },
+                  ]}
+                  required
+                  placeholder="Auto Increment"
+                />
+
+                <DropdownComponent
+                  label="Allow Null"
+                  name="allowNull"
+                  selectedValue={field.allowNull}
+                  onChange={(value) =>
+                    handleFieldChange(field.id, "allowNull", value)
+                  }
+                  options={[
+                    { value: "No", label: "No" },
+                    { value: "Yes", label: "Yes" },
+                  ]}
+                  required
+                  placeholder="Allow Null"
+                />
+
+                <DropdownComponent
+                  label="Unique"
+                  name="unique"
+                  selectedValue={field.unique}
+                  onChange={(value) =>
+                    handleFieldChange(field.id, "unique", value)
+                  }
+                  options={[
+                    { value: "No", label: "No" },
+                    { value: "Yes", label: "Yes" },
+                  ]}
+                  required
+                  placeholder="Unique"
+                />
+
+                <DropdownComponent
+                  label="Validate"
+                  name="validate"
+                  selectedValue={field.validate}
+                  onChange={(value) =>
+                    handleFieldChange(field.id, "validate", value)
+                  }
+                  options={[
+                    { value: "", label: "None" },
+                    { value: "minLength", label: "minLength" },
+                    { value: "maxLength", label: "maxLength" },
+                    { value: "pattern", label: "pattern" },
+                    { value: "custom", label: "custom" },
+                  ]}
+                  placeholder="Validation"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Live Preview */}
+        <div className="bg-white p-4 rounded shadow-sm w-full max-w-full">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-blue-600 text-xl font-semibold">Preview</h2>
+            <div className="flex gap-2">
+              <SolidIconBtn
+                icon={MdContentCopy}
+                text={"Copy"}
+                onClick={() => copyToClipboard(generatedCode)}
+                className="text-sm bg-[#eee] hover:bg-[#ccc] text-secondary"
               />
 
-              <DropdownComponent
-                label="Auto Increment"
-                name="autoIncrement"
-                selectedValue={field.autoIncrement}
-                onChange={(value) =>
-                  handleFieldChange(field.id, "autoIncrement", value)
-                }
-                options={[
-                  { value: "No", label: "No" },
-                  { value: "Yes", label: "Yes" },
-                ]}
-                required
-                placeholder="Auto Increment"
-              />
-
-              <DropdownComponent
-                label="Allow Null"
-                name="allowNull"
-                selectedValue={field.allowNull}
-                onChange={(value) =>
-                  handleFieldChange(field.id, "allowNull", value)
-                }
-                options={[
-                  { value: "No", label: "No" },
-                  { value: "Yes", label: "Yes" },
-                ]}
-                required
-                placeholder="Allow Null"
-              />
-
-              <DropdownComponent
-                label="Unique"
-                name="unique"
-                selectedValue={field.unique}
-                onChange={(value) =>
-                  handleFieldChange(field.id, "unique", value)
-                }
-                options={[
-                  { value: "No", label: "No" },
-                  { value: "Yes", label: "Yes" },
-                ]}
-                required
-                placeholder="Unique"
-              />
-
-              <DropdownComponent
-                label="Validate"
-                name="validate"
-                selectedValue={field.validate}
-                onChange={(value) =>
-                  handleFieldChange(field.id, "validate", value)
-                }
-                options={[
-                  { value: "", label: "None" },
-                  { value: "minLength", label: "minLength" },
-                  { value: "maxLength", label: "maxLength" },
-                  { value: "pattern", label: "pattern" },
-                  { value: "custom", label: "custom" },
-                ]}
-                placeholder="Validation"
+              <SolidIconBtn
+                icon={FiDownload}
+                text={"Download"}
+                onClick={() => setDownloadModalClose(!downloadModal)}
+                className="bg-secondary text-white text-sm hover:bg-dark-ter-bg "
               />
             </div>
-          ))}
+          </div>
+
+          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+            <div className="flex flex-col gap-2">
+              <span className="text-base text-blue-600">Font Size:</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFontSize((prev) => Math.max(prev - 2, 10))}
+                  className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+                >
+                  <RiSubtractLine />
+                </button>
+                <span className="w-8 text-center">{fontSize}px</span>
+                <button
+                  onClick={() => setFontSize((prev) => Math.min(prev + 2, 32))}
+                  className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
+                >
+                  <IoMdAdd />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-blue-600 text-base">Theme:</span>
+              <DropdownComponent
+                name="theme"
+                selectedValue={selectedTheme}
+                onChange={(value) => setSelectedTheme(value)}
+                options={themeNames.map((name) => ({
+                  value: name,
+                  label: name,
+                }))}
+                placeholder="Select Theme"
+              />
+            </div>
+          </div>
+
+          <pre className="overflow-x-auto mt-3 w-full max-w-full">
+            <SyntaxHighlighter
+              language="javascript"
+              style={themeOptions[selectedTheme]}
+              showLineNumbers
+              className="rounded-md"
+              customStyle={{ fontSize: `${fontSize}px` }}
+            >
+              {generatedCode}
+            </SyntaxHighlighter>
+          </pre>
         </div>
       </div>
 
-      {/* Live Preview */}
-      <div className="bg-white p-4 rounded shadow-md w-full max-w-full">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-blue-600 text-xl font-semibold">Preview</h2>
-          <div className="flex gap-2">
-            <button
-              onClick={copyToClipboard}
-              className="w-20 bg-gray-600 text-white px-3 py-1 rounded hover:bg-blue-600 text-base"
-            >
-              Copy
-            </button>
-            <button
-              onClick={copyToClipboard}
-              className="w-30 bg-gray-600 text-white px-3 py-1 rounded hover:bg-blue-600 text-base"
-            >
-              Download
-            </button>
-          </div>
-        </div>
+      {downloadModal && (
+        <DownloadModal
+          generatedCode={generatedCode}
+          setDownloadModalClose={setDownloadModalClose}
+          modelName={modelName}
+        />
+      )}
 
-        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-          <div className="flex flex-col gap-2">
-            <span className="text-base text-blue-600">Font Size:</span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setFontSize((prev) => Math.max(prev - 2, 10))}
-                className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-              >
-                −
-              </button>
-              <span className="w-8 text-center">{fontSize}px</span>
-              <button
-                onClick={() => setFontSize((prev) => Math.min(prev + 2, 32))}
-                className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <span className="text-blue-600 text-base">Theme:</span>
-            <DropdownComponent
-              name="theme"
-              selectedValue={selectedTheme}
-              onChange={(value) => setSelectedTheme(value)}
-              options={themeNames.map((name) => ({
-                value: name,
-                label: name,
-              }))}
-              placeholder="Select Theme"
-            />
-          </div>
-        </div>
-
-        <pre className="overflow-x-auto mt-3 w-full max-w-full">
-          <SyntaxHighlighter
-            language="javascript"
-            style={themeOptions[selectedTheme]}
-            showLineNumbers
-            className="rounded-md"
-            customStyle={{ fontSize: `${fontSize}px` }}
-          >
-            {generatedCode}
-          </SyntaxHighlighter>
-        </pre>
-      </div>
-    </div>
+      {saveDeleteModal && (
+        <SaveDeleteModal
+          handleSave={handleSave}
+          onClose={() => {
+            setSaveDeleteModal(false);
+          }}
+          purpose={purpose}
+          item={item}
+        />
+      )}
+    </>
   );
 };
 

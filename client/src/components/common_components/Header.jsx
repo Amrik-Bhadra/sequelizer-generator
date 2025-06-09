@@ -48,7 +48,7 @@ const Header = ({ email, name, logout }) => {
               <SolidIconBtn
                 icon={MdLogout}
                 text="Logout"
-                className="bg-primary hover:bg-blue-700"
+                className="bg-primary hover:bg-blue-700 text-white"
                 onClick={() => {
                   logout();
                   navigate('/auth/login');
