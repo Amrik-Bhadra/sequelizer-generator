@@ -216,6 +216,7 @@ const GenerateModel = () => {
 
   return (
     <>
+    
       <div className="p-3 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
         {/* Left Section */}
         <div>
