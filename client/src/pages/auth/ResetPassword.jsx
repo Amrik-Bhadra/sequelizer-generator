@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import { IoMdArrowBack } from "react-icons/io";
@@ -14,6 +14,8 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const location = useLocation();
+  const state = location.state;
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -23,9 +25,10 @@ const ResetPassword = () => {
         return;
       }
 
+      const user_id = state.user_id;
       const response = await axios.put(
         "http://localhost:3000/api/auth/resetpassword",
-        { password }
+        { user_id, password }, { withCredentials: true }
       );
       if (response.status === 200) {
         toast.success(response.data.message);
@@ -79,7 +82,7 @@ const ResetPassword = () => {
             <SolidIconBtn
               icon={MdLockReset}
               text="Reset Password"
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               onClick={handleResetPassword}
             />
 

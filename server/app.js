@@ -11,13 +11,20 @@ console.log('modelRoutes:', typeof modelRoutes);
 const relationshipRoutes = require('./routes/relationship.routes');
 
 // cors setup
+// const corsOption = {
+//     origin: ['http://localhost:5173'],
+//     methods: 'GET,PATCH,PUT,POST,HEAD,DELETE',
+//     credentials: true,
+//     AccessControlAllowOrigin: true,
+//     optionsSuccessStatus: 200
+// }
+
 const corsOption = {
-    origin: ['http://localhost:5173'],
-    methods: 'GET,PATCH,PUT,POST,HEAD,DELETE',
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
-    AccessControlAllowOrigin: true,
     optionsSuccessStatus: 200
-}
+};
 
 const port = process.env.PORT || 3000
 
@@ -28,16 +35,17 @@ app.use(cors(corsOption));
 app.use(cookieparser());
 
 // session setup
-// app.use(session({
-//   secret: process.env.SECRET,
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: {
-//     maxAge: 1000 * 60 * 60 * 24, 
-//     httpOnly: true,
-//     secure: false,
-//   }
-// }));
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false,        
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 * 24,
+  }
+}));
 
 
 app.use('/api/auth', authRoutes);

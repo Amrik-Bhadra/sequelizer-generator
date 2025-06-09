@@ -5,12 +5,7 @@ import InputField from "../../components/form_components/InputField";
 import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
-import { MdEmail } from "react-icons/md";
-import { IoPerson } from "react-icons/io5";
-import { RiLockPasswordFill } from "react-icons/ri";
-import { HiUserAdd } from "react-icons/hi";
-import { MdAppRegistration } from "react-icons/md";
-import { FcGoogle } from "react-icons/fc";
+import { MdEmail, IoPerson, RiLockPasswordFill, HiUserAdd, MdAppRegistration, FcGoogle } from "../../utils/iconsProvider";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
@@ -56,10 +51,13 @@ const Registration = () => {
           username,
           email,
           password,
+        },
+        {
+          withCredentials: true,
         }
       );
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         toast.success(response.data.message);
         navigate("/auth/login");
       }
@@ -84,12 +82,14 @@ const Registration = () => {
         {
           uid,
           username,
-          email,
-          password: null, // Optional, or handled in backend
+          email
+        },
+        {
+          withCredentials: true,
         }
       );
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         toast.success(
           response.data.message || "Google registration successful"
         );
@@ -108,7 +108,9 @@ const Registration = () => {
           <div className="h-10 w-10 border border-[#e0e0e0] dark:text-gray-light1 text-primary-txt rounded-lg flex items-center justify-center mb-5 ">
             <HiUserAdd className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-semibold dark:text-white mb-2">Welcome to Sequelizer</h1>
+          <h1 className="text-2xl font-semibold dark:text-white mb-2">
+            Welcome to Sequelizer
+          </h1>
           <p className="text-center text-sm font-light text-secondary-txt dark:text-gray-light2">
             Join us and make backend development faster, cleaner, and fun!
           </p>
@@ -153,13 +155,15 @@ const Registration = () => {
               icon={MdAppRegistration}
               text="Register"
               onClick={handleRegister}
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
             />
 
             <div className="flex items-center dark:text-gray-light1">
               <hr className="flex-grow border-gray-300" />
-              <span className="mx-2 text-sm text-gray-500 font-medium dark:text-gray-light1">OR</span>
+              <span className="mx-2 text-sm text-gray-500 font-medium dark:text-gray-light1">
+                OR
+              </span>
               <hr className="flex-grow border-gray-300" />
             </div>
 
@@ -173,7 +177,10 @@ const Registration = () => {
 
           <p className="text-sm text-center text-primary-txt font-light dark:text-gray-light2">
             Already have an account?{" "}
-            <Link to="/auth/login" className="text-link font-medium text-primary">
+            <Link
+              to="/auth/login"
+              className="text-link font-medium text-primary"
+            >
               Login
             </Link>
           </p>

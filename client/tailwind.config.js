@@ -17,7 +17,11 @@ export default {
         "light-bg": "#f1f1f1",
         "dark-bg": "#222",
         "dark-sec-bg": "#303030",
-        "dark-ter-bg": "#464646"
+        "dark-ter-bg": "#464646",
+
+
+        "warning": "#FFB400",
+        "error": "#FF0000"
       }
     },
   },

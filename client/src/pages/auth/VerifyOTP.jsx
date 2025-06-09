@@ -2,20 +2,23 @@ import React, { useEffect, useRef, useState } from "react";
 import { MdOutlineVerifiedUser } from "react-icons/md";
 import { IoMdArrowBack } from "react-icons/io";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { MdVerifiedUser } from "react-icons/md";
-import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
+import { useAuth } from "../../contexts/AuthContext";
+
 
 const VerifyOTP = () => {
   const navigate = useNavigate();
-  const [otpInputs, setOtpInputs] = useState(["", "", "", ""]);
-  const [timer, setTimer] = useState(90); // 1 min 30 sec = 90 sec
+  const [otpInputs, setOtpInputs] = useState(["", "", "", "", ""]);
+  const [timer, setTimer] = useState(90); 
   const [showResend, setShowResend] = useState(false);
   const intervalRef = useRef(null);
-  const { setAuth } = useAuth();
+  const location = useLocation();
+  const state = location.state;
+  const { setUser } = useAuth();
 
   // Handle OTP input change
   const handleChange = (index, value) => {
@@ -47,35 +50,42 @@ const VerifyOTP = () => {
   };
 
   const handleVerifyOtp = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const otp = otpInputs.join("");
-    if (otp.length !== 5) {
-      toast.error("Please enter all 4 digits of the OTP.");
-      return;
+  const otp = otpInputs.join("");
+  if (otp.length !== 5) {
+    toast.error("Please enter all 5 digits of the OTP.");
+    return;
+  }
+
+  try {
+    const user_id = state.user_id;
+    const purpose = state.purpose;
+
+    const response = await axios.post(
+      "http://localhost:3000/api/auth/verifyotp",
+      { user_id, otp, purpose },
+      { withCredentials: true }
+    );
+
+    toast.success(response.data.message);
+
+    if (purpose === "login") {
+      const loggedInUser = response.data.user;
+      localStorage.setItem("user", JSON.stringify(loggedInUser));
+      setUser(loggedInUser);
+
+      navigate("/seq/dashboard");
+    } else {
+      navigate("/auth/resetpassword", { state: { user_id } });
     }
-
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/verifyotp",
-        { otp }
-      );
-      toast.success(`${response.data.message}`);
-
-      if (response.data.task === "login") {
-        const { token, user } = response.data;
-        setAuth({ token, user });
-      } else {
-        navigate("/auth/resetpassword");
-      }
-    } catch (error) {
-      console.error("OTP verification failed:", error);
-      toast.error("Invalid OTP. Please try again.");
-    }
-  };
+  } catch (error) {
+    console.error("OTP verification failed:", error);
+    toast.error("Invalid OTP. Please try again.");
+  }
+};
 
   const handleResendOTP = () => {
-    // Add your resend OTP API call here if needed
     setTimer(90);
     setShowResend(false);
 
@@ -113,7 +123,7 @@ const VerifyOTP = () => {
                 type="text"
                 maxLength="1"
                 value={digit}
-                className="border border-[#e0e0e0] dark:bg-transparent rounded-md h-16 w-16 text-center text-xl outline-none"
+                className="border border-[#e0e0e0] dark:bg-transparent rounded-md h-16 w-16 text-center text-xl outline-none dark:text-white"
                 onInput={(e) => {
                   const input = e.target;
                   const value = input.value.replace(/[^0-9]/g, "");
@@ -145,7 +155,7 @@ const VerifyOTP = () => {
             <SolidIconBtn
               icon={MdVerifiedUser}
               text="Verify OTP"
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
             />
 

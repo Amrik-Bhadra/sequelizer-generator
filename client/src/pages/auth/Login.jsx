@@ -5,19 +5,17 @@ import InputField from "../../components/form_components/InputField";
 import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
-import { MdEmail } from "react-icons/md";
-import { RiLockPasswordFill } from "react-icons/ri";
-import { MdLogin } from "react-icons/md";
-import { FaUserLock } from "react-icons/fa6";
-import { FcGoogle } from "react-icons/fc";
+import { MdEmail, RiLockPasswordFill, MdLogin, FaUserLock, FcGoogle } from "../../utils/iconsProvider"
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
 import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -31,17 +29,12 @@ const Login = () => {
       return;
     }
 
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const uid = userCredential.user.uid;
+    setIsLoading(true);
 
+    try {
       const response = await axios.post(
         "http://localhost:3000/api/auth/login",
-        { email, password, uid },
+        { email, password },
         {
           withCredentials: true,
         }
@@ -49,10 +42,13 @@ const Login = () => {
 
       if (response.status === 200) {
         toast.success(response?.data.message);
-        navigate("/seq/dashboard");
+        const user_id = response.data.user_id;
+        navigate("/auth/verifyotp", { state: { user_id, purpose: "login" } });
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed! Try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -63,23 +59,27 @@ const Login = () => {
       const userCredential = await signInWithPopup(auth, googleProvider);
       const user = userCredential.user;
       const uid = user.uid;
-      const username = user.displayName;
       const email = user.email;
+
+      setIsGoogleLoading(true);
 
       // Send to your backend
       const response = await axios.post(
         "http://localhost:3000/api/auth/google-login",
-        { uid, username, email },
+        { email, uid },
         { withCredentials: true }
       );
 
       if (response.status === 200) {
         toast.success(response.data.message || "Google login successful");
-        navigate("/seq/dashboard");
+        const user_id = response.data.user_id;
+        navigate("/auth/verifyotp", { state: { user_id, purpose: "login" } });
       }
     } catch (error) {
       console.error("Google login error:", error);
       toast.error(error.message || "Google login failed");
+    }finally{
+      setIsGoogleLoading(false);
     }
   };
 
@@ -90,7 +90,9 @@ const Login = () => {
           <div className="h-10 w-10 border border-[#e0e0e0] text-secondary dark:text-gray-light1 rounded-lg flex items-center justify-center mb-5 ">
             <FaUserLock className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-semibold mb-2 dark:text-white">Hi, Welcome Back</h1>
+          <h1 className="text-2xl font-semibold mb-2 dark:text-white">
+            Hi, Welcome Back
+          </h1>
           <p className="text-center text-sm font-light text-secondary-txt dark:text-gray-light2">
             Enter your credentials to access your account
           </p>
@@ -143,21 +145,80 @@ const Login = () => {
 
           <div className="flex flex-col gap-y-3 mt-2">
             <SolidIconBtn
-              icon={MdLogin}
-              text="Login"
-              className="bg-primary hover:bg-blue-700"
+              icon={isLoading ? null : MdLogin}
+              text={
+                isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                    Logging in...
+                  </span>
+                ) : (
+                  "Login"
+                )
+              }
+              className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
+              disabled={isLoading}
             />
 
             <div className="flex items-center dark:text-gray-light1">
               <hr className="flex-grow border-gray-300" />
-              <span className="mx-2 text-sm text-gray-500 font-medium dark:text-gray-light1">OR</span>
+              <span className="mx-2 text-sm text-gray-500 font-medium dark:text-gray-light1">
+                OR
+              </span>
               <hr className="flex-grow border-gray-300" />
             </div>
 
             <HollowIconButton
-              icon={FcGoogle}
-              text="Sign in with Google"
+              icon={isGoogleLoading? null : FcGoogle}
+              text={
+                isGoogleLoading ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-4 w-4 text-secondary"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                    Logging in...
+                  </span>
+                ) : (
+                  "Sign in with Google"
+                )
+              }
               onClick={handleGoogleLogin}
               className="border-gray-300 hover:bg-gray-100 text-gray-700"
             />
@@ -165,7 +226,10 @@ const Login = () => {
 
           <p className="text-sm text-center text-primary-txt font-light dark:text-gray-light2">
             Don't have an account?{" "}
-            <Link to="/auth/registration" className="text-link font-medium text-primary">
+            <Link
+              to="/auth/registration"
+              className="text-link font-medium text-primary"
+            >
               Register
             </Link>
           </p>

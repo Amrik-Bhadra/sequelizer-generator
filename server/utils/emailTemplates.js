@@ -27,5 +27,24 @@ const welcomeEmailTemplate = (userName) => {
 };
 
 
+const oneTimePasswordEmailTemplate = (userName, password) => {
+    return `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+            <h2 style="color: #d9534f;">Action Required: Reset Your Password, ${userName}</h2>
+            <p>Welcome to Sequelizer! As a part of your initial login, a one-time password has been generated for you.</p>
+            <p><strong>One-Time Password:</strong> <code style="background-color: #f5f5f5; padding: 4px 8px; border-radius: 4px;">${password}</code></p>
+            <p><strong>For your security, it is highly recommended to reset your password immediately.</strong></p>
+            <p>You can reset your password using the following link:</p>
+            <p><a href="http://localhost:5173/auth/resetpassword" style="color: #007bff;">Reset Password</a></p>
+            <br>
+            <p>If you did not request this or believe it to be a mistake, please contact our support team.</p>
+            <p>Stay secure,</p>
+            <p>Team Indigo</p>
+            <hr>
+            <footer style="font-size: 12px; color: #666;">Sequelizer - All Rights Reserved</footer>
+        </div>
+    `;
+};
 
-module.exports = { otpEmailTemplate, welcomeEmailTemplate };
+
+module.exports = { otpEmailTemplate, welcomeEmailTemplate, oneTimePasswordEmailTemplate };

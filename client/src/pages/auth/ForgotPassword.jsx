@@ -18,12 +18,17 @@ const ForgotPassword = () => {
   const handleSendOTP = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/forgotpassword", {
-        email,
-      });
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/forgotpassword",
+        {
+          email,
+        }, { withCredentials: true }
+      );
       if (response.status === 200) {
         toast.success(response.data.message);
-        navigate("/auth/verifyotp");
+        navigate("/auth/verifyotp", {
+          state: { user_id: response.data.user_id, purpose: "forgot_password" },
+        });
       } else {
         toast.error(response.data.message);
       }
@@ -39,7 +44,9 @@ const ForgotPassword = () => {
           <div className="h-12 w-12 border border-[#e0e0e0] dark:text-gray-light1 text-primary-txt rounded-lg flex items-center justify-center mb-5 ">
             <IoFingerPrintSharp className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-semibold mb-2 dark:text-white">Forget Password?</h1>
+          <h1 className="text-2xl font-semibold mb-2 dark:text-white">
+            Forget Password?
+          </h1>
           <p className="text-sm text-center font-light text-secondary-txt dark:text-gray-light2">
             Enter the email address associated with your account and we will
             send you a verification code to reset your password.
@@ -62,7 +69,7 @@ const ForgotPassword = () => {
             <SolidIconBtn
               icon={MdLockOpen}
               text="Send OTP"
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               onClick={handleSendOTP}
             />
 
