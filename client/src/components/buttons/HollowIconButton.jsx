@@ -6,6 +6,7 @@ const HollowIconButton = ({
   onClick,
   className = "",
   type = "button",
+  iconSize = "text-sm",
 }) => {
   return (
     <button
@@ -16,8 +17,8 @@ const HollowIconButton = ({
         transition duration-200 hover:bg-secondary/10 dark:border-none dark:bg-gray-light1 ${className}
       `}
     >
-      {Icon && <Icon className="text-lg font-semibold" />}
-      <span className="font-semibold">{text}</span>
+      {Icon && <Icon className={`${iconSize} font-semibold`}  />}
+      <span className="font-semibold text-sm">{text}</span>
     </button>
   );
 };

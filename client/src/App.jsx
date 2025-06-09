@@ -12,6 +12,7 @@ import UserLayout from "./layouts/UserLayout";
 import Dashboard from "./pages/main/Dashboard";
 import Models from "./pages/main/GenerateModel"
 import LandingPage from "./pages/LandingPage";
+import RelationshipMapping from "./pages/main/RelationshipMaping";
 
 export default function App() {
   const routes = createBrowserRouter([
@@ -64,6 +65,11 @@ export default function App() {
           path: "models",
           element: <Models/>,
           handle: { title: "Models Generation | Sequeelizer" },
+        },
+        {
+          path: "relationship",
+          element: <RelationshipMapping/>,
+          handle: { title: "Relation | Sequeelizer" },
         }
       ]
     }
