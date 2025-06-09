@@ -10,16 +10,17 @@ import ResetPassword from "../src/pages/auth/ResetPassword";
 import VerifyOTP from "../src/pages/auth/VerifyOTP";
 import UserLayout from "./layouts/UserLayout";
 import Dashboard from "./pages/main/Dashboard";
-import Models from "./pages/main/GenerateModel"
+import Models from "./pages/main/GenerateModel";
 import LandingPage from "./pages/LandingPage";
 import RelationshipMapping from "./pages/main/RelationshipMaping";
+import ProtectedRoute from "./contexts/ProtectedRoutes";
 
 export default function App() {
   const routes = createBrowserRouter([
     {
       path: "/",
-      element: <LandingPage/>,
-      handle: {title: "Sequelizer"}
+      element: <LandingPage />,
+      handle: { title: "Sequelizer" },
     },
     {
       path: "/auth",
@@ -54,16 +55,24 @@ export default function App() {
     },
     {
       path: "/seq",
-      element: <UserLayout/>,
+      element: <UserLayout />,
       children: [
         {
           path: "dashboard",
-          element: <Dashboard/>,
+          element: (
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          ),
           handle: { title: "Dashboard | Sequeelizer" },
         },
         {
           path: "models",
-          element: <Models/>,
+          element: (
+            <ProtectedRoute>
+              <Models />
+            </ProtectedRoute>
+          ),
           handle: { title: "Models Generation | Sequeelizer" },
         },
         {

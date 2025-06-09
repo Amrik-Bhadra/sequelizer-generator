@@ -1,7 +1,7 @@
 const md5 = require('md5');
 const { createUser, findUserByEmail, updateUserOtp, getUserById, clearUserOtp, updateUserPassword, findUserByEmailUid, createUserGoogleAuth, getUserData } = require('../models/User.model');
 const sendEmail = require('../utils/emailService');
-const { otpEmailTemplate, welcomeEmailTemplate } = require('../utils/emailTemplates');
+const { otpEmailTemplate, welcomeEmailTemplate, oneTimePasswordEmailTemplate } = require('../utils/emailTemplates');
 
 function generateOTP() {
     return Math.floor(10000 + Math.random() * 90000).toString();
@@ -41,7 +41,7 @@ const register = async (req, res) => {
             return res.status(500).json({ message: 'Failed to send OTP email.' });
         }
 
-        res.status(201).json({ message: "User registered successfully" });
+        res.status(200).json({ message: "User registered successfully" });
     } catch (error) {
         console.error('Error in forgotPassword:', error);
         res.status(500).json({ message: 'Server error' });
@@ -52,17 +52,18 @@ const googleRegister = async (req, res) => {
     try {
         const { uid, email, username } = req.body;
         const user = await findUserByEmail(email);
+        const password = "password@123";
 
         if (user) return res.status(409).json({ message: 'Email Already Exists' });
         await createUserGoogleAuth(uid, email, username);
 
-        const emailStatus = await sendEmail(email, 'Welcome To Sequelizer', welcomeEmailTemplate(username));
+        const emailStatus = await sendEmail(email, 'Welcome To Sequelizer', oneTimePasswordEmailTemplate(username, password));
 
         if (!emailStatus.success) {
             return res.status(500).json({ message: 'Failed to send OTP email.' });
         }
 
-        res.status(201).json({ message: "User registered successfully" });
+        res.status(200).json({ message: "User registered successfully" });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Server error' });
@@ -127,7 +128,6 @@ const verifyOtp = async (req, res) => {
     try {
         const { user_id, otp, purpose } = req.body;
         const user = await getUserById(user_id);
-        console.log(otp + "---" + user.otp);
 
         if (!user) {
             return res.status(400).json({ message: 'Invalid user.' });
@@ -138,13 +138,14 @@ const verifyOtp = async (req, res) => {
         }
 
         await clearUserOtp(user_id);
-
         if (purpose === 'login') {
             req.session.user = {
                 id: user.user_id,
                 username: user.username,
                 email: user.email
             };
+
+            console.log('session user: ', req.session.user);
 
             return res.status(200).json({ message: 'OTP verified, login successful.', user: req.session.user });
         }
@@ -155,7 +156,7 @@ const verifyOtp = async (req, res) => {
 
         return res.status(400).json({ message: 'Invalid purpose provided.' });
     } catch (error) {
-        console.error('Error in forgotPassword:', error);
+        console.error('Error in verifyotp:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -185,20 +186,15 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
     try {
-        const { user_id, otp, new_password } = req.body;
+        const { user_id,  password } = req.body;
 
         const user = await getUserById(user_id);
         if (!user) {
             return res.status(404).json({ message: 'Invalid user.' });
         }
 
-        if (user.otp !== otp) {
-            return res.status(401).json({ message: 'Invalid OTP.' });
-        }
-
-        const hashedPassword = md5(new_password);
+        const hashedPassword = md5(password);
         await updateUserPassword(user_id, hashedPassword);
-        await clearUserOtp(user_id);
 
         res.status(200).json({ message: 'Password reset successful. Please login with new password.' });
     } catch (error) {
