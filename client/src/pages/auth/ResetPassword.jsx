@@ -82,7 +82,7 @@ const ResetPassword = () => {
             <SolidIconBtn
               icon={MdLockReset}
               text="Reset Password"
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               onClick={handleResetPassword}
             />
 

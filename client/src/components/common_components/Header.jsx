@@ -13,8 +13,8 @@ const Header = ({ email, name, logout }) => {
 
   return (
     <header className="max-h-fit h-full w-full flex items-center justify-center bg-white dark:bg-dark-sec-bg px-6 py-4 shadow-sm">
-      <nav className="max-w-7xl w-full flex justify-between items-center">
-        <Link to="/">
+      <nav className="max-w-[90vw] w-full flex justify-between items-center">
+        <Link to="/seq/dashboard">
           <h1 className="text-2xl font-bold text-[#333] dark:text-gray-light1">
             Sequelizer
           </h1>
@@ -48,7 +48,7 @@ const Header = ({ email, name, logout }) => {
               <SolidIconBtn
                 icon={MdLogout}
                 text="Logout"
-                className="bg-primary hover:bg-blue-700"
+                className="bg-primary hover:bg-blue-700 text-white"
                 onClick={() => {
                   logout();
                   navigate('/auth/login');

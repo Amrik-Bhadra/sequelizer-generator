@@ -123,7 +123,7 @@ const VerifyOTP = () => {
                 type="text"
                 maxLength="1"
                 value={digit}
-                className="border border-[#e0e0e0] dark:bg-transparent rounded-md h-16 w-16 text-center text-xl outline-none"
+                className="border border-[#e0e0e0] dark:bg-transparent rounded-md h-16 w-16 text-center text-xl outline-none dark:text-white"
                 onInput={(e) => {
                   const input = e.target;
                   const value = input.value.replace(/[^0-9]/g, "");
@@ -155,7 +155,7 @@ const VerifyOTP = () => {
             <SolidIconBtn
               icon={MdVerifiedUser}
               text="Verify OTP"
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
             />
 

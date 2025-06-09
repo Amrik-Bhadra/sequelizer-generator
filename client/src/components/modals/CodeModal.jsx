@@ -1,0 +1,71 @@
+import { useState } from "react";
+import SolidIconBtn from "../buttons/SolidIconBtn";
+import { FaCopy, FaDownload } from "react-icons/fa6";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {
+  oneDark,
+  prism,
+  vscDarkPlus,
+  coy,
+  okaidia,
+  solarizedlight,
+  tomorrow,
+  darcula,
+  duotoneDark,
+  duotoneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+
+const CodeModal = ({code}) => {
+  const themeOptions = {
+    oneDark,
+    prism,
+    vscDarkPlus,
+    coy,
+    okaidia,
+    solarizedlight,
+    tomorrow,
+    darcula,
+    duotoneDark,
+    duotoneLight,
+  };
+
+  const [selectedTheme, setSelectedTheme] = useState("vscDarkPlus");
+  return (
+    <div className="absolute top-0 left-0 z-10 bg-black/60 h-screen w-screen flex items-center justify-center">
+      <div id="code-container" className="bg-white p-4 rounded-md md:w-[60%]">
+        <header className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-primary">Prodct Modal</h1>
+          <div id="button-div" className="flex items-center gap-x-3">
+            <SolidIconBtn
+              icon={FaCopy}
+              text="Copy"
+              onClick={() => {}}
+              className="bg-gray-dark1 text-[#333]"
+            />
+
+            <SolidIconBtn
+              icon={FaDownload}
+              text="Download"
+              onClick={() => {}}
+              className="bg-dark-sec-bg"
+            />
+          </div>
+        </header>
+
+        <pre className="overflow-x-auto mt-3 w-full max-w-full">
+          <SyntaxHighlighter
+            language="javascript"
+            style={themeOptions[selectedTheme]}
+            showLineNumbers
+            className="rounded-md"
+            customStyle={{ fontSize: `16px` }}
+          >
+            {code}
+          </SyntaxHighlighter>
+        </pre>
+      </div>
+    </div>
+  );
+};
+
+export default CodeModal;
