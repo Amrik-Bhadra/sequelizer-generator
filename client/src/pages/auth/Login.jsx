@@ -1,8 +1,8 @@
-import React from 'react'
+import React from "react";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import InputFieldComponent from "../../components/form_components/InputField";
-import PasswordFieldComponent from "../../components/form_components/PasswordField";
+import InputField from "../../components/form_components/InputField";
+import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
 import { MdEmail } from "react-icons/md";
@@ -11,6 +11,9 @@ import { MdLogin } from "react-icons/md";
 import { FaUserLock } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
+import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { auth, googleProvider } from "../../config/firebase_config";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -29,9 +32,16 @@ const Login = () => {
     }
 
     try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const uid = userCredential.user.uid;
+
       const response = await axios.post(
         "http://localhost:3000/api/auth/login",
-        { email, password },
+        { email, password, uid },
         {
           withCredentials: true,
         }
@@ -39,32 +49,54 @@ const Login = () => {
 
       if (response.status === 200) {
         toast.success(response?.data.message);
-        navigate("http://localhost:3000/auth/verifyotp");
+        navigate("/seq/dashboard");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed! Try again.");
     }
   };
 
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault();
+
+    try {
+      const userCredential = await signInWithPopup(auth, googleProvider);
+      const user = userCredential.user;
+      const uid = user.uid;
+      const username = user.displayName;
+      const email = user.email;
+
+      // Send to your backend
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/google-login",
+        { uid, username, email },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        toast.success(response.data.message || "Google login successful");
+        navigate("/seq/dashboard");
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error(error.message || "Google login failed");
+    }
+  };
+
   return (
     <>
-      <div className="absolute top-0 left-0 w-full bg-white flex items-center justify-start px-8 mt-2">
-        <span>
-          {/* <img src={images.logo} alt="logo" className="w-32" /> */}
-        </span>
-      </div>
-      <div className="w-full max-w-md bg-white rounded-lg p-6 flex flex-col gap-8">
+      <div className="w-full max-w-md bg-white dark:bg-transparent rounded-lg p-6 flex flex-col gap-8">
         <header className="flex flex-col items-center gap-1">
-          <div className="h-10 w-10 border border-[#e0e0e0] text-primary-txt rounded-lg flex items-center justify-center mb-5 ">
+          <div className="h-10 w-10 border border-[#e0e0e0] text-secondary dark:text-gray-light1 rounded-lg flex items-center justify-center mb-5 ">
             <FaUserLock className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-semibold mb-2">Hi, Welcome Back</h1>
-          <p className="text-center text-sm font-light text-secondary-txt">
+          <h1 className="text-2xl font-semibold mb-2 dark:text-white">Hi, Welcome Back</h1>
+          <p className="text-center text-sm font-light text-secondary-txt dark:text-gray-light2">
             Enter your credentials to access your account
           </p>
         </header>
-        <form className="flex flex-col gap-5" onSubmit={handleLogin}>
-          <InputFieldComponent
+        <form className="flex flex-col gap-y-4" onSubmit={handleLogin}>
+          <InputField
             label="Email"
             type="email"
             name="email"
@@ -76,7 +108,7 @@ const Login = () => {
             required={true}
           />
 
-          <PasswordFieldComponent
+          <PasswordField
             label="Password"
             name="password"
             id="password"
@@ -87,52 +119,53 @@ const Login = () => {
             required={true}
           />
 
-          <div className="flex justify-between items-center gap-3">
+          <div className="flex justify-between items-center gap-x-3">
             {/* Remember Me Checkbox */}
-            <label className="flex items-center text-sm text-primary-txt cursor-pointer">
+            <div className="flex items-center text-sm text-primary-txt cursor-pointer">
               <input
                 type="checkbox"
                 className="mr-2 accent-primary-btn cursor-pointer"
                 id="rememberMe"
               />
-              Remember Me
-            </label>
+              <p className="dark:text-[#b8b8b8]">Remember Me</p>
+            </div>
 
             {/* Forgot Password Link */}
             <div>
               <Link
                 to="/auth/forgotpassword"
-                className="w-full text-sm text-link font-semibold "
+                className="w-full text-sm text-link font-semibold dark:text-white"
               >
                 Forgot Password?
               </Link>
             </div>
           </div>
 
-          <SolidIconBtn
-            icon={MdLogin}
-            text="Login"
-            className="bg-primary hover:bg-blue-700"
-            type="submit"
-          />
+          <div className="flex flex-col gap-y-3 mt-2">
+            <SolidIconBtn
+              icon={MdLogin}
+              text="Login"
+              className="bg-primary hover:bg-blue-700"
+              type="submit"
+            />
 
-          <HollowIconButton
-            icon={FcGoogle}
-            text="Continue with Google"
-            onClick={() => {
-              // Trigger Google Auth here
-              console.log("Google login clicked");
-            }}
-            className="border-gray-300 hover:bg-gray-100 text-gray-700 mt-2"
-          />
+            <div className="flex items-center dark:text-gray-light1">
+              <hr className="flex-grow border-gray-300" />
+              <span className="mx-2 text-sm text-gray-500 font-medium dark:text-gray-light1">OR</span>
+              <hr className="flex-grow border-gray-300" />
+            </div>
 
+            <HollowIconButton
+              icon={FcGoogle}
+              text="Sign in with Google"
+              onClick={handleGoogleLogin}
+              className="border-gray-300 hover:bg-gray-100 text-gray-700"
+            />
+          </div>
 
-          <p className="text-sm text-center text-primary-txt font-light">
+          <p className="text-sm text-center text-primary-txt font-light dark:text-gray-light2">
             Don't have an account?{" "}
-            <Link
-              to="/auth/register"
-              className="text-link font-medium"
-            >
+            <Link to="/auth/registration" className="text-link font-medium text-primary">
               Register
             </Link>
           </p>

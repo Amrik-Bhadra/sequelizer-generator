@@ -10,6 +10,7 @@ import ResetPassword from "../src/pages/auth/ResetPassword";
 import VerifyOTP from "../src/pages/auth/VerifyOTP";
 import UserLayout from "./layouts/UserLayout";
 import Dashboard from "./pages/main/Dashboard";
+import Models from "./pages/main/GenerateModel"
 import LandingPage from "./pages/LandingPage";
 
 export default function App() {
@@ -57,7 +58,12 @@ export default function App() {
         {
           path: "dashboard",
           element: <Dashboard/>,
-          handle: { title: "Dashboard | Sequelizer" },
+          handle: { title: "Dashboard | Sequeelizer" },
+        },
+        {
+          path: "models",
+          element: <Models/>,
+          handle: { title: "Models Generation | Sequeelizer" },
         }
       ]
     }

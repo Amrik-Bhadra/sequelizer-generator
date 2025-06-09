@@ -18,19 +18,19 @@ const InputField = ({
             {label && (
                 <label
                     htmlFor={id}
-                    className="text-sm font-medium text-primary-text"
+                    className="text-sm font-medium text-primary-text dark:text-gray-light1"
                 >
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
             )}
 
             <div className={`
-                flex items-center border p-2 rounded-md
-                ${error ? 'border-red-500' : 'border-grey-300'}
+                flex items-center border p-2 rounded-md dark:bg-[#6f6f6f4b]
+                ${error ? 'border-red-500' : 'border-gray-300 dark:border-none'}
                 ${error ? 'focus-within:border-red-500' : 'focus-within:border-sky'}
                 transition-all duration-200
             `}>
-                {Icon && <Icon className="h-5 w-5 text-gray-400" />}
+                {Icon && <Icon className="h-5 w-5 text-gray-400 dark:text-gray-light2" />}
 
                 <input
                     type={type}
@@ -40,7 +40,6 @@ const InputField = ({
                     value={value}
                     onChange={(e) => {
                         if (typeof onChange === 'function') {
-                        // Handle both direct value updates and event objects
                         if (typeof e === 'object' && e.target) {
                             onChange(e.target.value);
                         } else {
@@ -52,8 +51,8 @@ const InputField = ({
                     className={`
                         w-full outline-none border-none bg-transparent
                         ${Icon ? 'pl-3' : 'pl-0'}
-                        transition-all duration-200
-                        text-md placeholder:text-sm
+                        transition-all duration-200 dark:text-white
+                        text-md placeholder:text-sm dark:placeholder:text-gray-light2
                         ${className}
                     `}
                     />

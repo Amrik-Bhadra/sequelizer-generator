@@ -12,6 +12,6 @@ router.post('/logout', logout);
 
 router.post('/google-login', googleLogin);
 router.post('/google-register', googleRegister)
-router.get('/me', checkCredentials, getUserDetails);
+// router.get('/me', checkCredentials, getUserDetails);
 
 module.exports = router;
