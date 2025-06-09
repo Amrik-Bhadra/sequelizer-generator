@@ -28,16 +28,16 @@ app.use(cors(corsOption));
 app.use(cookieparser());
 
 // session setup
-// app.use(session({
-//   secret: process.env.SECRET,
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: {
-//     maxAge: 1000 * 60 * 60 * 24, 
-//     httpOnly: true,
-//     secure: false,
-//   }
-// }));
+app.use(session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, 
+    httpOnly: true,
+    secure: false,
+  }
+}));
 
 
 app.use('/api/auth', authRoutes);

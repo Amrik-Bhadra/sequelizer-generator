@@ -2,20 +2,21 @@ import React, { useEffect, useRef, useState } from "react";
 import { MdOutlineVerifiedUser } from "react-icons/md";
 import { IoMdArrowBack } from "react-icons/io";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { MdVerifiedUser } from "react-icons/md";
-import { useAuth } from "../../contexts/AuthContext";
 import axios from "axios";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
 
+
 const VerifyOTP = () => {
   const navigate = useNavigate();
-  const [otpInputs, setOtpInputs] = useState(["", "", "", ""]);
-  const [timer, setTimer] = useState(90); // 1 min 30 sec = 90 sec
+  const [otpInputs, setOtpInputs] = useState(["", "", "", "", ""]);
+  const [timer, setTimer] = useState(90); 
   const [showResend, setShowResend] = useState(false);
   const intervalRef = useRef(null);
-  const { setAuth } = useAuth();
+  const location = useLocation();
+  const state = location.state;
 
   // Handle OTP input change
   const handleChange = (index, value) => {
@@ -51,20 +52,22 @@ const VerifyOTP = () => {
 
     const otp = otpInputs.join("");
     if (otp.length !== 5) {
-      toast.error("Please enter all 4 digits of the OTP.");
+      toast.error("Please enter all 5 digits of the OTP.");
       return;
     }
 
     try {
+      console.log(otp);
+      const user_id = state.user_id;
+      const purpose = state.purpose;
       const response = await axios.post(
         "http://localhost:3000/api/auth/verifyotp",
-        { otp }
+        { user_id, otp, purpose }
       );
       toast.success(`${response.data.message}`);
 
-      if (response.data.task === "login") {
-        const { token, user } = response.data;
-        setAuth({ token, user });
+      if (purpose === "login") {       
+        navigate('/seq/dashboard');
       } else {
         navigate("/auth/resetpassword");
       }
@@ -75,7 +78,6 @@ const VerifyOTP = () => {
   };
 
   const handleResendOTP = () => {
-    // Add your resend OTP API call here if needed
     setTimer(90);
     setShowResend(false);
 

@@ -5,9 +5,11 @@ import { FaCaretDown, FaCaretUp } from "react-icons/fa";
 import { getInitials } from "../../utils/helperFunctions";
 import { MdLogout } from "react-icons/md";
 import SolidIconBtn from "../buttons/SolidIconBtn";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ email, name, logout }) => {
   const [option, setOption] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <header className="max-h-fit h-full w-full flex items-center justify-center bg-white dark:bg-dark-sec-bg px-6 py-4 shadow-sm">
@@ -47,7 +49,10 @@ const Header = ({ email, name, logout }) => {
                 icon={MdLogout}
                 text="Logout"
                 className="bg-primary hover:bg-blue-700"
-                onClick={() => logout()}
+                onClick={() => {
+                  logout();
+                  navigate('/auth/login');
+                }}
               />
             </div>
           )}

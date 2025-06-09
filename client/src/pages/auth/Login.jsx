@@ -49,7 +49,8 @@ const Login = () => {
 
       if (response.status === 200) {
         toast.success(response?.data.message);
-        navigate("/seq/dashboard");
+        const user_id = response.data.user_id;
+        navigate("/auth/verifyotp", { state: { user_id, purpose: "login" } });
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed! Try again.");
@@ -75,7 +76,8 @@ const Login = () => {
 
       if (response.status === 200) {
         toast.success(response.data.message || "Google login successful");
-        navigate("/seq/dashboard");
+        const user_id = response.data.user_id;
+        navigate("/auth/verifyotp", { state: { user_id, purpose: "login" } });
       }
     } catch (error) {
       console.error("Google login error:", error);
@@ -90,7 +92,9 @@ const Login = () => {
           <div className="h-10 w-10 border border-[#e0e0e0] text-secondary dark:text-gray-light1 rounded-lg flex items-center justify-center mb-5 ">
             <FaUserLock className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-semibold mb-2 dark:text-white">Hi, Welcome Back</h1>
+          <h1 className="text-2xl font-semibold mb-2 dark:text-white">
+            Hi, Welcome Back
+          </h1>
           <p className="text-center text-sm font-light text-secondary-txt dark:text-gray-light2">
             Enter your credentials to access your account
           </p>
@@ -151,7 +155,9 @@ const Login = () => {
 
             <div className="flex items-center dark:text-gray-light1">
               <hr className="flex-grow border-gray-300" />
-              <span className="mx-2 text-sm text-gray-500 font-medium dark:text-gray-light1">OR</span>
+              <span className="mx-2 text-sm text-gray-500 font-medium dark:text-gray-light1">
+                OR
+              </span>
               <hr className="flex-grow border-gray-300" />
             </div>
 
@@ -165,7 +171,10 @@ const Login = () => {
 
           <p className="text-sm text-center text-primary-txt font-light dark:text-gray-light2">
             Don't have an account?{" "}
-            <Link to="/auth/registration" className="text-link font-medium text-primary">
+            <Link
+              to="/auth/registration"
+              className="text-link font-medium text-primary"
+            >
               Register
             </Link>
           </p>

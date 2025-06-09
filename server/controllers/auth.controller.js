@@ -127,7 +127,6 @@ const verifyOtp = async (req, res) => {
     try {
         const { user_id, otp, purpose } = req.body;
         const user = await getUserById(user_id);
-        console.log(otp + "---" + user.otp);
 
         if (!user) {
             return res.status(400).json({ message: 'Invalid user.' });
@@ -138,13 +137,14 @@ const verifyOtp = async (req, res) => {
         }
 
         await clearUserOtp(user_id);
-
         if (purpose === 'login') {
             req.session.user = {
                 id: user.user_id,
                 username: user.username,
                 email: user.email
             };
+
+            console.log('session user: ', req.session.user);
 
             return res.status(200).json({ message: 'OTP verified, login successful.', user: req.session.user });
         }
@@ -155,7 +155,7 @@ const verifyOtp = async (req, res) => {
 
         return res.status(400).json({ message: 'Invalid purpose provided.' });
     } catch (error) {
-        console.error('Error in forgotPassword:', error);
+        console.error('Error in verifyotp:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
