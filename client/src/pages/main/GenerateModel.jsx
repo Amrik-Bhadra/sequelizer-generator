@@ -211,7 +211,7 @@ const GenerateModel = () => {
       {/* Left Section */}
       <div>
         {/* Model Name */}
-        <div className="mb-4 p-4 bg-white border rounded-md shadow-sm flex items-center gap-4">
+        <div className="mb-4 p-4 bg-white dark:bg-[#6f6f6f4b] border rounded-md shadow-sm flex items-center gap-4">
           <label className="text-blue-600 font-semibold text-lg min-w-[100px]">
             Model Name <span className="text-red-500">*</span>
           </label>
@@ -466,3 +466,5 @@ const GenerateModel = () => {
 };
 
 export default GenerateModel;
+
+
