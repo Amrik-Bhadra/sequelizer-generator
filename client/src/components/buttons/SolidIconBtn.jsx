@@ -1,6 +1,7 @@
 import React from 'react';
 
 const SolidIconBtn = ({ icon: Icon, text, onClick, className = "", type = "button", disabled }) => {
+const SolidIconBtn = ({ icon: Icon, text, onClick, className = "", type = "button", disabled }) => {
   return (
     <button
       type={type}
@@ -14,4 +15,4 @@ const SolidIconBtn = ({ icon: Icon, text, onClick, className = "", type = "butto
   );
 };
 
-export default SolidIconBtn;
+export default SolidIconBtn;

@@ -8,7 +8,7 @@ import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 
 // Dummy Data
 const dummyModels = Array.from({ length: 23 }, (_, i) => ({
-  name: `Model ${i + 1}`,
+  name: Model ${i + 1},
   attributes: Math.floor(Math.random() * 10 + 1),
   createdAt: "08-06-25",
 }));
