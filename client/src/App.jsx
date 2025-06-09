@@ -77,11 +77,15 @@ export default function App() {
         },
         {
           path: "relationship",
-          element: <RelationshipMapping/>,
+          element: (
+            <ProtectedRoute>
+              <RelationshipMapping />
+            </ProtectedRoute>
+          ),
           handle: { title: "Relation | Sequeelizer" },
-        }
-      ]
-    }
+        },
+      ],
+    },
   ]);
 
   return (

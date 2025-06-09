@@ -155,7 +155,7 @@ const VerifyOTP = () => {
             <SolidIconBtn
               icon={MdVerifiedUser}
               text="Verify OTP"
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
             />
 

@@ -5,11 +5,7 @@ import InputField from "../../components/form_components/InputField";
 import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
-import { MdEmail } from "react-icons/md";
-import { RiLockPasswordFill } from "react-icons/ri";
-import { MdLogin } from "react-icons/md";
-import { FaUserLock } from "react-icons/fa6";
-import { FcGoogle } from "react-icons/fc";
+import { MdEmail, RiLockPasswordFill, MdLogin, FaUserLock, FcGoogle } from "../../utils/iconsProvider"
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
@@ -179,7 +175,7 @@ const Login = () => {
                   "Login"
                 )
               }
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
               disabled={isLoading}
             />

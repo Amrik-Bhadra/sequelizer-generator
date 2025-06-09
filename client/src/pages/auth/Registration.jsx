@@ -5,12 +5,7 @@ import InputField from "../../components/form_components/InputField";
 import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
-import { MdEmail } from "react-icons/md";
-import { IoPerson } from "react-icons/io5";
-import { RiLockPasswordFill } from "react-icons/ri";
-import { HiUserAdd } from "react-icons/hi";
-import { MdAppRegistration } from "react-icons/md";
-import { FcGoogle } from "react-icons/fc";
+import { MdEmail, IoPerson, RiLockPasswordFill, HiUserAdd, MdAppRegistration, FcGoogle } from "../../utils/iconsProvider";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
@@ -160,7 +155,7 @@ const Registration = () => {
               icon={MdAppRegistration}
               text="Register"
               onClick={handleRegister}
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
             />
 

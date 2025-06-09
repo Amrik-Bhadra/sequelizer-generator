@@ -69,7 +69,7 @@ const ForgotPassword = () => {
             <SolidIconBtn
               icon={MdLockOpen}
               text="Send OTP"
-              className="bg-primary hover:bg-blue-700"
+              className="bg-primary hover:bg-blue-700 text-white"
               onClick={handleSendOTP}
             />
 
