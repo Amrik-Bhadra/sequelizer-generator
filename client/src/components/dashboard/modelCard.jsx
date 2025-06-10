@@ -10,7 +10,9 @@ import {
 } from "../../utils/iconsProvider";
 import SolidIconBtn from "../buttons/SolidIconBtn";
 
+
 const ModelCard = ({ model }) => {
+    
   return (
     <div className="flex justify-between items-center px-4 py-3 bg-white border border-gray-300 rounded-md mb-3 shadow-sm">
       {/* Left Side */}
@@ -26,7 +28,7 @@ const ModelCard = ({ model }) => {
         </div>
         <div className="ml-10">
           <div className="text-1.25rem font-semibold text-blue-700 ml-4">
-            {model.attributes}
+            {model.metadata?.attributes ? Object.keys(model.metadata.attributes).length : 0}
           </div>
           <div className="text-sm text-cyan-600">Attributes</div>
         </div>
