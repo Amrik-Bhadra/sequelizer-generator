@@ -111,7 +111,7 @@ const VerifyOTP = () => {
             Verify OTP
           </h1>
           <p className="text-sm text-center font-light text-secondary-txt dark:text-gray-light2">
-            We have sent a 4 digit verification code to your email
+            We have sent a 5 digit verification code to your email
           </p>
         </header>
 
