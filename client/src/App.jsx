@@ -64,7 +64,7 @@ export default function App() {
               <Dashboard />
             </ProtectedRoute>
           ),
-          handle: { title: "Dashboard | Sequeelizer" },
+          handle: { title: "Dashboard | Sequelizer" },
         },
         {
           path: "models",
@@ -73,7 +73,7 @@ export default function App() {
               <Models />
             </ProtectedRoute>
           ),
-          handle: { title: "Models Generation | Sequeelizer" },
+          handle: { title: "Models Generation | Sequelizer" },
         },
         {
           path: "relationship",
