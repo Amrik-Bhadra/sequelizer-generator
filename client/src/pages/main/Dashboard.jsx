@@ -1,24 +1,25 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import ModelCard from "../../components/dashboard/modelCard";
 import RelationshipCard from "../../components/dashboard/relationshipCard";
 import { FaPlus } from "react-icons/fa";
-import { FaArrowRightLong, IoMdAdd } from "../../utils/iconsProvider";
 import InputField from "../../components/form_components/InputField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 // Dummy Data
-const dummyModels = Array.from({ length: 23 }, (_, i) => ({
-  name: `Model ${i + 1}`,
-  attributes: Math.floor(Math.random() * 10 + 1),
-  createdAt: "08-06-25",
-}));
+// const dummyModels = Array.from({ length: 23 }, (_, i) => ({
+//   name: `Model ${i + 1}`,
+//   attributes: Math.floor(Math.random() * 10 + 1),
+//   createdAt: "08-06-25",
+// }));
 
-const dummyRelationships = Array.from({ length: 20 }, () => ({
-  model1: "User",
-  model2: "Profile",
-  relationType: "One-to-one",
-  createdAt: "08-06-2025",
-}));
+// const dummyRelationships = Array.from({ length: 20 }, () => ({
+//   model1: "User",
+//   model2: "Profile",
+//   relationType: "One-to-one",
+//   createdAt: "08-06-2025",
+// }));
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -43,22 +44,62 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => (
 );
 
 const Dashboard = () => {
-  // Models State
+  const [models, setModels] = useState([]);
+  const [relationships, setRelationships] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [modelPage, setModelPage] = useState(1);
   const [modelLimit, setModelLimit] = useState(5);
-
-  // Relationships State
   const [relPage, setRelPage] = useState(1);
   const [relLimit, setRelLimit] = useState(5);
+
+   const fetchData = async () => {
+    setLoading(true);
+    try {
+      const modelRes = await axios.get("http://localhost:3000/api/models", { withCredentials: true });
+
+    // Assuming relationships are included in the model response
+       const allModels = modelRes.data || [];
+
+    const extractedRelationships = [];
+
+    allModels.forEach((model) => {
+      const associations = model.metadata?.associations || [];
+
+      associations.forEach((assoc) => {
+        extractedRelationships.push({
+          model1: model.name,
+          model2: assoc.target,
+          relationType: assoc.type,
+          foreignKey: assoc.foreignKey || "-",
+          as: assoc.as || "-",
+          createdAt: new Date().toLocaleDateString(), 
+        });
+      });
+    });
+
+    setModels(allModels); 
+    setRelationships(extractedRelationships);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const modelStart = (modelPage - 1) * modelLimit;
   const relStart = (relPage - 1) * relLimit;
 
-  const modelPageCount = Math.ceil(dummyModels.length / modelLimit);
-  const relPageCount = Math.ceil(dummyRelationships.length / relLimit);
+  const visibleModels = models.slice(modelStart, modelStart + modelLimit);
+  const visibleRels = relationships.slice(relStart, relStart + relLimit);
 
-  const visibleModels = dummyModels.slice(modelStart, modelStart + modelLimit);
-  const visibleRels = dummyRelationships.slice(relStart, relStart + relLimit);
+  const modelPageCount = Math.ceil(models.length / modelLimit);
+  const relPageCount = Math.ceil(relationships.length / relLimit);
 
   return (
     <div className="space-y-6 p-3 min-h-screen">
@@ -66,7 +107,7 @@ const Dashboard = () => {
       <div className="p-6 bg-white border rounded-md">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
           <h2 className="text-xl font-semibold text-blue-600">
-            Models ({dummyModels.length})
+            Models ({models.length})
           </h2>
           <div className="flex gap-2 flex-wrap">
             <InputField type="text" placeholder="Search models..." />
@@ -81,7 +122,11 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 gap-2">
           {visibleModels.map((model, index) => (
-            <ModelCard key={index} model={model} />
+            <ModelCard     key={index}
+    model={{
+      ...model,
+      createdAt: new Date(model.createdAt).toLocaleDateString(),
+    }} />
           ))}
         </div>
 
@@ -118,7 +163,7 @@ const Dashboard = () => {
       <div className="p-6 bg-white border rounded-md">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
           <h2 className="text-xl font-semibold text-blue-600">
-            Relationships ({dummyRelationships.length})
+            Relationships ({relationships.length})
           </h2>
           <div className="flex gap-2 flex-wrap">
             <InputField type="text" placeholder="Search Relationships..." />
