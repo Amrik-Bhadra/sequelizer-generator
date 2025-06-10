@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import axios from "axios";
+
 import {
   oneDark,
   prism,
@@ -206,9 +208,72 @@ const GenerateModel = () => {
     setFields((prev) => prev.filter((field) => field.id !== id));
   };
 
-  const handleSave = () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
 
-  }
+    try {
+      if (!modelName || fields.length === 0) {
+        alert("Please provide a model name and at least one attribute.");
+        return;
+      }
+
+      let modelExists = false;
+
+      try {
+        const existingModel = await axios.get(`http://localhost:3000/api/models/${modelName}`, {
+          withCredentials: true
+        });
+
+        if (existingModel.status === 200 && existingModel.data?.id) {
+          modelExists = true;
+        }
+      } catch (getErr) {
+        if (getErr.response && getErr.response.status === 404) {
+          modelExists = false;
+        } else {
+          console.error("Error checking model existence:", getErr);
+          alert("Error checking if model exists.");
+          return;
+        }
+      }
+
+      if (modelExists) {
+        // ✅ Model exists — Perform UPDATE
+        const updateResponse = await axios.put(`http://localhost:3000/api/models/${modelName}`, {
+          metadata: { fields },
+        }, {
+          withCredentials: true
+        });
+
+        if (updateResponse.status === 200) {
+          alert("Model updated successfully!");
+          setSaveDeleteModal(false);
+        } else {
+          alert("Failed to update the model.");
+        }
+      } else {
+        // 🆕 Model doesn't exist — Perform CREATE
+        const createResponse = await axios.post("http://localhost:3000/api/models/", {
+          modelName,
+          fields,
+        }, {
+          withCredentials: true
+        });
+
+        if (createResponse.status === 201 || createResponse.status === 200) {
+          alert("Model created successfully!");
+          setSaveDeleteModal(false);
+        } else {
+          alert("Failed to create the model.");
+        }
+      }
+
+    } catch (error) {
+      console.error("Error saving model:", error);
+      alert("Something went wrong while saving the model.");
+    }
+  };
+
 
   useEffect(() => {
     generateCode();
@@ -490,7 +555,7 @@ const GenerateModel = () => {
 
       {saveDeleteModal && (
         <SaveDeleteModal
-          handleSave={handleSave}
+          handleSave={ handleSave }
           onClose={() => {
             setSaveDeleteModal(false);
           }}

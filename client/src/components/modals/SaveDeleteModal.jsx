@@ -27,16 +27,14 @@ const SaveDeleteModal = ({ handleSave, onClose, purpose, item }) => {
           <SolidIconBtn
             icon={null}
             text={"Discard"}
-            onClick={onClose}
+            onClick={ onClose }
             className="text-base bg-[#eee] hover:bg-[#ccc] text-secondary"
           />
 
           <SolidIconBtn
             icon={null}
             text={"Save Model"}
-            onClick={() => {
-              handleSave;
-            }}
+            onClick={ handleSave }
             className="bg-secondary text-white text-base hover:bg-dark-ter-bg "
           />
         </div>
