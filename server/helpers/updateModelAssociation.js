@@ -17,26 +17,38 @@ async function updateModelAssociation(userId, modelName, targetModel, type, fore
     const metadata = typeof model.metadata === 'string'
         ? JSON.parse(model.metadata)
         : model.metadata;
-    if (metadata.association != undefined) {
+    // if (metadata.association != undefined) {
 
-        metadata.association.forEach((assoc) => {
-            if (assoc.type === type && assoc.target === targetModel && assoc.foreignKey === foreignKey && assoc.as === (as || null)) {
-                // console.warn(`Association already exists: ${type}(${targetModel}) on ${modelName}`);
-                return;
-            }
-            if (model.name === modelName && assoc.target === targetModel && assoc.type != type) {
-                console.warn(`Association already exists with different type: ${assoc.type}(${targetModel}) on ${modelName}`);
-                deleteRelationship(userId, modelName, targetModel);
-            }
-        });
-    }
+    //     metadata.association.forEach((assoc) => {
+    //         if (assoc.type === type && assoc.target === targetModel && assoc.foreignKey === foreignKey && assoc.as === (as || null)) {
+    //             // console.warn(`Association already exists: ${type}(${targetModel}) on ${modelName}`);
+    //             return;
+    //         }
+    //         if (model.name === modelName && assoc.target === targetModel && assoc.type != type) {
+    //             console.warn(`Association already exists with different type: ${assoc.type}(${targetModel}) on ${modelName}`);
+    //             deleteRelationship(userId, modelName, targetModel);
+    //         }
+    //     });
+    // }
 
     let association;
-    if (!as) {
-        association = `${modelName}.${type}(models.${targetModel}, { foreignKey: '${foreignKey}' });`;
+    const [modelA, modelB] = [modelName, targetModel].sort();
+    const throughTable = `${modelA}_${modelB}`;
+
+    if (type === 'belongsToMany') {
+        if (!as) {
+            association = `${modelName}.${type}(models.${targetModel}, { foreignKey: '${foreignKey}', through: '${throughTable}' });`;
+        } else {
+            association = `${modelName}.${type}(models.${targetModel}, { foreignKey: '${foreignKey}', through: '${throughTable}', as: '${as}' });`;
+        }
     } else {
-        association = `${modelName}.${type}(models.${targetModel}, { foreignKey: '${foreignKey}', as: '${as}' });`;
+        if (!as) {
+            association = `${modelName}.${type}(models.${targetModel}, { foreignKey: '${foreignKey}' });`;
+        } else {
+            association = `${modelName}.${type}(models.${targetModel}, { foreignKey: '${foreignKey}', as: '${as}' });`;
+        }
     }
+
     // console.log(`Adding association: ${association}`);
     if (code.includes("static associate(models)")) {
         code = code.replace(
@@ -67,12 +79,22 @@ async function updateModelAssociation(userId, modelName, targetModel, type, fore
         (a) => a.type === type && a.target === targetModel && a.foreignKey === foreignKey && a.as === (as || null)
     );
     if (!exists) {
-        metadata.associations.push({
-            type: type,
-            target: targetModel,
-            foreignKey: foreignKey,
-            as: as || null
-        });
+        if (type === 'belongsToMany') {
+            metadata.associations.push({
+                type: type,
+                target: targetModel,
+                foreignKey: foreignKey,
+                through: throughTable,
+                as: as || null
+            });
+        }else{
+            metadata.associations.push({
+                type: type,
+                target: targetModel,
+                foreignKey: foreignKey,
+                as: as || null
+            });
+        }
     }
 
     const metadataString = JSON.stringify(metadata);

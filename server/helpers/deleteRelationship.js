@@ -54,14 +54,30 @@ const deleteRelationships = async (fromModel, toModel, userId) => {
         const associationsTo = metadataTo.associations || [];
         for (const assoc of associationsTo.filter(a => a.target === fromModel)) {
             const { type, foreignKey, as } = assoc;
-            if( !as) {
-                pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}' \\}\\);`;
-            }else{
-                pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', as: '${as}' \\}\\);`;
+
+            let pattern;
+
+            if (type === 'belongsToMany') {
+                const [modelA, modelB] = [toModel, fromModel].sort(); // to avoid inconsistencies
+                const throughTable = `${modelA}_${modelB}`;
+
+                if (!as) {
+                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}' \\}\\);`;
+                } else {
+                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}', as: '${as}' \\}\\);`;
+                }
+            } else {
+                if (!as) {
+                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}' \\}\\);`;
+                } else {
+                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', as: '${as}' \\}\\);`;
+                }
             }
+
             const regex = new RegExp(pattern, 'g');
             codeTo = codeTo.replace(regex, '');
         }
+
         codeTo = codeTo.replace(/\n\s*\n/g, '\n');
         metadataTo.associations = associationsTo.filter(a => a.target !== fromModel);
         await db.execute(
