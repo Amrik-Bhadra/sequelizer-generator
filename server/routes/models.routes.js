@@ -2,6 +2,7 @@ const express = require('express');
 const {
   createRecord,
   getAllModels,
+  getOneModel,
   updateModel,
   deleteModel,
 } = require('../controllers/models.controller');
@@ -10,7 +11,8 @@ const router = express.Router();
 
 router.post('/', createRecord);
 router.get('/', getAllModels);
-router.put('/:id', updateModel);
+router.get('/:modelName', getOneModel);
+router.put('/:modelName', updateModel);
 router.delete('/:id', deleteModel);
 
 module.exports = router;

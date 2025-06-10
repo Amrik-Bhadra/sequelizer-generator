@@ -14,6 +14,7 @@ import Models from "./pages/main/GenerateModel";
 import LandingPage from "./pages/LandingPage";
 import RelationshipMapping from "./pages/main/RelationshipMaping";
 import ProtectedRoute from "./contexts/ProtectedRoutes";
+import { ModelContextProvider } from "./contexts/ModelContext";
 
 export default function App() {
   const routes = createBrowserRouter([
@@ -92,8 +93,10 @@ export default function App() {
     <>
       <AuthContextProvider>
         <ThemeContextProvider>
-          <Toaster position="top-center" />
-          <RouterProvider router={routes} />
+          <ModelContextProvider>
+            <Toaster position="top-center" />
+            <RouterProvider router={routes} />
+          </ModelContextProvider>
         </ThemeContextProvider>
       </AuthContextProvider>
     </>

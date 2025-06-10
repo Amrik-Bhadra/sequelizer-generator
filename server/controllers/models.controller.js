@@ -42,9 +42,9 @@ const deleteModelById = async (id) => {
 };
 
 // Generate model code
-const generateModelCode = (modelName, attributes) => {
+const generateModelCode = (modelName, fields) => {
   let attrString = '';
-  for (const [key, options] of Object.entries(attributes)) {
+  for (const [key, options] of Object.entries(fields)) {
     let line = `    ${key}: {\n      type: DataTypes.${options.type.toUpperCase()}`;
     if (options.allowNull === false) {
       line += ',\n      allowNull: false';
@@ -64,10 +64,9 @@ const generateModelCode = (modelName, attributes) => {
 
 // CREATE RECORD and MODEL TABLE
 const createRecord = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-  const { modelName, attributes, data } = req.body;
-  // const userId = req.session.user.id;
-  const userId = 1;
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  const { modelName, fields, data } = req.body;
+  const userId = req.session.user.id;
 
   try {
     // Check if model exists for user
@@ -75,10 +74,12 @@ const createRecord = async (req, res) => {
     if (existing) return res.status(400).json({ message: 'Model already exists' });
 
     // Generate Sequelize model code string
-    const code = generateModelCode(modelName, attributes);
+    const code = generateModelCode(modelName, fields);
 
     // Store model metadata and generated Sequelize code in Models table
-    await insertModel(modelName, code, { attributes }, userId);
+    const newmodel = await insertModel(modelName, code, { fields }, userId);
+
+
 
     res.status(201).json({
       message: 'Model and record created'
@@ -90,8 +91,8 @@ const createRecord = async (req, res) => {
 
 // READ all models
 const getAllModels = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-  const userId = 1; // Or from session: req.session.user.id
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  const userId = req.session.user.id; // Or from session: req.session.user.id
 
   try {
     const models = await getAllModelsForUser(userId);
@@ -103,43 +104,59 @@ const getAllModels = async (req, res) => {
   }
 };
 
-// UPDATE model metadata/code
+const getOneModel = async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
 
-const updateModel = async (req, res) => {
-  const id = req.params.id;
-  const { metadata } = req.body;
+  const userId = req.session.user.id;
+  const { modelName } = req.params;
 
   try {
-    // Get existing model from DB
-    const [rows] = await getModelById(id);
-    if (rows.length === 0) {
+    const model = await getModelByNameAndUser(modelName, userId);
+    if (!model) {
+      return res.status(404).json({ message: 'Model not found' });  
+    }
+
+    res.status(200).json(model); // ✅ model found
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching model', error: err.message });
+  }
+};
+
+// UPDATE model metadata/code
+const updateModel = async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+
+  const { modelName } = req.params;
+  const { metadata } = req.body;
+  const userId = req.session.user.id;
+
+  try {
+    // 🔍 Find the model by name and user
+    const existingModel = await getModelByNameAndUser(modelName, userId);
+    if (!existingModel) {
       return res.status(404).json({ message: 'Model not found' });
     }
 
-    const existingModel = rows[0];
-    const modelName = existingModel.name;
+    // ⚙️ Generate updated Sequelize code
+    const regeneratedCode = generateModelCode(modelName, metadata.fields);
 
-    // Use new metadata or merge with old one (optional)
-    const updatedMetadata = metadata; // or deep merge if needed
-
-    // Generate updated Sequelize class-based code
-    const regeneratedCode = generateModelCode(modelName, updatedMetadata.attributes);
-
-    // Update in DB
-    await updateModelCode(id, regeneratedCode, updatedMetadata);
+    // 🛠 Update the model in DB
+    await updateModelCode(existingModel.id, regeneratedCode, metadata);
 
     res.status(200).json({
-      message: 'Model updated',
+      message: 'Model updated successfully',
       code: regeneratedCode
     });
+
   } catch (err) {
+    console.error("Error in updateModel:", err);
     res.status(500).json({ message: 'Error updating model', error: err.message });
   }
 };
 
 // DELETE model (metadata only)
 const deleteModel = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const { id } = req.params;
 
   try {
@@ -153,6 +170,7 @@ const deleteModel = async (req, res) => {
 module.exports = {
   createRecord,
   getAllModels,
+  getOneModel,
   updateModel,
   deleteModel,
 };
