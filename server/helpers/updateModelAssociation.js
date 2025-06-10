@@ -17,19 +17,6 @@ async function updateModelAssociation(userId, modelName, targetModel, type, fore
     const metadata = typeof model.metadata === 'string'
         ? JSON.parse(model.metadata)
         : model.metadata;
-    // if (metadata.association != undefined) {
-
-    //     metadata.association.forEach((assoc) => {
-    //         if (assoc.type === type && assoc.target === targetModel && assoc.foreignKey === foreignKey && assoc.as === (as || null)) {
-    //             // console.warn(`Association already exists: ${type}(${targetModel}) on ${modelName}`);
-    //             return;
-    //         }
-    //         if (model.name === modelName && assoc.target === targetModel && assoc.type != type) {
-    //             console.warn(`Association already exists with different type: ${assoc.type}(${targetModel}) on ${modelName}`);
-    //             deleteRelationship(userId, modelName, targetModel);
-    //         }
-    //     });
-    // }
 
     let association;
     const [modelA, modelB] = [modelName, targetModel].sort();
