@@ -1,24 +1,27 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import ModelCard from "../../components/dashboard/modelCard";
 import RelationshipCard from "../../components/dashboard/relationshipCard";
 import { FaPlus } from "react-icons/fa";
-import { FaArrowRightLong, IoMdAdd } from "../../utils/iconsProvider";
 import InputField from "../../components/form_components/InputField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 
 // Dummy Data
-const dummyModels = Array.from({ length: 23 }, (_, i) => ({
-  name: `Model ${i + 1}`,
-  attributes: Math.floor(Math.random() * 10 + 1),
-  createdAt: "08-06-25",
-}));
+// const dummyModels = Array.from({ length: 23 }, (_, i) => ({
+//   name: `Model ${i + 1}`,
+//   attributes: Math.floor(Math.random() * 10 + 1),
+//   createdAt: "08-06-25",
+// }));
 
-const dummyRelationships = Array.from({ length: 20 }, () => ({
-  model1: "User",
-  model2: "Profile",
-  relationType: "One-to-one",
-  createdAt: "08-06-2025",
-}));
+// const dummyRelationships = Array.from({ length: 20 }, () => ({
+//   model1: "User",
+//   model2: "Profile",
+//   relationType: "One-to-one",
+//   createdAt: "08-06-2025",
+// }));
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -43,22 +46,131 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => (
 );
 
 const Dashboard = () => {
-  // Models State
+  const navigate = useNavigate();
+  const [searchTermModel, setSearchTermModel] = useState("");
+  const [searchTermRelation,setSearchTermRelation] = useState("");
+
+
+
+  const [models, setModels] = useState([]);
+  const [relationships, setRelationships] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [modelPage, setModelPage] = useState(1);
   const [modelLimit, setModelLimit] = useState(5);
-
-  // Relationships State
   const [relPage, setRelPage] = useState(1);
   const [relLimit, setRelLimit] = useState(5);
 
+   const fetchData = async () => {
+    setLoading(true);
+    try {
+      const modelRes = await axios.get("http://localhost:3000/api/models", { withCredentials: true });
+      const allModels = modelRes.data || [];
+      const extractedRelationships = [];
+      allModels.forEach((model) => {
+
+      const associations = model.metadata?.associations || [];
+      associations.forEach((assoc) => {
+        extractedRelationships.push({
+          model1: model.name,
+          model2: assoc.target,
+          relationType: assoc.type,
+          foreignKey: assoc.foreignKey || "-",
+          as: assoc.as || "-",
+          createdAt: new Date().toLocaleDateString(), 
+        });
+      });
+    });
+
+    setModels(allModels); 
+    setRelationships(extractedRelationships);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  //search
+  const filteredModels = models.filter((model) =>
+    model.name.toLowerCase().includes(searchTermModel.toLowerCase())
+  );
+
+  const filteredRelationships = relationships.filter((rel) =>
+    rel.model1.toLowerCase().includes(searchTermRelation.toLowerCase()) ||
+    rel.model2.toLowerCase().includes(searchTermRelation.toLowerCase()) ||
+    rel.relationType.toLowerCase().includes(searchTermRelation.toLowerCase())
+  );  
+
+
+  //Delete
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this model?");
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`http://localhost:3000/api/models/${id}`, {
+        withCredentials: true,
+      });
+      toast.success("Model deleted successfully!");
+      fetchData(); // refresh
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed!");
+    }
+  };
+
+  //View
+  const handleView = (model) => {
+    alert("View functionality")
+  };
+
+  //Edit
+  const handleEdit = (model) => {
+  alert("Edit functionality");
+};
+
+  // DOWNLOAD
+  const handleDownload = (model) => {
+    const fileContent = `module.exports = ${JSON.stringify(model.metadata, null, 2)};`;
+    const blob = new Blob([fileContent], { type: "application/javascript" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${model.name}.js`;
+    link.click();
+  };
+
+  //Duplicate
+ const handleDuplicate = async (model) => {
+  const duplicated = {
+    modelName: model.name + "_copy",
+    attributes: model.metadata?.attributes || {}, 
+    cloneFrom: model.name,                         
+  };
+
+  try {
+    await axios.post("http://localhost:3000/api/models", duplicated);
+    toast.success("Model duplicated successfully!");
+    fetchData();
+  } catch (err) {
+    console.error("Duplication error:", err.response?.data || err);
+    toast.error("Duplication failed");
+  }
+};
+ 
   const modelStart = (modelPage - 1) * modelLimit;
   const relStart = (relPage - 1) * relLimit;
 
-  const modelPageCount = Math.ceil(dummyModels.length / modelLimit);
-  const relPageCount = Math.ceil(dummyRelationships.length / relLimit);
+  const visibleModels = filteredModels.slice(modelStart, modelStart + modelLimit);
+  const visibleRels = filteredRelationships.slice(relStart, relStart + relLimit);
 
-  const visibleModels = dummyModels.slice(modelStart, modelStart + modelLimit);
-  const visibleRels = dummyRelationships.slice(relStart, relStart + relLimit);
+  const modelPageCount = Math.ceil(filteredModels.length / modelLimit);
+  const relPageCount = Math.ceil(filteredRelationships.length / relLimit);
 
   return (
     <div className="space-y-6 p-3 min-h-screen">
@@ -66,24 +178,42 @@ const Dashboard = () => {
       <div className="p-6 bg-white border rounded-md">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
           <h2 className="text-xl font-semibold text-blue-600">
-            Models ({dummyModels.length})
+            Models ({models.length})
           </h2>
           <div className="flex gap-2 flex-wrap">
-            <InputField type="text" placeholder="Search models..." />
-            <SolidIconBtn
+          <InputField 
+            placeholder="Search models..." 
+            value={searchTermModel}
+            onChange={setSearchTermModel}
+            className="w-full max-w-xs"/>
+
+          <SolidIconBtn
               icon={FaPlus}
               text={"New Model"}
-              onClick={() => {}}
+              onClick={() => {navigate("/seq/models");}}
               className="bg-secondary text-white text-sm"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-2">
-          {visibleModels.map((model, index) => (
-            <ModelCard key={index} model={model} />
+        {visibleModels
+          .slice((modelPage - 1) * modelLimit, modelPage * modelLimit)
+          .map((model, index) => (
+            <ModelCard
+              key={index}
+              model={{
+                ...model,
+                createdAt: new Date(model.createdAt).toLocaleDateString(),
+              }}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onDownload={handleDownload}
+              onDuplicate={handleDuplicate}
+            />
           ))}
-        </div>
+      </div>
 
         <div className="flex justify-between items-center mt-4">
           <div className="text-sm text-gray-600 flex items-center gap-2">
@@ -118,14 +248,17 @@ const Dashboard = () => {
       <div className="p-6 bg-white border rounded-md">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
           <h2 className="text-xl font-semibold text-blue-600">
-            Relationships ({dummyRelationships.length})
+            Relationships ({relationships.length})
           </h2>
           <div className="flex gap-2 flex-wrap">
-            <InputField type="text" placeholder="Search Relationships..." />
+            <InputField type="text" placeholder="Search Relationships..."
+              value={searchTermRelation}
+              onChange={setSearchTermRelation}
+              className="w-full max-w-xs"/>
             <SolidIconBtn
               icon={FaPlus}
               text={"New Relation"}
-              onClick={() => {}}
+              onClick={() => {navigate("/seq/relationship");}}
               className="bg-secondary text-white text-sm"
             />
           </div>

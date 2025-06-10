@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { useRelation } from "../../contexts/ModelContext";
 import axios from "axios";
 
 import {
@@ -50,6 +51,7 @@ const GenerateModel = () => {
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [purpose, setPurpose] = useState("");
   const [item, setItem] = useState("");
+  const { addModel, updateModel } = useRelation();
 
   const themeOptions = {
     oneDark,
@@ -247,6 +249,7 @@ const GenerateModel = () => {
 
         if (updateResponse.status === 200) {
           alert("Model updated successfully!");
+          updateModel(updateResponse.data);
           setSaveDeleteModal(false);
         } else {
           alert("Failed to update the model.");
@@ -262,6 +265,7 @@ const GenerateModel = () => {
 
         if (createResponse.status === 201 || createResponse.status === 200) {
           alert("Model created successfully!");
+          addModel(createResponse.data);
           setSaveDeleteModal(false);
         } else {
           alert("Failed to create the model.");
