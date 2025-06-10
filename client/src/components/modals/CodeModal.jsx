@@ -2,6 +2,9 @@ import { useState } from "react";
 import SolidIconBtn from "../buttons/SolidIconBtn";
 import { FaCopy, FaDownload } from "react-icons/fa6";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import DownloadModal from "../../components/modals/DownloadModal";
+import { copyToClipboard } from "../../utils/helperFunctions";
+
 import {
   oneDark,
   prism,
@@ -15,7 +18,7 @@ import {
   duotoneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const CodeModal = ({code}) => {
+const CodeModal = ({ code, onClose }) => {
   const themeOptions = {
     oneDark,
     prism,
@@ -29,6 +32,8 @@ const CodeModal = ({code}) => {
     duotoneLight,
   };
 
+    const [downloadModal, setDownloadModalClose] = useState(false);
+  
   const [selectedTheme, setSelectedTheme] = useState("vscDarkPlus");
   return (
     <div className="absolute top-0 left-0 z-10 bg-black/60 h-screen w-screen flex items-center justify-center">
@@ -39,15 +44,21 @@ const CodeModal = ({code}) => {
             <SolidIconBtn
               icon={FaCopy}
               text="Copy"
-              onClick={() => {}}
+              onClick={() => copyToClipboard(code)}
               className="bg-gray-dark1 text-[#333]"
             />
 
             <SolidIconBtn
               icon={FaDownload}
               text="Download"
-              onClick={() => {}}
+              onClick={() => setDownloadModalClose(!downloadModal)}
               className="bg-dark-sec-bg"
+            />
+
+            <SolidIconBtn
+              text="Close"
+              onClick={onClose}
+              className="bg-red-500 text-white"
             />
           </div>
         </header>
@@ -64,6 +75,13 @@ const CodeModal = ({code}) => {
           </SyntaxHighlighter>
         </pre>
       </div>
+      {downloadModal && (
+        <DownloadModal
+          generatedCode={code}
+          setDownloadModalClose={setDownloadModalClose}
+          // modelName={modelName}
+        />
+      )}
     </div>
   );
 };
