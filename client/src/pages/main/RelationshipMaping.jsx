@@ -6,12 +6,13 @@ import DownloadModal from "../../components/modals/DownloadModal";
 import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 import CodePreviewComponent from "../../components/common_components/CodePreviewComponent";
 import AddedRelations from "../../components/relationship/AddedRelations";
+import { useRelation } from "../../contexts/ModelContext";
+import axios from "axios";
 
 const associations = [
-  { value: "hasOne", label: "hasOne" },
-  { value: "hasMany", label: "hasMany" },
-  { value: "belongsTo", label: "belongsTo" },
-  { value: "belongsToMany", label: "belongsToMany" },
+  { value: "one-to-one", label: "one-to-one" },
+  { value: "one-to-many", label: "one-to-many" },
+  { value: "many-to-many", label: "many-to-many" },
 ];
 
 const dummyModels = [
@@ -24,40 +25,118 @@ const dummyModels = [
 const RelationshipMapping = () => {
   const [sourceModel, setSourceModel] = useState("");
   const [targetModel, setTargetModel] = useState("");
-  const [associationType, setAssociationType] = useState("hasOne");
+  const [associationType, setAssociationType] = useState("");
   const [foreignKey, setForeignKey] = useState("");
   const [throughModel, setThroughModel] = useState("");
   const [asValue, setAsValue] = useState("");
-  const [generatedCode, setGeneratedCode] = useState("");
+  const [generatedCode, setGeneratedCode] = useState({
+    sourceCode: "",
+    targetCode: "",
+  });
 
   const [downloadModal, setDownloadModalClose] = useState(false);
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [purpose, setPurpose] = useState("");
   const [item, setItem] = useState("");
+  const [modelList, setModelList] = useState([]);
+  const [modelCodes, setModelCodes] = useState({});
+
+  const { relations, addRelation, updateRelation } = useRelation();
 
   const generateAssociationCode = () => {
     if (!sourceModel || !targetModel || !associationType) {
-      setGeneratedCode("// Please select the models");
+      setGeneratedCode({
+        sourceCode: "// Please select the models",
+        targetCode: "// Please select the models",
+      });
       return;
     }
 
-    let assocLine = `${sourceModel}.${associationType}(${targetModel}`;
-    const options = [];
+    let forwardMethod, reverseMethod;
 
-    if (foreignKey) options.push(`foreignKey: "${foreignKey}"`);
-    if (throughModel && associationType === "belongsToMany") {
-      options.push(`through: "${throughModel}"`);
+    switch (associationType) {
+      case "one-to-one":
+        forwardMethod = "hasOne";
+        reverseMethod = "belongsTo";
+        break;
+      case "one-to-many":
+        forwardMethod = "hasMany";
+        reverseMethod = "belongsTo";
+        break;
+      case "many-to-many":
+        forwardMethod = "belongsToMany";
+        reverseMethod = "belongsToMany";
+        break;
+      default:
+        throw new Error(`Unknown relationship type: ${associationType}`);
     }
-    if (asValue) options.push(`as: "${asValue}"`);
 
-    if (options.length > 0) {
-      assocLine += `, { ${options.join(", ")} }`;
-    }
+    const buildOptions = (isReverse = false) => {
+      const opts = [];
+      if (foreignKey) opts.push(`foreignKey: "${foreignKey}"`);
+      if (throughModel && forwardMethod === "belongsToMany") {
+        opts.push(`through: "${throughModel}"`);
+      }
+      if (asValue && !isReverse) {
+        opts.push(`as: "${asValue}"`);
+      }
+      return opts.length > 0 ? `, \n\t\t{ ${opts.join(", ")} }` : "";
+    };
 
-    assocLine += ");";
+    const forwardLine = `${sourceModel}.${forwardMethod}(models.${targetModel}${buildOptions(
+      false
+    )});`;
+    const reverseLine = `${targetModel}.${reverseMethod}(models.${sourceModel}${buildOptions(
+      true
+    )});`;
 
-    const code = `// Sequelize association\n${assocLine}`;
-    setGeneratedCode(code);
+    const updateModelCode = (modelName, relationLine) => {
+      let baseCode = modelCodes[modelName] || "";
+
+      if (baseCode.includes("static associate(models)")) {
+        baseCode = baseCode.replace(
+          /static associate\(models\) \{([\s\S]*?)\n\s*\}/,
+          (match, inner) => {
+            const lines = inner
+              .trim()
+              .split("\n")
+              .map((line) => line.trim())
+              .filter(Boolean);
+
+            if (!lines.includes(relationLine)) {
+              lines.push(relationLine);
+            }
+
+            const newInner = lines.map((line) => `    ${line}`).join("\n");
+            return `static associate(models) {\n${newInner}\n  }`;
+          }
+        );
+      } else {
+        const classRegex = new RegExp(
+          `class\\s+${modelName}\\s+extends\\s+Model\\s*\\{`
+        );
+        const match = baseCode.match(classRegex);
+
+        if (match) {
+          baseCode = baseCode.replace(
+            classRegex,
+            `${match[0]}\n  static associate(models) {\n    ${relationLine}\n  }`
+          );
+        } else {
+          baseCode += `\n\nstatic associate(models) {\n    ${relationLine}\n  }\n`;
+        }
+      }
+
+      return baseCode;
+    };
+
+    const sourceUpdatedCode = updateModelCode(sourceModel, forwardLine);
+    const targetUpdatedCode = updateModelCode(targetModel, reverseLine);
+
+    setGeneratedCode({
+      sourceCode: sourceUpdatedCode,
+      targetCode: targetUpdatedCode,
+    });
   };
 
   useEffect(() => {
@@ -70,6 +149,27 @@ const RelationshipMapping = () => {
     throughModel,
     asValue,
   ]);
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/models");
+        console.log("Fetched models:", response.data);
+        const data = response.data;
+        const names = data.map((model) => model.name);
+        setModelList(names);
+
+        const codes = {};
+        data.forEach((model) => {
+          codes[model.name] = model.code;
+        });
+        setModelCodes(codes);
+      } catch (error) {
+        console.error("Error fetching models:", error);
+      }
+    };
+    fetchModels();
+  }, []);
 
   const handleSave = () => {};
 
@@ -105,7 +205,10 @@ const RelationshipMapping = () => {
                 label="Select Model 1"
                 selectedValue={sourceModel}
                 onChange={setSourceModel}
-                options={dummyModels}
+                options={modelList.map((name) => ({
+                  value: name,
+                  label: name,
+                }))}
                 placeholder="Select Model"
               />
               <DropdownComponent
@@ -119,21 +222,27 @@ const RelationshipMapping = () => {
                 label="Select Model 2"
                 selectedValue={targetModel}
                 onChange={setTargetModel}
-                options={dummyModels}
+                options={modelList.map((name) => ({
+                  value: name,
+                  label: name,
+                }))}
                 placeholder="Select Model"
               />
-              <InputField
-                label="Foreign Key (optional)"
-                type="text"
-                name="foreignKey"
-                id="foreignKey"
-                placeholder="e.g. userId"
-                value={foreignKey}
-                onChange={setForeignKey}
-              />
-              {associationType === "belongsToMany" && (
+              {associationType != "many-to-many" && (
                 <InputField
-                  label="Through Model (only for belongsToMany)"
+                  label="Foreign Key (optional)"
+                  type="text"
+                  name="foreignKey"
+                  id="foreignKey"
+                  placeholder="e.g. userId"
+                  value={foreignKey}
+                  onChange={setForeignKey}
+                />
+              )}
+
+              {associationType === "many-to-many" && (
+                <InputField
+                  label="Through Model"
                   type="text"
                   name="throughModel"
                   id="throughModel"
@@ -158,13 +267,13 @@ const RelationshipMapping = () => {
           <div className="grid md:grid-cols-2 gap-x-2">
             <CodePreviewComponent
               title={"Model 1 Preview"}
-              generatedCode={generatedCode}
+              generatedCode={generatedCode.sourceCode}
               downloadModal={downloadModal}
               setDownloadModalClose={setDownloadModalClose}
             />
             <CodePreviewComponent
               title={"Model 2 Preview"}
-              generatedCode={generatedCode}
+              generatedCode={generatedCode.targetCode}
               downloadModal={downloadModal}
               setDownloadModalClose={setDownloadModalClose}
             />
