@@ -7,7 +7,7 @@ import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+import CodeModal from "../../components/modals/CodeModal"
 
 // Dummy Data
 // const dummyModels = Array.from({ length: 23 }, (_, i) => ({
@@ -50,8 +50,6 @@ const Dashboard = () => {
   const [searchTermModel, setSearchTermModel] = useState("");
   const [searchTermRelation,setSearchTermRelation] = useState("");
 
-
-
   const [models, setModels] = useState([]);
   const [relationships, setRelationships] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +58,11 @@ const Dashboard = () => {
   const [modelLimit, setModelLimit] = useState(5);
   const [relPage, setRelPage] = useState(1);
   const [relLimit, setRelLimit] = useState(5);
+
+  const [viewCode, setViewCode] = useState("");
+  const [showCodeModal, setShowCodeModal] = useState(false);
+  const [modelName, setModelName] = useState("");
+  const [fields, setFields] = useState([]);
 
    const fetchData = async () => {
     setLoading(true);
@@ -126,13 +129,50 @@ const Dashboard = () => {
   };
 
   //View
-  const handleView = (model) => {
-    alert("View functionality")
+  const handleView = async (model) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/models/${model.name}`, {
+        withCredentials: true
+    });
+
+    if (response.status === 200 && response.data.code) {
+      setViewCode(response.data.code);       // Set code
+      setShowCodeModal(true);                // Show modal
+    }
+    } catch (error) {
+      console.error("Error fetching model code:", error);
+      alert("Failed to fetch model code.");
+    }
   };
 
   //Edit
-  const handleEdit = (model) => {
-  alert("Edit functionality");
+  const handleEdit = async (model) => {
+  try {
+    const response = await axios.get(`http://localhost:3000/api/models/${model.name}`, {
+      withCredentials: true,
+    });
+
+    if (response.status === 200) {
+      const modelData = response.data;
+      // console.log(modelData);
+      
+      // Navigate to the models page and pass model data via state
+      navigate("/seq/models", {
+        state: {
+          editMode: true,
+          modelData: {
+            modelName: modelData.name,
+            metadata: {
+              fields: modelData.metadata.fields,
+            },
+          },
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching model for edit:", error);
+    alert("Failed to fetch model details.");
+  }
 };
 
   // DOWNLOAD
@@ -298,6 +338,12 @@ const Dashboard = () => {
           />
         </div>
       </div>
+      {showCodeModal && (
+        <CodeModal
+          code={ viewCode }
+          onClose={() => setShowCodeModal(false)}
+        />
+      )}
     </div>
   );
 };

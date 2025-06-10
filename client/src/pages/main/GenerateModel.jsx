@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { useRelation } from "../../contexts/ModelContext";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 import {
@@ -52,6 +53,9 @@ const GenerateModel = () => {
   const [purpose, setPurpose] = useState("");
   const [item, setItem] = useState("");
   const { addModel, updateModel } = useRelation();
+  const location = useLocation();
+  const editMode = location.state?.editMode;
+  const modelData = location.state?.modelData;
 
   const themeOptions = {
     oneDark,
@@ -282,6 +286,14 @@ const GenerateModel = () => {
   useEffect(() => {
     generateCode();
   }, [fields, modelName]);
+
+  useEffect(() => {
+    if (editMode && modelData) {
+      setModelName(modelData.modelName || ""); // ✅ fixed
+      setFields(modelData.metadata.fields || []);
+      console.log("Loaded fields:", modelData.metadata.field);
+    }
+  }, [editMode, modelData]);
 
   return (
     <>
