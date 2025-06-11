@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
 import axios from "axios";
+import Loader from "../../components/common_components/Loader";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -148,29 +149,7 @@ const Login = () => {
               icon={isLoading ? null : MdLogin}
               text={
                 isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                    Logging in...
-                  </span>
+                  <Loader text={'Logging in...'} />
                 ) : (
                   "Login"
                 )
@@ -192,29 +171,7 @@ const Login = () => {
               icon={isGoogleLoading? null : FcGoogle}
               text={
                 isGoogleLoading ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-4 w-4 text-secondary"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                    Logging in...
-                  </span>
+                  <Loader text={'Logging in...'} />
                 ) : (
                   "Sign in with Google"
                 )

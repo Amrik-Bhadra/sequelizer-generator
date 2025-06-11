@@ -10,13 +10,22 @@ import { MdLockOpen } from "react-icons/md";
 import toast from "react-hot-toast";
 import axios from "axios";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
+import Loader from "../../components/common_components/Loader";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState("");
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
+    if(!email){
+      toast.error('Email not entered!');
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
       const response = await axios.post(
         "http://localhost:3000/api/auth/forgotpassword",
@@ -34,6 +43,8 @@ const ForgotPassword = () => {
       }
     } catch (error) {
       toast.error(error);
+    } finally{
+      setIsLoading(false);
     }
   };
 
@@ -67,8 +78,10 @@ const ForgotPassword = () => {
 
           <div className="flex flex-col gap-3 w-full">
             <SolidIconBtn
-              icon={MdLockOpen}
-              text="Send OTP"
+              icon={ !isLoading ? MdLockOpen : null}
+              text={ isLoading ? (
+                <Loader text={'Sending OTP...'} />
+              ) : "Send OTP"}
               className="bg-primary hover:bg-blue-700 text-white"
               onClick={handleSendOTP}
             />

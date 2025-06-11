@@ -287,8 +287,7 @@ const RelationshipMapping = () => {
           </h1>
 
           <div className="flex flex-col gap-y-2 mt-3">
-            <AddedRelations />{" "}
-            {/* pass model1 name, model 2 name, relation, and other data */}
+            <AddedRelations />
           </div>
 
           <SolidIconBtn

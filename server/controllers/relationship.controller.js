@@ -37,7 +37,7 @@ const updateRelationship = async (req, res) => {
                 ) {
                     console.warn(`Association already exists: ${forwardMethod}(${toModel}) on ${fromModel}`);
                     shouldDelete = false;
-                    break; // no need to add again
+                    break; 
                 }
                 if (
                     assoc.target === toModel &&

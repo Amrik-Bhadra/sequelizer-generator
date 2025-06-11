@@ -59,13 +59,7 @@ const CodeModal = ({code, onClose}) => {
               text="Close"
               onClick={onClose}
               className="bg-red-500 text-white"
-            />
-
-            <SolidIconBtn
-              text="Close"
-              onClick={onClose}
-              className="bg-red-500 text-white"
-            />
+            />  
           </div>
         </header>
 
