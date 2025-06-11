@@ -28,8 +28,8 @@ export const downloadJsFile = (code, filename) => {
         a.href = url;
         a.download = filename;
         a.click();
-
         URL.revokeObjectURL(url);
+        
 
     } catch (error) {
         console.log(error);

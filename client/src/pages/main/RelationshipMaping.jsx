@@ -153,7 +153,7 @@ const RelationshipMapping = () => {
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/models");
+        const response = await axios.get("http://localhost:3000/api/models", { withCredentials: true });
         console.log("Fetched models:", response.data);
         const data = response.data;
         const names = data.map((model) => model.name);

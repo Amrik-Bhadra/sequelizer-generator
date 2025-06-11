@@ -46,6 +46,7 @@ const DownloadModal = ({ generatedCode, setDownloadModalClose, modelName }) => {
             onClick={() => {
               downloadJsFile(generatedCode, fileName);
               toast.success(`${fileName}.js donloaded!`);
+              setDownloadModalClose(false);
             }}
             className="bg-secondary text-white text-sm hover:bg-dark-ter-bg "
           />
