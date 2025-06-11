@@ -11,14 +11,6 @@ console.log('modelRoutes:', typeof modelRoutes);
 const relationshipRoutes = require('./routes/relationship.routes');
 
 // cors setup
-// const corsOption = {
-//     origin: ['http://localhost:5173'],
-//     methods: 'GET,PATCH,PUT,POST,HEAD,DELETE',
-//     credentials: true,
-//     AccessControlAllowOrigin: true,
-//     optionsSuccessStatus: 200
-// }
-
 const corsOption = {
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],

@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import CodeModal from "../../components/modals/CodeModal";
 import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 import DownloadModal from "../../components/modals/DownloadModal";
+import RelationCodeModal from "../../components/modals/RelationCodeModal";
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -49,6 +50,10 @@ const Dashboard = () => {
 
   const [viewCode, setViewCode] = useState("");
   const [showCodeModal, setShowCodeModal] = useState(false);
+
+  const [code1, setCode1] = useState("");
+  const [code2, setCode2] = useState("");
+  const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
   // const [modelName, setModelName] = useState("");
   // const [fields, setFields] = useState([]);
 
@@ -127,7 +132,7 @@ const Dashboard = () => {
   const handleView = async (model) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/models/${model.name}`,
+        `http://localhost:3000/api/models/${model.id}`,
         {
           withCredentials: true,
         }
@@ -147,7 +152,7 @@ const Dashboard = () => {
   const handleEdit = async (model) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/models/${model.name}`,
+        `http://localhost:3000/api/models/${model.id}`,
         {
           withCredentials: true,
         }
@@ -155,18 +160,12 @@ const Dashboard = () => {
 
       if (response.status === 200) {
         const modelData = response.data;
-        // console.log(modelData);
+        console.log(`Model data: ${modelData.id}`);
 
-        // Navigate to the models page and pass model data via state
         navigate("/seq/models", {
           state: {
             editMode: true,
-            modelData: {
-              modelName: modelData.name,
-              metadata: {
-                fields: modelData.metadata.fields,
-              },
-            },
+            modelData,
           },
         });
       }
@@ -175,22 +174,6 @@ const Dashboard = () => {
       alert("Failed to fetch model details.");
     }
   };
-
-  // DOWNLOAD
-  // const handleDownload = (fileName) => {
-  //   const fileContent = `module.exports = ${JSON.stringify(
-  //     model.metadata,
-  //     null,
-  //     2
-  //   )};`;
-  //   // const blob = new Blob([fileContent], { type: "application/javascript" });
-  //   // const link = document.createElement("a");
-  //   // link.href = URL.createObjectURL(blob);
-  //   // link.download = `${model.name}.js`;
-  //   // link.click();
-
-  //   downloadJsFile(fileContent, fileName);
-  // };
 
   //Duplicate
   const handleDuplicate = async (model) => {
@@ -223,6 +206,7 @@ const Dashboard = () => {
       toast.error("Duplication failed");
     }
   };
+
 
   const modelStart = (modelPage - 1) * modelLimit;
   const relStart = (relPage - 1) * relLimit;
@@ -356,7 +340,12 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 gap-2">
             {visibleRels.length > 0 ? (
               visibleRels.map((rel, index) => (
-                <RelationshipCard key={index} relationship={rel} />
+                <RelationshipCard
+                  key={index}
+                  relationship={rel}
+                  onView={()=>{}}
+                  onEdit={()=>{setShowRelationCodeModal(true)}}
+                />
               ))
             ) : (
               <h2 className="dark:text-white">No Relations Yet</h2>
@@ -395,6 +384,14 @@ const Dashboard = () => {
 
       {showCodeModal && (
         <CodeModal code={viewCode} onClose={() => setShowCodeModal(false)} />
+      )}
+
+      {showRelationCodeModal && (
+        <RelationCodeModal
+          code1={code1}
+          code2={code2}
+          onClose={() => setShowRelationCodeModal(false)}
+        />
       )}
 
       {saveDeleteModal && (

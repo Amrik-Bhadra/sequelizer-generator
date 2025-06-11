@@ -18,7 +18,7 @@ import {
   duotoneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const CodeModal = ({code, onClose}) => {
+const CodeModal = ({ code, onClose }) => {
   const themeOptions = {
     oneDark,
     prism,
@@ -32,8 +32,8 @@ const CodeModal = ({code, onClose}) => {
     duotoneLight,
   };
 
-    const [downloadModal, setDownloadModalClose] = useState(false);
-  
+  const [downloadModal, setDownloadModalClose] = useState(false);
+
   const [selectedTheme, setSelectedTheme] = useState("vscDarkPlus");
   return (
     <div className="absolute top-0 left-0 z-10 bg-black/60 h-screen w-screen flex items-center justify-center">
@@ -44,7 +44,9 @@ const CodeModal = ({code, onClose}) => {
             <SolidIconBtn
               icon={MdContentCopy}
               text="Copy"
-              onClick={() => {}}
+              onClick={() => {
+                copyToClipboard();
+              }}
               className="bg-[#eee] text-[#333] text-sm"
             />
 
@@ -59,7 +61,7 @@ const CodeModal = ({code, onClose}) => {
               text="Close"
               onClick={onClose}
               className="bg-red-500 text-white"
-            />  
+            />
           </div>
         </header>
 

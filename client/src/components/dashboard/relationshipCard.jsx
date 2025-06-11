@@ -8,7 +8,7 @@ import {
 } from "../../utils/iconsProvider";
 import SolidIconBtn from "../buttons/SolidIconBtn";
 
-const RelationshipCard = ({ relationship }) => {
+const RelationshipCard = ({ relationship, onEdit }) => {
   return (
     <div className="flex justify-between items-center px-4 py-3 bg-white border border-gray-300 rounded-md mb-3 shadow-sm">
       {/* Left Side */}
@@ -55,7 +55,7 @@ const RelationshipCard = ({ relationship }) => {
       {/* Right Side: Action Buttons */}
       <div className="flex gap-4">
         {[
-          { icon: MdEdit, text: "Edit", onClick: () => {} },
+          { icon: MdEdit, text: "Edit", onClick: onEdit },
           { icon: MdDelete, text: "Delete", onClick: () => {} },
           { icon: FaEye, text: "View", onClick: () => {} },
           { icon: FiDownload, text: "Download", onClick: () => {} },

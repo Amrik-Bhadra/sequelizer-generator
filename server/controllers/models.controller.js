@@ -15,10 +15,10 @@ const insertModel = async (name, code, metadata, userId) => {
   return result;
 };
 
-const updateModelCode = async (id, regeneratedCode, updatedMetadata) => {
+const updateModelCode = async (id, name, regeneratedCode, updatedMetadata) => {
   const [result] = await db.execute(
-    `UPDATE Models SET code = ?, metadata = ? WHERE id = ?`,
-    [regeneratedCode, JSON.stringify(updatedMetadata), id]
+    `UPDATE Models SET name = ?, code = ?, metadata = ? WHERE id = ?`,
+    [name, regeneratedCode, JSON.stringify(updatedMetadata), id]
   );
   return result;
 };
@@ -27,6 +27,14 @@ const getModelByNameAndUser = async (name, userId) => {
   const [rows] = await db.execute(
     `SELECT * FROM Models WHERE name = ? AND user_id = ?`,
     [name, userId]
+  );
+  return rows[0];
+};
+
+const getModelByIdAndUser = async (id, userId) => {
+  const [rows] = await db.execute(
+    `SELECT * FROM Models WHERE id = ? AND user_id = ?`,
+    [id, userId]
   );
   return rows[0];
 };
@@ -69,19 +77,12 @@ const createRecord = async (req, res) => {
   const userId = req.session.user.id;
 
   try {
-    // Check if model exists for user
     const existing = await getModelByNameAndUser(modelName, userId);
     if (existing) return res.status(400).json({ message: 'Model already exists' });
-
-    // Generate Sequelize model code string
     const code = generateModelCode(modelName, fields);
-
-    // Store model metadata and generated Sequelize code in Models table
     const newmodel = await insertModel(modelName, code, { fields }, userId);
 
-
-
-    res.status(201).json({
+    res.status(200).json({
       message: 'Model and record created'
     });
   } catch (err) {
@@ -96,7 +97,7 @@ const getAllModels = async (req, res) => {
 
   try {
     const models = await getAllModelsForUser(userId);
-    console.log(models);
+    // console.log(models);
     
     res.status(200).json(models);
   } catch (err) {
@@ -107,16 +108,19 @@ const getAllModels = async (req, res) => {
 const getOneModel = async (req, res) => {
   if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
 
+  console.log('Inside getOneModel');
+
   const userId = req.session.user.id;
-  const { modelName } = req.params;
+  const { modelId } = req.params;
 
   try {
-    const model = await getModelByNameAndUser(modelName, userId);
+    const model = await getModelByIdAndUser(modelId, userId);
     if (!model) {
       return res.status(404).json({ message: 'Model not found' });  
     }
 
-    res.status(200).json(model); // ✅ model found
+    console.log(`Model using id: ${model}`);
+    res.status(200).json(model);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching model', error: err.message });
   }
@@ -125,26 +129,25 @@ const getOneModel = async (req, res) => {
 // UPDATE model metadata/code
 const updateModel = async (req, res) => {
   if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  
+  console.log('Inside updateModel');
 
-  const { modelName } = req.params;
-  const { metadata } = req.body;
+  const { modelId } = req.params;
+  const { metadata, modelName } = req.body;
   const userId = req.session.user.id;
 
   try {
-    // 🔍 Find the model by name and user
-    const existingModel = await getModelByNameAndUser(modelName, userId);
+    const existingModel = await getModelByIdAndUser(modelId, userId);
     if (!existingModel) {
       return res.status(404).json({ message: 'Model not found' });
     }
 
-    // ⚙️ Generate updated Sequelize code
     const regeneratedCode = generateModelCode(modelName, metadata.fields);
 
-    // 🛠 Update the model in DB
-    await updateModelCode(existingModel.id, regeneratedCode, metadata);
+    await updateModelCode(existingModel.id, modelName, regeneratedCode, metadata);
 
     res.status(200).json({
-      message: 'Model updated successfully',
+      message: 'Model updated successfully',  
       code: regeneratedCode
     });
 

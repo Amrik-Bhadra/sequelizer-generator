@@ -11,8 +11,8 @@ const router = express.Router();
 
 router.post('/', createRecord);
 router.get('/', getAllModels);
-router.get('/:modelName', getOneModel);
-router.put('/:modelName', updateModel);
+router.get('/:modelId', getOneModel);
+router.put('/:modelId', updateModel);
 router.delete('/:id', deleteModel);
 
 module.exports = router;

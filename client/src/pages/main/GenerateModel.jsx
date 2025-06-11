@@ -47,8 +47,8 @@ const GenerateModel = () => {
     },
   ]);
   const [generatedCode, setGeneratedCode] = useState("");
+  const [modelId, setModelId] = useState("");
   const [modelName, setModelName] = useState("");
-
   const [downloadModal, setDownloadModalClose] = useState(false);
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [purpose, setPurpose] = useState("");
@@ -84,26 +84,6 @@ const GenerateModel = () => {
       )
     );
   };
-
-  // const handleFieldChange = (id, key, value) => {
-  //   setFields((prev) =>
-  //     prev.map((field) => {
-  //       if (field.id !== id) return field;
-
-  //       if (key === "primaryKey" && value === "Yes") {
-  //         return {
-  //           ...field,
-  //           [key]: value,
-  //           autoIncrement: true,
-  //           allowNull: false,
-  //           unique: true,
-  //         };
-  //       }
-
-  //       return { ...field, [key]: value };
-  //     })
-  //   );
-  // };
 
   const addField = () => {
     setFields((prev) => [
@@ -240,8 +220,10 @@ const GenerateModel = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
+    console.log(`Model id: ${modelId}`);
+
     try {
-      if (!modelName || fields.length === 0) {
+      if (!modelId || fields.length === 0) {
         toast.error("Please provide a model name and at least one attribute.");
         return;
       }
@@ -250,13 +232,13 @@ const GenerateModel = () => {
 
       try {
         const existingModel = await axios.get(
-          `http://localhost:3000/api/models/${modelName}`,
+          `http://localhost:3000/api/models/${modelId}`,
           {
             withCredentials: true,
           }
         );
 
-        if (existingModel.status === 200 && existingModel.data?.id) {
+        if (existingModel.status === 200) {
           modelExists = true;
         }
       } catch (getErr) {
@@ -272,8 +254,9 @@ const GenerateModel = () => {
       if (modelExists) {
         //Model exists — Perform UPDATE
         const updateResponse = await axios.put(
-          `http://localhost:3000/api/models/${modelName}`,
+          `http://localhost:3000/api/models/${modelId}`,
           {
+            modelName,
             metadata: { fields },
           },
           {
@@ -302,7 +285,7 @@ const GenerateModel = () => {
           }
         );
 
-        if (createResponse.status === 201 || createResponse.status === 200) {
+        if (createResponse.status === 200) {
           toast.success("Model created successfully!");
           addModel(createResponse.data);
           setSaveDeleteModal(false);
@@ -322,6 +305,7 @@ const GenerateModel = () => {
           ]);
           setModelName("");
           setGeneratedCode("")
+          setModelId("");
         } else {
           toast.error("Failed to create the model.");
         }
@@ -338,16 +322,9 @@ const GenerateModel = () => {
 
   useEffect(() => {
     if (editMode && modelData) {
-      setModelName(modelData.modelName || ""); // ✅ fixed
+      setModelId(modelData.id || ""); 
       setFields(modelData.metadata.fields || []);
-      console.log("Loaded fields:", modelData.metadata.field);
-    }
-  }, [editMode, modelData]);
-
-  useEffect(() => {
-    if (editMode && modelData) {
-      setModelName(modelData.modelName || ""); // ✅ fixed
-      setFields(modelData.metadata.fields || []);
+      setModelName(modelData.name);
       console.log("Loaded fields:", modelData.metadata.field);
     }
   }, [editMode, modelData]);
