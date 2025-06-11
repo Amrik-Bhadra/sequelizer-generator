@@ -45,7 +45,7 @@ const deleteModelById = async (id) => {
 const generateModelCode = (modelName, fields) => {
   let attrString = '';
   for (const [key, options] of Object.entries(fields)) {
-    let line = `    ${key}: {\n      type: DataTypes.${options.type.toUpperCase()}`;
+    let line = `    ${options.name}: {\n      type: DataTypes.${options.type.toUpperCase()}`;
     if (options.allowNull === false) {
       line += ',\n      allowNull: false';
     }
@@ -92,7 +92,7 @@ const createRecord = async (req, res) => {
 // READ all models
 const getAllModels = async (req, res) => {
   if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-  const userId = req.session.user.id; // Or from session: req.session.user.id
+  const userId = req.session.user.id; 
 
   try {
     const models = await getAllModelsForUser(userId);

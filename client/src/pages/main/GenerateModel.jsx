@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { useRelation } from "../../contexts/ModelContext";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import {
@@ -29,6 +29,7 @@ import {
 } from "../../utils/iconsProvider";
 import DownloadModal from "../../components/modals/DownloadModal";
 import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
+import toast from "react-hot-toast";
 
 const GenerateModel = () => {
   const [fields, setFields] = useState([
@@ -36,10 +37,10 @@ const GenerateModel = () => {
       id: uuidv4(),
       name: "",
       type: "",
-      primaryKey: "",
-      autoIncrement: "",
-      allowNull: "",
-      unique: "",
+      primaryKey: false,
+      autoIncrement: false,
+      allowNull: true,
+      unique: false,
       defaultValue: "",
       validate: "",
       arrayType: "",
@@ -56,6 +57,8 @@ const GenerateModel = () => {
   const location = useLocation();
   const editMode = location.state?.editMode;
   const modelData = location.state?.modelData;
+
+  const navigate = useNavigate();
 
   const themeOptions = {
     oneDark,
@@ -81,6 +84,26 @@ const GenerateModel = () => {
       )
     );
   };
+
+  // const handleFieldChange = (id, key, value) => {
+  //   setFields((prev) =>
+  //     prev.map((field) => {
+  //       if (field.id !== id) return field;
+
+  //       if (key === "primaryKey" && value === "Yes") {
+  //         return {
+  //           ...field,
+  //           [key]: value,
+  //           autoIncrement: true,
+  //           allowNull: false,
+  //           unique: true,
+  //         };
+  //       }
+
+  //       return { ...field, [key]: value };
+  //     })
+  //   );
+  // };
 
   const addField = () => {
     setFields((prev) => [
@@ -219,16 +242,19 @@ const GenerateModel = () => {
 
     try {
       if (!modelName || fields.length === 0) {
-        alert("Please provide a model name and at least one attribute.");
+        toast.error("Please provide a model name and at least one attribute.");
         return;
       }
 
       let modelExists = false;
 
       try {
-        const existingModel = await axios.get(`http://localhost:3000/api/models/${modelName}`, {
-          withCredentials: true
-        });
+        const existingModel = await axios.get(
+          `http://localhost:3000/api/models/${modelName}`,
+          {
+            withCredentials: true,
+          }
+        );
 
         if (existingModel.status === 200 && existingModel.data?.id) {
           modelExists = true;
@@ -238,50 +264,73 @@ const GenerateModel = () => {
           modelExists = false;
         } else {
           console.error("Error checking model existence:", getErr);
-          alert("Error checking if model exists.");
+          toast.error("Error checking if model exists.");
           return;
         }
       }
 
       if (modelExists) {
-        // ✅ Model exists — Perform UPDATE
-        const updateResponse = await axios.put(`http://localhost:3000/api/models/${modelName}`, {
-          metadata: { fields },
-        }, {
-          withCredentials: true
-        });
+        //Model exists — Perform UPDATE
+        const updateResponse = await axios.put(
+          `http://localhost:3000/api/models/${modelName}`,
+          {
+            metadata: { fields },
+          },
+          {
+            withCredentials: true,
+          }
+        );
 
         if (updateResponse.status === 200) {
-          alert("Model updated successfully!");
+          toast.success("Model updated successfully!");
           updateModel(updateResponse.data);
           setSaveDeleteModal(false);
+          navigate('/seq/dashboard');
         } else {
-          alert("Failed to update the model.");
+          toast.error("Failed to update the model.");
         }
       } else {
-        // 🆕 Model doesn't exist — Perform CREATE
-        const createResponse = await axios.post("http://localhost:3000/api/models/", {
-          modelName,
-          fields,
-        }, {
-          withCredentials: true
-        });
+        // Model doesn't exist — Perform CREATE
+        const createResponse = await axios.post(
+          "http://localhost:3000/api/models/",
+          {
+            modelName,
+            fields,
+          },
+          {
+            withCredentials: true,
+          }
+        );
 
         if (createResponse.status === 201 || createResponse.status === 200) {
-          alert("Model created successfully!");
+          toast.success("Model created successfully!");
           addModel(createResponse.data);
           setSaveDeleteModal(false);
+          setFields([
+            {
+              id: uuidv4(),
+              name: "",
+              type: "",
+              primaryKey: false,
+              autoIncrement: false,
+              allowNull: true,
+              unique: false,
+              defaultValue: "",
+              validate: "",
+              arrayType: "",
+            },
+          ]);
+          setModelName("");
+          setGeneratedCode("")
         } else {
-          alert("Failed to create the model.");
+          toast.error("Failed to create the model.");
         }
       }
-
     } catch (error) {
       console.error("Error saving model:", error);
       alert("Something went wrong while saving the model.");
     }
   };
-
 
   useEffect(() => {
     generateCode();
@@ -295,9 +344,16 @@ const GenerateModel = () => {
     }
   }, [editMode, modelData]);
 
+  useEffect(() => {
+    if (editMode && modelData) {
+      setModelName(modelData.modelName || ""); // ✅ fixed
+      setFields(modelData.metadata.fields || []);
+      console.log("Loaded fields:", modelData.metadata.field);
+    }
+  }, [editMode, modelData]);
+
   return (
     <>
-    
       <div className="p-3 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
         {/* Left Section */}
         <div>
@@ -479,7 +535,8 @@ const GenerateModel = () => {
                     handleFieldChange(field.id, "validate", value)
                   }
                   options={[
-                    { value: "", label: "None" },
+                    { value: "", label: "Select validation" },
+                    { value: "none", label: "None" },
                     { value: "minLength", label: "minLength" },
                     { value: "maxLength", label: "maxLength" },
                     { value: "pattern", label: "pattern" },
@@ -572,7 +629,7 @@ const GenerateModel = () => {
 
       {saveDeleteModal && (
         <SaveDeleteModal
-          handleSave={ handleSave }
+          onClick={handleSave}
           onClose={() => {
             setSaveDeleteModal(false);
           }}
@@ -585,5 +642,3 @@ const GenerateModel = () => {
 };
 
 export default GenerateModel;
-
-

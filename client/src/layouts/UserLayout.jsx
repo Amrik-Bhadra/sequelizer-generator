@@ -22,8 +22,6 @@ const UserLayout = () => {
         <Outlet />
       </main>
       <Footer />
-
-      {/* <CodeModal/> */}
     </div>
   );
 };
