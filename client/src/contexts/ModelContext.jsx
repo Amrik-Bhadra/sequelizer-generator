@@ -58,9 +58,19 @@ export const ModelContextProvider = ({ children }) => {
     );
   };
 
+  const deleteRelation = (id) => {
+  setRelations((prev) => prev.filter((rel) => rel.id !== id));
+};
+
+const clearRelations = () => {
+  setRelations([]);
+  localStorage.removeItem("relations");
+}
+
+
   return (
     <RelationContext.Provider
-      value={{ relations, addRelation, updateRelation, addModel, updateModel }}
+      value={{ relations, setRelations, addRelation, updateRelation, addModel, updateModel, deleteRelation, clearRelations, models, setModels }}
     >
       {children}
     </RelationContext.Provider>

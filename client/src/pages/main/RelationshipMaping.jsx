@@ -7,7 +7,10 @@ import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 import CodePreviewComponent from "../../components/common_components/CodePreviewComponent";
 import AddedRelations from "../../components/relationship/AddedRelations";
 import { useRelation } from "../../contexts/ModelContext";
+import {useAuth} from "../../contexts/AuthContext"
+import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const associations = [
   { value: "one-to-one", label: "one-to-one" },
@@ -40,8 +43,10 @@ const RelationshipMapping = () => {
   const [item, setItem] = useState("");
   const [modelList, setModelList] = useState([]);
   const [modelCodes, setModelCodes] = useState({});
+  const { user } = useAuth();
 
-  const { relations, addRelation, updateRelation } = useRelation();
+
+  const { relations, addRelation, updateRelation, clearRelations } = useRelation();
 
   const generateAssociationCode = () => {
     if (!sourceModel || !targetModel || !associationType) {
@@ -153,7 +158,9 @@ const RelationshipMapping = () => {
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/models", { withCredentials: true });
+        const response = await axios.get("http://localhost:3000/api/models", {
+          withCredentials: true,
+        });
         console.log("Fetched models:", response.data);
         const data = response.data;
         const names = data.map((model) => model.name);
@@ -171,7 +178,91 @@ const RelationshipMapping = () => {
     fetchModels();
   }, []);
 
-  const handleSave = () => {};
+  const handleSave = () => {
+    if (!sourceModel || !targetModel || !associationType) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const duplicate = relations.some(
+      (rel) =>
+        rel.sourceModel === sourceModel &&
+        rel.targetModel === targetModel &&
+        rel.associationType === associationType &&
+        rel.foreignKey === foreignKey &&
+        rel.throughModel === throughModel &&
+        rel.asValue === asValue
+    );
+
+    if (duplicate) {
+      alert("This relationship already exists!");
+      return;
+    }
+
+    const newRelation = {
+      id: uuidv4(),
+      sourceModel,
+      targetModel,
+      associationType,
+      foreignKey,
+      throughModel,
+      asValue,
+    };
+
+    addRelation(newRelation);
+
+    setSourceModel("");
+    setTargetModel("");
+    setAssociationType("");
+    setForeignKey("");
+    setThroughModel("");
+    setAsValue("");
+
+    setGeneratedCode({ sourceCode: "", targetCode: "" });
+
+    setSaveDeleteModal(false);
+  };
+
+  const handleFinalSubmit = async () => {
+  if (relations.length === 0) {
+    alert("No relationships to submit!");
+    return;
+  } 
+  // console.log("User:", user);
+
+  if (!user || !user.id) {
+    alert("User not logged in!");
+    return;
+  }
+
+  const payload = {
+    userId: user.id,
+    relationships: relations.map((rel) => ({
+      fromModel: rel.sourceModel,
+      toModel: rel.targetModel,
+      relationshipType: rel.associationType,
+      foreignKey: rel.foreignKey || undefined,
+      as: rel.asValue || undefined,
+    })),
+  };
+
+  try {
+    const response = await axios.post(
+      "http://localhost:3000/api/relationship/update",
+      payload,
+      { withCredentials: true }
+    );
+    toast.success("Relationships submitted successfully!");
+    console.log("Backend response:", response.data);
+
+    clearRelations();
+  } catch (error) {
+    console.error("Error submitting relationships:", error);
+    toast.error("Failed to submit relationships.");
+  }
+};
+
+
 
   return (
     <>
@@ -294,6 +385,7 @@ const RelationshipMapping = () => {
             icon={null}
             text={"Final Submit"}
             className="w-full bg-secondary text-sm text-white mt-4 hover:bg-[#464646]"
+            onClick={handleFinalSubmit}
           />
         </div>
       </div>
@@ -308,7 +400,7 @@ const RelationshipMapping = () => {
 
       {saveDeleteModal && (
         <SaveDeleteModal
-          handleSave={handleSave}
+          onClick={handleSave}
           onClose={() => {
             setSaveDeleteModal(false);
           }}
