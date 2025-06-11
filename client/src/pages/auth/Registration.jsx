@@ -5,21 +5,34 @@ import InputField from "../../components/form_components/InputField";
 import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
-import { MdEmail, IoPerson, RiLockPasswordFill, HiUserAdd, MdAppRegistration, FcGoogle } from "../../utils/iconsProvider";
+import {
+  MdEmail,
+  IoPerson,
+  RiLockPasswordFill,
+  HiUserAdd,
+  MdAppRegistration,
+  FcGoogle,
+} from "../../utils/iconsProvider";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
 import axios from "axios";
+import Loader from "../../components/common_components/Loader";
 
 const Registration = () => {
   const [username, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    
 
     if (!username) {
       toast.error("Name field not filled!");
@@ -35,6 +48,13 @@ const Registration = () => {
       toast.error("Password field not filled!");
       return;
     }
+
+    if(password !== confirmPassword){
+      toast.error('Both passwords should match');
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -64,6 +84,8 @@ const Registration = () => {
     } catch (error) {
       console.error(error);
       toast.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,12 +99,14 @@ const Registration = () => {
       const username = user.displayName;
       const email = user.email;
 
+      setIsGoogleLoading(true);
+
       const response = await axios.post(
         "http://localhost:3000/api/auth/google-register",
         {
           uid,
           username,
-          email
+          email,
         },
         {
           withCredentials: true,
@@ -98,6 +122,8 @@ const Registration = () => {
     } catch (error) {
       console.error("Google registration failed:", error);
       toast.error(error.message);
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -150,10 +176,27 @@ const Registration = () => {
             required={true}
           />
 
+          <PasswordField
+            label="Confirm Password"
+            name="confirmPassword"
+            id="confirmPassword"
+            placeholder="Re-enter your password"
+            icon={RiLockPasswordFill}
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            required={true}
+          />
+
           <div className="flex flex-col gap-y-3 mt-2">
             <SolidIconBtn
-              icon={MdAppRegistration}
-              text="Register"
+              icon={ !isLoading ? MdAppRegistration : null }
+              text={
+                isLoading ? (
+                  <Loader text={'Registering in...'} />
+                ) : (
+                  "Register"
+                )
+              }
               onClick={handleRegister}
               className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
@@ -168,8 +211,14 @@ const Registration = () => {
             </div>
 
             <HollowIconButton
-              icon={FcGoogle}
-              text="Signup with Google"
+              icon={!isGoogleLoading ? FcGoogle : null}
+              text={
+                isGoogleLoading ? (
+                  <Loader text={'Registering in...'} />
+                ) : (
+                  "Signup with Google"
+                )
+              }
               onClick={handleGoogleRegister}
               className="border-gray-300 hover:bg-gray-100 text-gray-700"
             />
