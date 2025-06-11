@@ -344,6 +344,14 @@ const GenerateModel = () => {
     }
   }, [editMode, modelData]);
 
+  useEffect(() => {
+    if (editMode && modelData) {
+      setModelName(modelData.modelName || ""); // ✅ fixed
+      setFields(modelData.metadata.fields || []);
+      console.log("Loaded fields:", modelData.metadata.field);
+    }
+  }, [editMode, modelData]);
+
   return (
     <>
       <div className="p-3 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
