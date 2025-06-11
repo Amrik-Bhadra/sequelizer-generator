@@ -1,9 +1,14 @@
 import React from "react";
 import SolidIconBtn from "../buttons/SolidIconBtn";
+import { MdDelete } from "../../utils/iconsProvider";
 
 const AddedRelations = () => {
   return (
-    <span className="border rounded-md p-2 flex flex-col gap-y-1">
+    <span className="relative border rounded-md p-2 flex flex-col gap-y-1">
+      <button className="absolute top-1 right-2 p-2 bg-[#eee] text-[#333] w-fit rounded-full hover:bg-[#ccc] transition-all">
+        <MdDelete />
+      </button>
+
       <span className="flex items-center gap-x-2">
         <h3 className="text-sm font-medium text-secondary">Model 1 : </h3>
         <p className="text-sm text-[#aaa] font-medium">User</p>

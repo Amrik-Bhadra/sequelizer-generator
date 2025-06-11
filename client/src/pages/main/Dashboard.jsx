@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import CodeModal from "../../components/modals/CodeModal";
 import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 import DownloadModal from "../../components/modals/DownloadModal";
-import { downloadJsFile } from "../../utils/helperFunctions";
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -58,7 +57,6 @@ const Dashboard = () => {
   const [purpose, setPurpose] = useState("");
   const [item, setItem] = useState("");
   const [downloadModal, setDownloadModalClose] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState("");
   const [modelName, setModelName] = useState("");
 
   const fetchData = async () => {
@@ -245,7 +243,7 @@ const Dashboard = () => {
     <>
       <div className="space-y-6 p-3 max-h-screen h-max overflow-y-auto">
         {/* Models */}
-        <div className="p-6 bg-white border rounded-md">
+        <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
             <h2 className="text-xl font-semibold text-blue-600">
               Models ({models.length})
@@ -264,7 +262,7 @@ const Dashboard = () => {
                 onClick={() => {
                   navigate("/seq/models");
                 }}
-                className="bg-secondary text-white text-sm"
+                className="bg-secondary text-white dark:bg-[#fff] dark:text-secondary text-sm"
               />
             </div>
           </div>
@@ -303,7 +301,7 @@ const Dashboard = () => {
 
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-gray-600 flex items-center gap-2">
-              <span>Display</span>
+              <span className="dark:text-gray-light2">Display</span>
               <select
                 value={modelLimit}
                 onChange={(e) => {
@@ -318,9 +316,9 @@ const Dashboard = () => {
                   </option>
                 ))}
               </select>
-              <span>rows in page</span>
+              <span className="dark:text-gray-light2">rows in page</span>
               <span className="text-primary font-semibold">{modelPage}</span>
-              <span>of {modelPageCount}</span>
+              <span className="dark:text-gray-light2">of {modelPageCount}</span>
             </div>
             <Pagination
               currentPage={modelPage}
@@ -331,7 +329,7 @@ const Dashboard = () => {
         </div>
 
         {/* Relationships */}
-        <div className="p-6 bg-white border rounded-md">
+        <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
             <h2 className="text-xl font-semibold text-blue-600">
               Relationships ({relationships.length})
@@ -350,7 +348,7 @@ const Dashboard = () => {
                 onClick={() => {
                   navigate("/seq/relationship");
                 }}
-                className="bg-secondary text-white text-sm"
+                className="bg-secondary text-white text-sm dark:bg-[#eee] dark:text-secondary"
               />
             </div>
           </div>
@@ -361,13 +359,13 @@ const Dashboard = () => {
                 <RelationshipCard key={index} relationship={rel} />
               ))
             ) : (
-              <h2>No Relations Yet</h2>
+              <h2 className="dark:text-white">No Relations Yet</h2>
             )}
           </div>
 
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-gray-600 flex items-center gap-2">
-              <span>Display</span>
+              <span className="dark:text-gray-light2">Display</span>
               <select
                 value={relLimit}
                 onChange={(e) => {
@@ -382,9 +380,9 @@ const Dashboard = () => {
                   </option>
                 ))}
               </select>
-              <span>rows in page</span>
+              <span className="dark:text-gray-light2">rows in page</span>
               <span className="text-primary font-semibold">{relPage}</span>
-              <span>of {relPageCount}</span>
+              <span className="dark:text-gray-light2">of {relPageCount}</span>
             </div>
             <Pagination
               currentPage={relPage}
