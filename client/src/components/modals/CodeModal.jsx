@@ -1,6 +1,6 @@
 import { useState } from "react";
 import SolidIconBtn from "../buttons/SolidIconBtn";
-import { FaCopy, FaDownload } from "react-icons/fa6";
+import { FiDownload, MdContentCopy } from "../../utils/iconsProvider";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   oneDark,
@@ -15,7 +15,7 @@ import {
   duotoneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const CodeModal = ({code}) => {
+const CodeModal = ({code, onClose}) => {
   const themeOptions = {
     oneDark,
     prism,
@@ -37,17 +37,23 @@ const CodeModal = ({code}) => {
           <h1 className="text-xl font-semibold text-primary">Prodct Modal</h1>
           <div id="button-div" className="flex items-center gap-x-3">
             <SolidIconBtn
-              icon={FaCopy}
+              icon={MdContentCopy}
               text="Copy"
               onClick={() => {}}
-              className="bg-gray-dark1 text-[#333]"
+              className="bg-[#eee] text-[#333] text-sm"
             />
 
             <SolidIconBtn
-              icon={FaDownload}
+              icon={FiDownload}
               text="Download"
               onClick={() => {}}
-              className="bg-dark-sec-bg"
+              className="bg-dark-sec-bg text-white text-sm"
+            />
+
+            <SolidIconBtn
+              text="Close"
+              onClick={onClose}
+              className="bg-red-500 text-white"
             />
           </div>
         </header>
