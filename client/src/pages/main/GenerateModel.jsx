@@ -48,6 +48,7 @@ const GenerateModel = () => {
   ]);
   const [generatedCode, setGeneratedCode] = useState("");
   const [modelName, setModelName] = useState("");
+  const [modelId, setModelId] = useState(null); 
 
   const [downloadModal, setDownloadModalClose] = useState(false);
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
@@ -246,34 +247,12 @@ const GenerateModel = () => {
         return;
       }
 
-      let modelExists = false;
-
-      try {
-        const existingModel = await axios.get(
-          `http://localhost:3000/api/models/${modelName}`,
-          {
-            withCredentials: true,
-          }
-        );
-
-        if (existingModel.status === 200 && existingModel.data?.id) {
-          modelExists = true;
-        }
-      } catch (getErr) {
-        if (getErr.response && getErr.response.status === 404) {
-          modelExists = false;
-        } else {
-          console.error("Error checking model existence:", getErr);
-          toast.error("Error checking if model exists.");
-          return;
-        }
-      }
-
-      if (modelExists) {
-        //Model exists — Perform UPDATE
+      if (modelId) {
+        // ✅ Perform UPDATE using known ID
         const updateResponse = await axios.put(
-          `http://localhost:3000/api/models/${modelName}`,
+          `http://localhost:3000/api/models/${modelId}`,
           {
+            modelName,
             metadata: { fields },
           },
           {
@@ -289,8 +268,9 @@ const GenerateModel = () => {
         } else {
           toast.error("Failed to update the model.");
         }
+
       } else {
-        // Model doesn't exist — Perform CREATE
+        // ❌ No ID means new model — Perform CREATE
         const createResponse = await axios.post(
           "http://localhost:3000/api/models/",
           {
@@ -306,31 +286,18 @@ const GenerateModel = () => {
           toast.success("Model created successfully!");
           addModel(createResponse.data);
           setSaveDeleteModal(false);
-          setFields([
-            {
-              id: uuidv4(),
-              name: "",
-              type: "",
-              primaryKey: false,
-              autoIncrement: false,
-              allowNull: true,
-              unique: false,
-              defaultValue: "",
-              validate: "",
-              arrayType: "",
-            },
-          ]);
-          setModelName("");
-          setGeneratedCode("")
+          resetFields(); // You can abstract reset logic into a function
         } else {
           toast.error("Failed to create the model.");
         }
       }
+
     } catch (error) {
       console.error("Error saving model:", error);
       alert("Something went wrong while saving the model.");
     }
   };
+
 
   useEffect(() => {
     generateCode();
@@ -340,15 +307,8 @@ const GenerateModel = () => {
     if (editMode && modelData) {
       setModelName(modelData.modelName || ""); // ✅ fixed
       setFields(modelData.metadata.fields || []);
-      console.log("Loaded fields:", modelData.metadata.field);
-    }
-  }, [editMode, modelData]);
-
-  useEffect(() => {
-    if (editMode && modelData) {
-      setModelName(modelData.modelName || ""); // ✅ fixed
-      setFields(modelData.metadata.fields || []);
-      console.log("Loaded fields:", modelData.metadata.field);
+      setModelId(modelData.modelId);
+      // console.log("Loaded fields:", modelData.metadata.field);
     }
   }, [editMode, modelData]);
 

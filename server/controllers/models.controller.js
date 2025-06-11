@@ -3,8 +3,9 @@
 const db = require('../config/db'); 
 
 // SQL Helpers
-const getModelById = (id) => {
-  return db.execute(`SELECT * FROM Models WHERE id = ?`, [id]);
+const getModelById = async (id) => {
+  const [rows] = await db.execute(`SELECT * FROM Models WHERE id = ?`, [id]);
+  return rows[0]; // always return single object
 };
 
 const insertModel = async (name, code, metadata, userId) => {
@@ -15,10 +16,10 @@ const insertModel = async (name, code, metadata, userId) => {
   return result;
 };
 
-const updateModelCode = async (id, regeneratedCode, updatedMetadata) => {
+const updateModelCode = async (id, newName, regeneratedCode, updatedMetadata) => {
   const [result] = await db.execute(
-    `UPDATE Models SET code = ?, metadata = ? WHERE id = ?`,
-    [regeneratedCode, JSON.stringify(updatedMetadata), id]
+    `UPDATE Models SET name = ?, code = ?, metadata = ? WHERE id = ?`,
+    [newName, regeneratedCode, JSON.stringify(updatedMetadata), id]
   );
   return result;
 };
@@ -77,9 +78,7 @@ const createRecord = async (req, res) => {
     const code = generateModelCode(modelName, fields);
 
     // Store model metadata and generated Sequelize code in Models table
-    const newmodel = await insertModel(modelName, code, { fields }, userId);
-
-
+    await insertModel(modelName, code, { fields }, userId);
 
     res.status(201).json({
       message: 'Model and record created'
@@ -122,37 +121,52 @@ const getOneModel = async (req, res) => {
   }
 };
 
+const getOneModelByID = async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+
+  const id = req.params.id;
+  console.log(id);
+
+  try {
+    const model = await getModelById(id);
+    console.log(model);
+    if (!model) {
+      return res.status(404).json({ message: 'Model not found' });  
+    }
+    res.status(200).json(model); // ✅ model found
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching model', error: err.message });
+  }
+};
+
 // UPDATE model metadata/code
 const updateModel = async (req, res) => {
   if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
 
-  const { modelName } = req.params;
-  const { metadata } = req.body;
-  const userId = req.session.user.id;
+  const id = req.params.id; // ✅ correctly extract id
+  const { modelName, metadata } = req.body; // ✅ get both from body
+  console.log(modelName);
 
   try {
-    // 🔍 Find the model by name and user
-    const existingModel = await getModelByNameAndUser(modelName, userId);
+    const existingModel = await getModelById(id);
     if (!existingModel) {
       return res.status(404).json({ message: 'Model not found' });
     }
 
-    // ⚙️ Generate updated Sequelize code
-    const regeneratedCode = generateModelCode(modelName, metadata.fields);
+    const regeneratedCode = generateModelCode(modelName, metadata.fields); // ✅ ensure modelName is valid
 
-    // 🛠 Update the model in DB
-    await updateModelCode(existingModel.id, regeneratedCode, metadata);
+    await updateModelCode(id, modelName, regeneratedCode, metadata);
 
     res.status(200).json({
       message: 'Model updated successfully',
       code: regeneratedCode
     });
-
   } catch (err) {
     console.error("Error in updateModel:", err);
     res.status(500).json({ message: 'Error updating model', error: err.message });
   }
 };
+
 
 // DELETE model (metadata only)
 const deleteModel = async (req, res) => {
@@ -171,6 +185,7 @@ module.exports = {
   createRecord,
   getAllModels,
   getOneModel,
+  getOneModelByID,
   updateModel,
   deleteModel,
 };

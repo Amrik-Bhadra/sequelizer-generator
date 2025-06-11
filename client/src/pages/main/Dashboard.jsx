@@ -149,7 +149,7 @@ const Dashboard = () => {
   const handleEdit = async (model) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/models/${model.name}`,
+        `http://localhost:3000/api/models/getbyid/${model.id}`,
         {
           withCredentials: true,
         }
@@ -164,6 +164,7 @@ const Dashboard = () => {
           state: {
             editMode: true,
             modelData: {
+              modelId: modelData.id,
               modelName: modelData.name,
               metadata: {
                 fields: modelData.metadata.fields,
@@ -215,7 +216,7 @@ const Dashboard = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/api/models", duplicated, {
+      await axios.post(`http://localhost:3000/api/models`, duplicated, {
         withCredentials: true,
       });
       toast.success(`Model duplicated as ${newName}`);
