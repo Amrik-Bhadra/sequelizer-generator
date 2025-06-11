@@ -146,22 +146,37 @@ const Dashboard = () => {
   };
 
   //Duplicate
- const handleDuplicate = async (model) => {
+const handleDuplicate = async (model) => {
+  const baseName = model.name + "_copy";
+  let newName = baseName;
+  let counter = 1;
+
+  const nameExists = (name) =>
+    models.some((m) => m.name.toLowerCase() === name.toLowerCase());
+
+  while (nameExists(newName)) {
+    newName = `${baseName}_${counter}`;
+    counter++;
+  }
+
   const duplicated = {
-    modelName: model.name + "_copy",
-    attributes: model.metadata?.attributes || {}, 
-    cloneFrom: model.name,                         
+    modelName: newName,
+    fields: model.metadata?.fields || {},
+    cloneFrom: model.name,
   };
 
   try {
-    await axios.post("http://localhost:3000/api/models", duplicated);
-    toast.success("Model duplicated successfully!");
+    await axios.post("http://localhost:3000/api/models", duplicated, {
+      withCredentials: true,
+    });
+    toast.success(`Model duplicated as ${newName}`);
     fetchData();
   } catch (err) {
     console.error("Duplication error:", err.response?.data || err);
     toast.error("Duplication failed");
   }
 };
+
  
   const modelStart = (modelPage - 1) * modelLimit;
   const relStart = (relPage - 1) * relLimit;
