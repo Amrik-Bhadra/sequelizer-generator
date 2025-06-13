@@ -3,7 +3,7 @@ import SolidIconBtn from "../buttons/SolidIconBtn";
 import { FiDownload, MdContentCopy } from "../../utils/iconsProvider";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import DownloadModal from "../../components/modals/DownloadModal";
-import { copyToClipboard, downloadJsFile } from "../../utils/helperFunctions";
+import { copyToClipboard } from "../../utils/helperFunctions";
 
 import {
   oneDark,
