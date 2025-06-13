@@ -8,7 +8,7 @@ import { IoFingerPrintSharp } from "react-icons/io5";
 import { IoMdArrowBack } from "react-icons/io";
 import { MdLockOpen } from "react-icons/md";
 import toast from "react-hot-toast";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
 import Loader from "../../components/common_components/Loader";
 
@@ -19,20 +19,17 @@ const ForgotPassword = () => {
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
-    if(!email){
-      toast.error('Email not entered!');
+    if (!email) {
+      toast.error("Email not entered!");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/forgotpassword",
-        {
-          email,
-        }, { withCredentials: true }
-      );
+      const response = await axiosInstance.post("/auth/forgotpassword", {
+        email,
+      });
       if (response.status === 200) {
         toast.success(response.data.message);
         navigate("/auth/verifyotp", {
@@ -43,7 +40,7 @@ const ForgotPassword = () => {
       }
     } catch (error) {
       toast.error(error);
-    } finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -78,10 +75,8 @@ const ForgotPassword = () => {
 
           <div className="flex flex-col gap-3 w-full">
             <SolidIconBtn
-              icon={ !isLoading ? MdLockOpen : null}
-              text={ isLoading ? (
-                <Loader text={'Sending OTP...'} />
-              ) : "Send OTP"}
+              icon={!isLoading ? MdLockOpen : null}
+              text={isLoading ? <Loader text={"Sending OTP..."} /> : "Send OTP"}
               className="bg-primary hover:bg-blue-700 text-white"
               onClick={handleSendOTP}
             />

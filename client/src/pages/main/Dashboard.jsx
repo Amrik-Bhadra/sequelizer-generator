@@ -4,7 +4,7 @@ import RelationshipCard from "../../components/dashboard/relationshipCard";
 import { FaPlus } from "react-icons/fa";
 import InputField from "../../components/form_components/InputField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import CodeModal from "../../components/modals/CodeModal";
@@ -55,8 +55,6 @@ const Dashboard = () => {
   const [code1, setCode1] = useState("");
   const [code2, setCode2] = useState("");
   const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
-  // const [modelName, setModelName] = useState("");
-  // const [fields, setFields] = useState([]);
 
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [selectModel, setSelectModel] = useState("");
@@ -66,27 +64,24 @@ const Dashboard = () => {
   const [modelName, setModelName] = useState("");
 
   const fetchData = async () => {
-  setLoading(true);
-  try {
-    const modelRes = await axios.get("http://localhost:3000/api/models", {
-      withCredentials: true,
-    });
-    const allModels = modelRes.data || [];
-    console.log("Fetched models:", allModels);
+    setLoading(true);
+    try {
+      const modelRes = await axiosInstance.get("/models");
+      const allModels = modelRes.data || [];
+      console.log("Fetched models:", allModels);
 
-    // Use the new mapRelations function to convert raw associations
-    const extractedRelationships = mapRelations(allModels);
+      // Use the new mapRelations function to convert raw associations
+      const extractedRelationships = mapRelations(allModels);
 
-    setModels(allModels);
-    setRelationships(extractedRelationships);
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to load dashboard data");
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setModels(allModels);
+      setRelationships(extractedRelationships);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -109,9 +104,7 @@ const Dashboard = () => {
     try {
       const id = selectModel;
       console.log("delete item id" + id);
-      await axios.delete(`http://localhost:3000/api/models/${id}`, {
-        withCredentials: true,
-      });
+      await axiosInstance.delete(`/models/${id}`);
       toast.success("Model deleted successfully!");
       fetchData();
     } catch (err) {
@@ -123,12 +116,7 @@ const Dashboard = () => {
   //View
   const handleView = async (model) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/models/${model.id}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.get(`/models/${model.id}`);
 
       if (response.status === 200 && response.data.code) {
         setViewCode(response.data.code); // Set code
@@ -143,12 +131,7 @@ const Dashboard = () => {
   //Edit
   const handleEdit = async (model) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/models/${model.id}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.get(`/models/${model.id}`);
 
       if (response.status === 200) {
         const modelData = response.data;
@@ -188,9 +171,7 @@ const Dashboard = () => {
     };
 
     try {
-      await axios.post("http://localhost:3000/api/models", duplicated, {
-        withCredentials: true,
-      });
+      await axiosInstance.post("/models", duplicated);
       toast.success(`Model duplicated as ${newName}`);
       fetchData();
     } catch (err) {
@@ -198,7 +179,6 @@ const Dashboard = () => {
       toast.error("Duplication failed");
     }
   };
-
 
   const modelStart = (modelPage - 1) * modelLimit;
   const relStart = (relPage - 1) * relLimit;
@@ -335,8 +315,10 @@ const Dashboard = () => {
                 <RelationshipCard
                   key={index}
                   relationship={rel}
-                  onView={()=>{}}
-                  onEdit={()=>{setShowRelationCodeModal(true)}}
+                  onView={() => {}}
+                  onEdit={() => {
+                    setShowRelationCodeModal(true);
+                  }}
                 />
               ))
             ) : (

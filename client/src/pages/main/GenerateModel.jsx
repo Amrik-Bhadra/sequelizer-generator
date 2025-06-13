@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { useRelation } from "../../contexts/ModelContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 import {
   oneDark,
@@ -231,12 +231,7 @@ const GenerateModel = () => {
       let modelExists = false;
 
       try {
-        const existingModel = await axios.get(
-          `http://localhost:3000/api/models/${modelId}`,
-          {
-            withCredentials: true,
-          }
-        );
+        const existingModel = await axiosInstance.get(`/models/${modelId}`);
 
         if (existingModel.status === 200) {
           modelExists = true;
@@ -253,35 +248,26 @@ const GenerateModel = () => {
 
       if (modelExists) {
         //Model exists — Perform UPDATE
-        const updateResponse = await axios.put(
-          `http://localhost:3000/api/models/${modelId}`,
-          {
-            modelName,
-            metadata: { fields },
-          },
-          {
-            withCredentials: true,
-          }
-        );
+        const updateResponse = await axiosInstance.put(`/models/${modelId}`, {
+          modelName,
+          metadata: { fields },
+        });
 
         if (updateResponse.status === 200) {
           toast.success("Model updated successfully!");
           updateModel(updateResponse.data);
           setSaveDeleteModal(false);
-          navigate('/seq/dashboard');
+          navigate("/seq/dashboard");
         } else {
           toast.error("Failed to update the model.");
         }
       } else {
         // Model doesn't exist — Perform CREATE
-        const createResponse = await axios.post(
-          "http://localhost:3000/api/models/",
+        const createResponse = await axiosInstance.post(
+          "/models/",
           {
             modelName,
             fields,
-          },
-          {
-            withCredentials: true,
           }
         );
 
@@ -304,7 +290,7 @@ const GenerateModel = () => {
             },
           ]);
           setModelName("");
-          setGeneratedCode("")
+          setGeneratedCode("");
           setModelId("");
         } else {
           toast.error("Failed to create the model.");
@@ -322,7 +308,7 @@ const GenerateModel = () => {
 
   useEffect(() => {
     if (editMode && modelData) {
-      setModelId(modelData.id || ""); 
+      setModelId(modelData.id || "");
       setFields(modelData.metadata.fields || []);
       setModelName(modelData.name);
       console.log("Loaded fields:", modelData.metadata.field);

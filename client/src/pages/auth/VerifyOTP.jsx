@@ -5,7 +5,7 @@ import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { MdVerifiedUser } from "react-icons/md";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -62,10 +62,9 @@ const VerifyOTP = () => {
     const user_id = state.user_id;
     const purpose = state.purpose;
 
-    const response = await axios.post(
-      "http://localhost:3000/api/auth/verifyotp",
-      { user_id, otp, purpose },
-      { withCredentials: true }
+    const response = await axiosInstance.post(
+      "/auth/verifyotp",
+      { user_id, otp, purpose }
     );
 
     toast.success(response.data.message);

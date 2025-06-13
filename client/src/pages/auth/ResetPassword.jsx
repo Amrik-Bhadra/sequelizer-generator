@@ -7,7 +7,7 @@ import { MdOutlinePassword } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
 import { MdLockReset } from "react-icons/md";
 import toast from "react-hot-toast";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
 
 const ResetPassword = () => {
@@ -26,10 +26,10 @@ const ResetPassword = () => {
       }
 
       const user_id = state.user_id;
-      const response = await axios.put(
-        "http://localhost:3000/api/auth/resetpassword",
-        { user_id, password }, { withCredentials: true }
-      );
+      const response = await axiosInstance.put("/auth/resetpassword", {
+        user_id,
+        password,
+      });
       if (response.status === 200) {
         toast.success(response.data.message);
         navigate("/auth/login");

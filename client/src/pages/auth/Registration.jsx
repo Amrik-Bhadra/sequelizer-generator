@@ -16,7 +16,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import Loader from "../../components/common_components/Loader";
 
 const Registration = () => {
@@ -31,8 +31,6 @@ const Registration = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    
 
     if (!username) {
       toast.error("Name field not filled!");
@@ -49,8 +47,8 @@ const Registration = () => {
       return;
     }
 
-    if(password !== confirmPassword){
-      toast.error('Both passwords should match');
+    if (password !== confirmPassword) {
+      toast.error("Both passwords should match");
       return;
     }
 
@@ -64,18 +62,12 @@ const Registration = () => {
       );
       const uid = userCredential.user.uid;
 
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/register",
-        {
-          uid,
-          username,
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.post("/auth/register", {
+        uid,
+        username,
+        email,
+        password,
+      });
 
       if (response.status === 200) {
         toast.success(response.data.message);
@@ -101,17 +93,11 @@ const Registration = () => {
 
       setIsGoogleLoading(true);
 
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/google-register",
-        {
-          uid,
-          username,
-          email,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.post("/auth/google-register", {
+        uid,
+        username,
+        email,
+      });
 
       if (response.status === 200) {
         toast.success(
@@ -189,13 +175,9 @@ const Registration = () => {
 
           <div className="flex flex-col gap-y-3 mt-2">
             <SolidIconBtn
-              icon={ !isLoading ? MdAppRegistration : null }
+              icon={!isLoading ? MdAppRegistration : null}
               text={
-                isLoading ? (
-                  <Loader text={'Registering in...'} />
-                ) : (
-                  "Register"
-                )
+                isLoading ? <Loader text={"Registering in..."} /> : "Register"
               }
               onClick={handleRegister}
               className="bg-primary hover:bg-blue-700 text-white"
@@ -214,7 +196,7 @@ const Registration = () => {
               icon={!isGoogleLoading ? FcGoogle : null}
               text={
                 isGoogleLoading ? (
-                  <Loader text={'Registering in...'} />
+                  <Loader text={"Registering in..."} />
                 ) : (
                   "Signup with Google"
                 )

@@ -5,12 +5,19 @@ import InputField from "../../components/form_components/InputField";
 import PasswordField from "../../components/form_components/PasswordField";
 import SolidIconBtn from "../../components/buttons/SolidIconBtn";
 import HollowIconButton from "../../components/buttons/HollowIconButton";
-import { MdEmail, RiLockPasswordFill, MdLogin, FaUserLock, FcGoogle } from "../../utils/iconsProvider"
+import {
+  MdEmail,
+  RiLockPasswordFill,
+  MdLogin,
+  FaUserLock,
+  FcGoogle,
+} from "../../utils/iconsProvider";
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
 import axios from "axios";
 import Loader from "../../components/common_components/Loader";
+import axiosInstance from "../../utils/axiosInstance";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -33,13 +40,10 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        { email, password },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axiosInstance.post("/auth/login", {
+        email,
+        password,
+      });
 
       if (response.status === 200) {
         toast.success(response?.data.message);
@@ -65,11 +69,10 @@ const Login = () => {
       setIsGoogleLoading(true);
 
       // Send to your backend
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/google-login",
-        { email, uid },
-        { withCredentials: true }
-      );
+      const response = await axiosInstance.post("/auth/google-login", {
+        email,
+        uid,
+      });
 
       if (response.status === 200) {
         toast.success(response.data.message || "Google login successful");
@@ -79,7 +82,7 @@ const Login = () => {
     } catch (error) {
       console.error("Google login error:", error);
       toast.error(error.message || "Google login failed");
-    }finally{
+    } finally {
       setIsGoogleLoading(false);
     }
   };
@@ -147,13 +150,7 @@ const Login = () => {
           <div className="flex flex-col gap-y-3 mt-2">
             <SolidIconBtn
               icon={isLoading ? null : MdLogin}
-              text={
-                isLoading ? (
-                  <Loader text={'Logging in...'} />
-                ) : (
-                  "Login"
-                )
-              }
+              text={isLoading ? <Loader text={"Logging in..."} /> : "Login"}
               className="bg-primary hover:bg-blue-700 text-white"
               type="submit"
               disabled={isLoading}
@@ -168,10 +165,10 @@ const Login = () => {
             </div>
 
             <HollowIconButton
-              icon={isGoogleLoading? null : FcGoogle}
+              icon={isGoogleLoading ? null : FcGoogle}
               text={
                 isGoogleLoading ? (
-                  <Loader text={'Logging in...'} />
+                  <Loader text={"Logging in..."} />
                 ) : (
                   "Sign in with Google"
                 )

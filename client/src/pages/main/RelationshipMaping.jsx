@@ -7,22 +7,15 @@ import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 import CodePreviewComponent from "../../components/common_components/CodePreviewComponent";
 import AddedRelations from "../../components/relationship/AddedRelations";
 import { useRelation } from "../../contexts/ModelContext";
-import {useAuth} from "../../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
 
 const associations = [
   { value: "one-to-one", label: "one-to-one" },
   { value: "one-to-many", label: "one-to-many" },
   { value: "many-to-many", label: "many-to-many" },
-];
-
-const dummyModels = [
-  { value: "User", label: "User" },
-  { value: "Post", label: "Post" },
-  { value: "Comment", label: "Comment" },
-  { value: "Profile", label: "Profile" },
 ];
 
 const RelationshipMapping = () => {
@@ -45,8 +38,8 @@ const RelationshipMapping = () => {
   const [modelCodes, setModelCodes] = useState({});
   const { user } = useAuth();
 
-
-  const { relations, addRelation, updateRelation, clearRelations } = useRelation();
+  const { relations, addRelation, clearRelations } =
+    useRelation();
 
   const generateAssociationCode = () => {
     if (!sourceModel || !targetModel || !associationType) {
@@ -158,10 +151,7 @@ const RelationshipMapping = () => {
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/models", {
-          withCredentials: true,
-        });
-        console.log("Fetched models:", response.data);
+        const response = await axiosInstance.get("/models");
         const data = response.data;
         const names = data.map((model) => model.name);
         setModelList(names);
@@ -224,45 +214,45 @@ const RelationshipMapping = () => {
   };
 
   const handleFinalSubmit = async () => {
-  if (relations.length === 0) {
-    alert("No relationships to submit!");
-    return;
-  } 
-  // console.log("User:", user);
+    if (relations.length === 0) {
+      alert("No relationships to submit!");
+      return;
+    }
+    // console.log("User:", user);
 
-  if (!user || !user.id) {
-    alert("User not logged in!");
-    return;
-  }
+    if (!user || !user.id) {
+      alert("User not logged in!");
+      return;
+    }
 
-  const payload = {
-    userId: user.id,
-    relationships: relations.map((rel) => ({
-      fromModel: rel.sourceModel,
-      toModel: rel.targetModel,
-      relationshipType: rel.associationType,
-      foreignKey: rel.foreignKey || undefined,
-      as: rel.asValue || undefined,
-    })),
+    const payload = {
+      userId: user.id,
+      relationships: relations.map((rel) => ({
+        fromModel: rel.sourceModel,
+        toModel: rel.targetModel,
+        relationshipType: rel.associationType,
+        foreignKey: rel.foreignKey || undefined,
+        as: rel.asValue || undefined,
+      })),
+    };
+
+    try {
+      const response = await axiosInstance.post(
+        "/relationship/update",
+        payload
+      );
+
+      if (response.status === 200) {
+        toast.success("Relationships submitted successfully!");
+        clearRelations();
+      }else{
+        toast.error("Error in submiting relationship");
+      }
+    } catch (error) {
+      console.error("Error submitting relationships:", error);
+      toast.error("Failed to submit relationships.");
+    }
   };
-
-  try {
-    const response = await axios.post(
-      "http://localhost:3000/api/relationship/update",
-      payload,
-      { withCredentials: true }
-    );
-    toast.success("Relationships submitted successfully!");
-    console.log("Backend response:", response.data);
-
-    clearRelations();
-  } catch (error) {
-    console.error("Error submitting relationships:", error);
-    toast.error("Failed to submit relationships.");
-  }
-};
-
-
 
   return (
     <>
