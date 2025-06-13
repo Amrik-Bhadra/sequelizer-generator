@@ -38,8 +38,7 @@ const RelationshipMapping = () => {
   const [modelCodes, setModelCodes] = useState({});
   const { user } = useAuth();
 
-  const { relations, addRelation, clearRelations } =
-    useRelation();
+  const { relations, addRelation, clearRelations } = useRelation();
 
   const generateAssociationCode = () => {
     if (!sourceModel || !targetModel || !associationType) {
@@ -245,7 +244,7 @@ const RelationshipMapping = () => {
       if (response.status === 200) {
         toast.success("Relationships submitted successfully!");
         clearRelations();
-      }else{
+      } else {
         toast.error("Error in submiting relationship");
       }
     } catch (error) {
@@ -270,11 +269,7 @@ const RelationshipMapping = () => {
                 <SolidIconBtn
                   icon={null}
                   text={"Save"}
-                  onClick={() => {
-                    setSaveDeleteModal(true);
-                    setPurpose("save");
-                    setItem("model");
-                  }}
+                  onClick={handleSave}
                   className="bg-secondary text-white text-sm"
                 />
               </div>
@@ -375,7 +370,11 @@ const RelationshipMapping = () => {
             icon={null}
             text={"Final Submit"}
             className="w-full bg-secondary text-sm text-white mt-4 hover:bg-[#464646]"
-            onClick={handleFinalSubmit}
+            onClick={() => {
+              setPurpose("submit");
+              setItem("relationship");
+              setSaveDeleteModal(true);
+            }}
           />
         </div>
       </div>
@@ -390,7 +389,13 @@ const RelationshipMapping = () => {
 
       {saveDeleteModal && (
         <SaveDeleteModal
-          onClick={handleSave}
+          onClick={() => {
+            if (purpose === "submit") {
+              handleFinalSubmit();
+            } else {
+              handleSave();
+            }
+          }}
           onClose={() => {
             setSaveDeleteModal(false);
           }}

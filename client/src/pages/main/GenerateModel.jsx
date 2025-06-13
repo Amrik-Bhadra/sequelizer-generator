@@ -4,6 +4,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { useRelation } from "../../contexts/ModelContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
+import InputField from "../../components/form_components/InputField";
 
 import {
   oneDark,
@@ -98,6 +99,7 @@ const GenerateModel = () => {
         unique: "No",
         defaultValue: "",
         validate: "",
+        validateArgs: {},
         arrayType: "",
       },
     ]);
@@ -194,8 +196,26 @@ const GenerateModel = () => {
         }
       }
 
-      if (field.validate) {
-        schema += `    validate: { ${field.validate}: true },\n`;
+      if (field.validate && field.validate !== "none") {
+        schema += `    validate: {\n`;
+
+        if (field.validate === "len") {
+          const min = field.validateArgs?.min || 0;
+          const max = field.validateArgs?.max || 255;
+          schema += `      len: [${min}, ${max}],\n`;
+        } else if (field.validate === "is") {
+          const regex = field.validateArgs?.regex || "/.*/";
+          schema += `      is: ${regex},\n`;
+        } else if (field.validate === "isEmail") {
+          schema += `      isEmail: true,\n`;
+        } else if (field.validate === "isNumeric") {
+          schema += `      isNumeric: true,\n`;
+        } else if (field.validate === "customValidator") {
+          const funcBody = field.validateArgs?.functionBody || "";
+          schema += `      customValidator(value) {\n        ${funcBody}\n      },\n`;
+        }
+
+        schema += `    },\n`;
       }
 
       schema += `  },\n`;
@@ -251,6 +271,11 @@ const GenerateModel = () => {
             fields,
           }
         );
+        // Model doesn't exist — Perform CREATE
+        const createResponse = await axiosInstance.post("/models/", {
+          modelName,
+          fields,
+        });
 
         if (createResponse.status === 201 || createResponse.status === 200) {
           toast.success("Model created successfully!");
@@ -481,13 +506,87 @@ const GenerateModel = () => {
                   options={[
                     { value: "", label: "Select validation" },
                     { value: "none", label: "None" },
-                    { value: "minLength", label: "minLength" },
-                    { value: "maxLength", label: "maxLength" },
-                    { value: "pattern", label: "pattern" },
-                    { value: "custom", label: "custom" },
+                    { value: "len", label: "Length (min, max)" },
+                    { value: "is", label: "Regex Pattern" },
+                    { value: "isEmail", label: "Email" },
+                    { value: "isNumeric", label: "Numeric" },
+                    // { value: "customValidator", label: "Custom Function" },
                   ]}
                   placeholder="Validation"
                 />
+                {field.validate === "len" && (
+                  <div className="flex flex-col gap-2 mt-2 w-full">
+                    <div className="flex flex-col gap-2 w-full">
+                      <label className="text-sm font-medium text-primary-text">
+                        Min Length
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Min Length"
+                        value={field.validateArgs?.min || ""}
+                        onChange={(e) =>
+                          handleFieldChange(field.id, "validateArgs", {
+                            ...field.validateArgs,
+                            min: parseInt(e.target.value, 10),
+                          })
+                        }
+                        className="p-2 border rounded text-sm text-gray-700 focus:ring-sky focus:border-sky outline-none transition-all"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2 w-full">
+                      <label className="text-sm font-medium text-primary-text">
+                        Max Length
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Max Length"
+                        value={field.validateArgs?.max || ""}
+                        onChange={(e) =>
+                          handleFieldChange(field.id, "validateArgs", {
+                            ...field.validateArgs,
+                            max: parseInt(e.target.value, 10),
+                          })
+                        }
+                        className="p-2 border rounded text-sm text-gray-700 focus:ring-sky focus:border-sky outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {field.validate === "is" && (
+                  <div className="flex flex-col gap-2 w-full mt-2">
+                    <label className="text-sm font-medium text-primary-text">
+                      Regex Pattern
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. ^[a-zA-Z0-9]+$"
+                      value={field.validateArgs?.regex || ""}
+                      onChange={(e) =>
+                        handleFieldChange(field.id, "validateArgs", {
+                          ...field.validateArgs,
+                          regex: e.target.value,
+                        })
+                      }
+                      className="p-2 border rounded text-sm text-gray-700 focus:ring-sky focus:border-sky outline-none transition-all"
+                    />
+                  </div>
+                )}
+
+                {field.validate === "customValidator" && (
+                  <textarea
+                    className="w-full mt-2 p-2 border rounded"
+                    placeholder="function(value) { if (value < 0) throw new Error('Invalid'); }"
+                    rows={4}
+                    value={field.validateArgs?.functionBody || ""}
+                    onChange={(e) =>
+                      handleFieldChange(field.id, "validateArgs", {
+                        ...field.validateArgs,
+                        functionBody: e.target.value,
+                      })
+                    }
+                  />
+                )}
               </div>
             ))}
           </div>
