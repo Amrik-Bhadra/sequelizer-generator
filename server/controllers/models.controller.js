@@ -92,11 +92,9 @@ const createRecord = async (req, res) => {
 const getAllModels = async (req, res) => {
   if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const userId = req.session.user.id; 
-  // const userId = 6; 
 
   try {
     const models = await getAllModelsForUser(userId);
-    console.log(models);
     
     res.status(200).json(models);
   } catch (err) {
@@ -134,7 +132,7 @@ const getOneModelByID = async (req, res) => {
     if (!model) {
       return res.status(404).json({ message: 'Model not found' });  
     }
-    res.status(200).json(model); // ✅ model found
+    res.status(200).json(model); 
   } catch (err) {
     res.status(500).json({ message: 'Error fetching model', error: err.message });
   }
@@ -144,8 +142,8 @@ const getOneModelByID = async (req, res) => {
 const updateModel = async (req, res) => {
   if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
 
-  const id = req.params.id; // ✅ correctly extract id
-  const { modelName, metadata } = req.body; // ✅ get both from body
+  const id = req.params.id;
+  const { modelName, metadata } = req.body; 
   console.log(modelName);
 
   try {
@@ -154,7 +152,7 @@ const updateModel = async (req, res) => {
       return res.status(404).json({ message: 'Model not found' });
     }
 
-    const regeneratedCode = generateModelCode(modelName, metadata.fields); // ✅ ensure modelName is valid
+    const regeneratedCode = generateModelCode(modelName, metadata.fields);
 
     await updateModelCode(id, modelName, regeneratedCode, metadata);
 

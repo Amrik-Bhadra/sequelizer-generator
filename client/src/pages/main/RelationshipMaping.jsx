@@ -169,7 +169,7 @@ const RelationshipMapping = () => {
 
   const handleSave = () => {
     if (!sourceModel || !targetModel || !associationType) {
-      alert("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -184,7 +184,7 @@ const RelationshipMapping = () => {
     );
 
     if (duplicate) {
-      alert("This relationship already exists!");
+      toast.error("This relationship already exists!");
       return;
     }
 
@@ -214,13 +214,13 @@ const RelationshipMapping = () => {
 
   const handleFinalSubmit = async () => {
     if (relations.length === 0) {
-      alert("No relationships to submit!");
+      toast.error("No relationships to submit!");
       return;
     }
     // console.log("User:", user);
 
     if (!user || !user.id) {
-      alert("User not logged in!");
+      toast.error("User not logged in!");
       return;
     }
 
@@ -371,7 +371,7 @@ const RelationshipMapping = () => {
             text={"Final Submit"}
             className="w-full bg-secondary text-sm text-white mt-4 hover:bg-[#464646]"
             onClick={() => {
-              setPurpose("submit");
+              setPurpose("save");
               setItem("relationship");
               setSaveDeleteModal(true);
             }}
@@ -390,7 +390,7 @@ const RelationshipMapping = () => {
       {saveDeleteModal && (
         <SaveDeleteModal
           onClick={() => {
-            if (purpose === "submit") {
+            if (purpose === "save") {
               handleFinalSubmit();
             } else {
               handleSave();

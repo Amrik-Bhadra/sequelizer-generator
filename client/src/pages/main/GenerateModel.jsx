@@ -87,26 +87,6 @@ const GenerateModel = () => {
     );
   };
 
-  // const handleFieldChange = (id, key, value) => {
-  //   setFields((prev) =>
-  //     prev.map((field) => {
-  //       if (field.id !== id) return field;
-
-  //       if (key === "primaryKey" && value === "Yes") {
-  //         return {
-  //           ...field,
-  //           [key]: value,
-  //           autoIncrement: true,
-  //           allowNull: false,
-  //           unique: true,
-  //         };
-  //       }
-
-  //       return { ...field, [key]: value };
-  //     })
-  //   );
-  // };
-
   const addField = () => {
     setFields((prev) => [
       ...prev,
@@ -263,7 +243,6 @@ const GenerateModel = () => {
 
     try {
       if (!modelName || fields.length === 0) {
-      if (!modelName || fields.length === 0) {
         toast.error("Please provide a model name and at least one attribute.");
         return;
       }
@@ -287,14 +266,11 @@ const GenerateModel = () => {
         }
 
       } else {
-        
-        // Model doesn't exist — Perform CREATE
         const createResponse = await axiosInstance.post("/models/", {
           modelName,
           fields,
         });
 
-        if (createResponse.status === 201 || createResponse.status === 200) {
         if (createResponse.status === 201 || createResponse.status === 200) {
           toast.success("Model created successfully!");
           addModel(createResponse.data);
@@ -325,6 +301,7 @@ const GenerateModel = () => {
       console.error("Error saving model:", error);
       toast.error("Something went wrong while saving the model.");
     }
+    
   };
 
 
@@ -336,8 +313,7 @@ const GenerateModel = () => {
     if (editMode && modelData) {
       setModelId(modelData.id || "");
       setFields(modelData.metadata.fields || []);
-      setModelId(modelData.modelId);
-      // console.log("Loaded fields:", modelData.metadata.field);
+      setModelName(modelData.name);
     }
   }, [editMode, modelData]);
 

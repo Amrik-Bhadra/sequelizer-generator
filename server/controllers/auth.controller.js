@@ -145,8 +145,6 @@ const verifyOtp = async (req, res) => {
                 email: user.email
             };
 
-            console.log('session user: ', req.session.user);
-
             return res.status(200).json({ message: 'OTP verified, login successful.', user: req.session.user });
         }
 
