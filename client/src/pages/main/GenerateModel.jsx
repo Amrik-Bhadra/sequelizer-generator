@@ -286,7 +286,23 @@ const GenerateModel = () => {
           toast.success("Model created successfully!");
           addModel(createResponse.data);
           setSaveDeleteModal(false);
-          resetFields(); // You can abstract reset logic into a function
+          setFields([
+            {
+              id: uuidv4(),
+              name: "",
+              type: "",
+              primaryKey: false,
+              autoIncrement: false,
+              allowNull: true,
+              unique: false,
+              defaultValue: "",
+              validate: "",
+              arrayType: "",
+            },
+          ]);
+          setModelName("");
+          setGeneratedCode("");
+          setModelId(""); 
         } else {
           toast.error("Failed to create the model.");
         }
