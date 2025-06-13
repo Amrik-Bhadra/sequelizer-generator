@@ -3,6 +3,7 @@ import { Outlet, useMatches } from "react-router-dom";
 import Header from "../components/common_components/Header";
 import Footer from "../components/common_components/Footer";
 import { useAuth } from "../contexts/AuthContext";
+import CodeModal from "../components/modals/CodeModal";
 
 const UserLayout = () => {
   const { user, logout } = useAuth();
