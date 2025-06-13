@@ -27,12 +27,6 @@ const RelationshipCard = ({ relationship, onEdit }) => {
             <div className="text-sm text-gray-500">Model 1</div>
           </div>
 
-          <div className="flex flex-col">
-            <div className="text-1.25rem font-semibold text-gray-800">
-              {relationship.model2}
-            </div>
-            <div className="text-sm text-gray-500">Model 2</div>
-          </div>
 
           {/* Relation Type */}
           <div className="flex flex-col">
@@ -40,6 +34,12 @@ const RelationshipCard = ({ relationship, onEdit }) => {
               {relationship.relationType}
             </div>
             <div className="text-sm text-gray-500">Relation Type</div>
+          </div>
+          <div className="flex flex-col">
+            <div className="text-1.25rem font-semibold text-gray-800">
+              {relationship.model2}
+            </div>
+            <div className="text-sm text-gray-500">Model 2</div>
           </div>
 
           {/* Created On */}

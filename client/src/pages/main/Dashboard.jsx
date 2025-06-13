@@ -11,6 +11,7 @@ import CodeModal from "../../components/modals/CodeModal";
 import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 import DownloadModal from "../../components/modals/DownloadModal";
 import RelationCodeModal from "../../components/modals/RelationCodeModal";
+import { mapRelations } from "../../utils/mapRelationships";
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -65,36 +66,27 @@ const Dashboard = () => {
   const [modelName, setModelName] = useState("");
 
   const fetchData = async () => {
-    setLoading(true);
-    try {
-      const modelRes = await axios.get("http://localhost:3000/api/models", {
-        withCredentials: true,
-      });
-      const allModels = modelRes.data || [];
-      const extractedRelationships = [];
-      allModels.forEach((model) => {
-        const associations = model.metadata?.associations || [];
-        associations.forEach((assoc) => {
-          extractedRelationships.push({
-            model1: model.name,
-            model2: assoc.target,
-            relationType: assoc.type,
-            foreignKey: assoc.foreignKey || "-",
-            as: assoc.as || "-",
-            createdAt: new Date().toLocaleDateString(),
-          });
-        });
-      });
+  setLoading(true);
+  try {
+    const modelRes = await axios.get("http://localhost:3000/api/models", {
+      withCredentials: true,
+    });
+    const allModels = modelRes.data || [];
+    console.log("Fetched models:", allModels);
 
-      setModels(allModels);
-      setRelationships(extractedRelationships);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load dashboard data");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Use the new mapRelations function to convert raw associations
+    const extractedRelationships = mapRelations(allModels);
+
+    setModels(allModels);
+    setRelationships(extractedRelationships);
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to load dashboard data");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchData();
