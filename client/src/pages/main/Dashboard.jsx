@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import CodeModal from "../../components/modals/CodeModal";
 import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
 import DownloadModal from "../../components/modals/DownloadModal";
-import { downloadJsFile } from "../../utils/helperFunctions";
+import RelationCodeModal from "../../components/modals/RelationCodeModal";
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -50,6 +50,10 @@ const Dashboard = () => {
 
   const [viewCode, setViewCode] = useState("");
   const [showCodeModal, setShowCodeModal] = useState(false);
+
+  const [code1, setCode1] = useState("");
+  const [code2, setCode2] = useState("");
+  const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
   // const [modelName, setModelName] = useState("");
   // const [fields, setFields] = useState([]);
 
@@ -58,7 +62,6 @@ const Dashboard = () => {
   const [purpose, setPurpose] = useState("");
   const [item, setItem] = useState("");
   const [downloadModal, setDownloadModalClose] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState("");
   const [modelName, setModelName] = useState("");
 
   const fetchData = async () => {
@@ -129,7 +132,7 @@ const Dashboard = () => {
   const handleView = async (model) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/models/${model.name}`,
+        `http://localhost:3000/api/models/${model.id}`,
         {
           withCredentials: true,
         }
@@ -157,9 +160,8 @@ const Dashboard = () => {
 
       if (response.status === 200) {
         const modelData = response.data;
-        // console.log(modelData);
+        console.log(`Model data: ${modelData.id}`);
 
-        // Navigate to the models page and pass model data via state
         navigate("/seq/models", {
           state: {
             editMode: true,
@@ -178,22 +180,6 @@ const Dashboard = () => {
       alert("Failed to fetch model details.");
     }
   };
-
-  // DOWNLOAD
-  // const handleDownload = (fileName) => {
-  //   const fileContent = `module.exports = ${JSON.stringify(
-  //     model.metadata,
-  //     null,
-  //     2
-  //   )};`;
-  //   // const blob = new Blob([fileContent], { type: "application/javascript" });
-  //   // const link = document.createElement("a");
-  //   // link.href = URL.createObjectURL(blob);
-  //   // link.download = `${model.name}.js`;
-  //   // link.click();
-
-  //   downloadJsFile(fileContent, fileName);
-  // };
 
   //Duplicate
   const handleDuplicate = async (model) => {
@@ -227,6 +213,7 @@ const Dashboard = () => {
     }
   };
 
+
   const modelStart = (modelPage - 1) * modelLimit;
   const relStart = (relPage - 1) * relLimit;
 
@@ -246,7 +233,7 @@ const Dashboard = () => {
     <>
       <div className="space-y-6 p-3 max-h-screen h-max overflow-y-auto">
         {/* Models */}
-        <div className="p-6 bg-white border rounded-md">
+        <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
             <h2 className="text-xl font-semibold text-blue-600">
               Models ({models.length})
@@ -265,7 +252,7 @@ const Dashboard = () => {
                 onClick={() => {
                   navigate("/seq/models");
                 }}
-                className="bg-secondary text-white text-sm"
+                className="bg-secondary text-white dark:bg-[#fff] dark:text-secondary text-sm"
               />
             </div>
           </div>
@@ -304,7 +291,7 @@ const Dashboard = () => {
 
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-gray-600 flex items-center gap-2">
-              <span>Display</span>
+              <span className="dark:text-gray-light2">Display</span>
               <select
                 value={modelLimit}
                 onChange={(e) => {
@@ -319,9 +306,9 @@ const Dashboard = () => {
                   </option>
                 ))}
               </select>
-              <span>rows in page</span>
+              <span className="dark:text-gray-light2">rows in page</span>
               <span className="text-primary font-semibold">{modelPage}</span>
-              <span>of {modelPageCount}</span>
+              <span className="dark:text-gray-light2">of {modelPageCount}</span>
             </div>
             <Pagination
               currentPage={modelPage}
@@ -332,7 +319,7 @@ const Dashboard = () => {
         </div>
 
         {/* Relationships */}
-        <div className="p-6 bg-white border rounded-md">
+        <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
             <h2 className="text-xl font-semibold text-blue-600">
               Relationships ({relationships.length})
@@ -351,7 +338,7 @@ const Dashboard = () => {
                 onClick={() => {
                   navigate("/seq/relationship");
                 }}
-                className="bg-secondary text-white text-sm"
+                className="bg-secondary text-white text-sm dark:bg-[#eee] dark:text-secondary"
               />
             </div>
           </div>
@@ -359,16 +346,21 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 gap-2">
             {visibleRels.length > 0 ? (
               visibleRels.map((rel, index) => (
-                <RelationshipCard key={index} relationship={rel} />
+                <RelationshipCard
+                  key={index}
+                  relationship={rel}
+                  onView={()=>{}}
+                  onEdit={()=>{setShowRelationCodeModal(true)}}
+                />
               ))
             ) : (
-              <h2>No Relations Yet</h2>
+              <h2 className="dark:text-white">No Relations Yet</h2>
             )}
           </div>
 
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-gray-600 flex items-center gap-2">
-              <span>Display</span>
+              <span className="dark:text-gray-light2">Display</span>
               <select
                 value={relLimit}
                 onChange={(e) => {
@@ -383,9 +375,9 @@ const Dashboard = () => {
                   </option>
                 ))}
               </select>
-              <span>rows in page</span>
+              <span className="dark:text-gray-light2">rows in page</span>
               <span className="text-primary font-semibold">{relPage}</span>
-              <span>of {relPageCount}</span>
+              <span className="dark:text-gray-light2">of {relPageCount}</span>
             </div>
             <Pagination
               currentPage={relPage}
@@ -398,6 +390,14 @@ const Dashboard = () => {
 
       {showCodeModal && (
         <CodeModal code={viewCode} onClose={() => setShowCodeModal(false)} />
+      )}
+
+      {showRelationCodeModal && (
+        <RelationCodeModal
+          code1={code1}
+          code2={code2}
+          onClose={() => setShowRelationCodeModal(false)}
+        />
       )}
 
       {saveDeleteModal && (

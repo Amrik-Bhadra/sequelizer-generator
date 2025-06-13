@@ -14,17 +14,17 @@
   const ModelCard = ({ model, onEdit, onDelete, onView, onDownload, onDuplicate}) => {
       
     return (
-      <div className="flex justify-between items-center px-4 py-3 bg-white border border-gray-300 rounded-md mb-3 shadow-sm">
+      <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-dark-ter-bg border border-gray-300 dark:border-none rounded-md mb-3 shadow-sm">
         {/* Left Side */}
         <div className="flex items-center justify-normal gap-6">
           <div className="border border-primary text-primary bg-primary/10 p-1 rounded-md">
             <FaDatabase className="text-3xl" />
           </div>
           <div>
-            <div className="text-1.25rem font-semibold text-gray-800">
+            <div className="text-1.25rem font-semibold text-secondary dark:text-white">
               {model.name}
             </div>
-            <div className="text-sm text-gray-500">{model.createdAt}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-light1">{model.createdAt}</div>
           </div>
           <div className="ml-10">
             <div className="text-1.25rem font-semibold text-blue-700 ml-4">
@@ -62,7 +62,7 @@
         />
         <SolidIconBtn
           icon={MdContentCopy}
-          text="Use"
+          text="Duplicate"
           onClick={() => onDuplicate(model)}
           className="bg-gray-light1 text-sm text-secondary"
         />
