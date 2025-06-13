@@ -93,7 +93,7 @@ const getAllModels = async (req, res) => {
   if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const userId = req.session.user.id; 
   // const userId = 6; 
-
+  console.log("User ID:", userId);
   try {
     const models = await getAllModelsForUser(userId);
     console.log(models);
