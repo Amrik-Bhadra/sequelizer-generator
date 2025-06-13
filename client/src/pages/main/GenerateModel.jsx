@@ -264,13 +264,7 @@ const GenerateModel = () => {
           toast.error("Failed to update the model.");
         }
       } else {
-        const createResponse = await axiosInstance.post(
-          "/models/",
-          {
-            modelName,
-            fields,
-          }
-        );
+        
         // Model doesn't exist — Perform CREATE
         const createResponse = await axiosInstance.post("/models/", {
           modelName,
