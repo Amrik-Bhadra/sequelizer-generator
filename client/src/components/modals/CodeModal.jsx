@@ -3,7 +3,7 @@ import SolidIconBtn from "../buttons/SolidIconBtn";
 import { FiDownload, MdContentCopy } from "../../utils/iconsProvider";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import DownloadModal from "../../components/modals/DownloadModal";
-import { copyToClipboard } from "../../utils/helperFunctions";
+import { copyToClipboard, downloadJsFile } from "../../utils/helperFunctions";
 
 import {
   oneDark,
@@ -18,7 +18,7 @@ import {
   duotoneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const CodeModal = ({ code, onClose }) => {
+const CodeModal = ({ selectedModel, onClose }) => {
   const themeOptions = {
     oneDark,
     prism,
@@ -45,7 +45,7 @@ const CodeModal = ({ code, onClose }) => {
               icon={MdContentCopy}
               text="Copy"
               onClick={() => {
-                copyToClipboard();
+                copyToClipboard(selectedModel.code);
               }}
               className="bg-[#eee] text-[#333] text-sm"
             />
@@ -53,7 +53,9 @@ const CodeModal = ({ code, onClose }) => {
             <SolidIconBtn
               icon={FiDownload}
               text="Download"
-              onClick={() => {}}
+              onClick={() => {
+                setDownloadModalClose(true);
+              }}
               className="bg-dark-sec-bg text-white text-sm"
             />
 
@@ -73,15 +75,15 @@ const CodeModal = ({ code, onClose }) => {
             className="rounded-md"
             customStyle={{ fontSize: `16px` }}
           >
-            {code}
+            {selectedModel.code}
           </SyntaxHighlighter>
         </pre>
       </div>
       {downloadModal && (
         <DownloadModal
-          generatedCode={code}
+          generatedCode={selectedModel.code}
           setDownloadModalClose={setDownloadModalClose}
-          // modelName={modelName}
+          modelName={selectedModel.name}
         />
       )}
     </div>

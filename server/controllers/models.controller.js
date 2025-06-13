@@ -92,9 +92,9 @@ const createRecord = async (req, res) => {
 
 // READ all models
 const getAllModels = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-  // const userId = req.session.user.id; 
-  const userId = 6; 
+  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  const userId = req.session.user.id; 
+  // const userId = 6; 
 
   try {
     const models = await getAllModelsForUser(userId);

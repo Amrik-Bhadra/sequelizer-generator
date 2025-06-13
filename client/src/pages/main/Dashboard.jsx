@@ -51,6 +51,7 @@ const Dashboard = () => {
 
   const [viewCode, setViewCode] = useState("");
   const [showCodeModal, setShowCodeModal] = useState(false);
+  const [selectedModel, setModel] = useState(null);
 
   const [code1, setCode1] = useState("");
   const [code2, setCode2] = useState("");
@@ -103,7 +104,6 @@ const Dashboard = () => {
   const handleDelete = async () => {
     try {
       const id = selectModel;
-      console.log("delete item id" + id);
       await axiosInstance.delete(`/models/${id}`);
       toast.success("Model deleted successfully!");
       fetchData();
@@ -115,39 +115,18 @@ const Dashboard = () => {
 
   //View
   const handleView = async (model) => {
-    try {
-      const response = await axiosInstance.get(`/models/${model.id}`);
-
-      if (response.status === 200 && response.data.code) {
-        setViewCode(response.data.code); // Set code
-        setShowCodeModal(true); // Show modal
-      }
-    } catch (error) {
-      console.error("Error fetching model code:", error);
-      alert("Failed to fetch model code.");
-    }
+    setModel(model);
+    setShowCodeModal(true);
   };
 
   //Edit
   const handleEdit = async (model) => {
-    try {
-      const response = await axiosInstance.get(`/models/${model.id}`);
-
-      if (response.status === 200) {
-        const modelData = response.data;
-        console.log(`Model data: ${modelData.id}`);
-
-        navigate("/seq/models", {
-          state: {
-            editMode: true,
-            modelData,
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching model for edit:", error);
-      alert("Failed to fetch model details.");
-    }
+    navigate("/seq/models", {
+      state: {
+        editMode: true,
+        modelData: model,
+      },
+    });
   };
 
   //Duplicate
@@ -357,7 +336,10 @@ const Dashboard = () => {
       </div>
 
       {showCodeModal && (
-        <CodeModal code={viewCode} onClose={() => setShowCodeModal(false)} />
+        <CodeModal
+          selectedModel={selectedModel}
+          onClose={() => setShowCodeModal(false)}
+        />
       )}
 
       {showRelationCodeModal && (

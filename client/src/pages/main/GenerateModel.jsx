@@ -91,7 +91,7 @@ const GenerateModel = () => {
       {
         id: uuidv4(),
         name: "",
-        type: "String",
+        type: "",
         primaryKey: "No",
         autoIncrement: "No",
         allowNull: "No",
@@ -220,38 +220,20 @@ const GenerateModel = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    console.log(`Model id: ${modelId}`);
-
     try {
-      if (!modelId || fields.length === 0) {
+      if (!modelName || fields.length === 0) {
         toast.error("Please provide a model name and at least one attribute.");
         return;
       }
 
-      let modelExists = false;
-
-      try {
-        const existingModel = await axiosInstance.get(`/models/${modelId}`);
-
-        if (existingModel.status === 200) {
-          modelExists = true;
-        }
-      } catch (getErr) {
-        if (getErr.response && getErr.response.status === 404) {
-          modelExists = false;
-        } else {
-          console.error("Error checking model existence:", getErr);
-          toast.error("Error checking if model exists.");
-          return;
-        }
-      }
-
-      if (modelExists) {
-        //Model exists — Perform UPDATE
-        const updateResponse = await axiosInstance.put(`/models/${modelId}`, {
-          modelName,
-          metadata: { fields },
-        });
+      if (modelId) {
+        const updateResponse = await axiosInstance.put(
+          `/models/${modelId}`,
+          {
+            modelName,
+            metadata: { fields },
+          }
+        );
 
         if (updateResponse.status === 200) {
           toast.success("Model updated successfully!");
@@ -262,7 +244,6 @@ const GenerateModel = () => {
           toast.error("Failed to update the model.");
         }
       } else {
-        // Model doesn't exist — Perform CREATE
         const createResponse = await axiosInstance.post(
           "/models/",
           {
@@ -271,7 +252,7 @@ const GenerateModel = () => {
           }
         );
 
-        if (createResponse.status === 200) {
+        if (createResponse.status === 201 || createResponse.status === 200) {
           toast.success("Model created successfully!");
           addModel(createResponse.data);
           setSaveDeleteModal(false);
@@ -298,7 +279,7 @@ const GenerateModel = () => {
       }
     } catch (error) {
       console.error("Error saving model:", error);
-      alert("Something went wrong while saving the model.");
+      toast.error("Something went wrong while saving the model.");
     }
   };
 
