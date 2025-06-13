@@ -48,8 +48,9 @@ const GenerateModel = () => {
     },
   ]);
   const [generatedCode, setGeneratedCode] = useState("");
-  const [modelId, setModelId] = useState("");
   const [modelName, setModelName] = useState("");
+  const [modelId, setModelId] = useState(null); 
+
   const [downloadModal, setDownloadModalClose] = useState(false);
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [purpose, setPurpose] = useState("");
@@ -85,6 +86,26 @@ const GenerateModel = () => {
       )
     );
   };
+
+  // const handleFieldChange = (id, key, value) => {
+  //   setFields((prev) =>
+  //     prev.map((field) => {
+  //       if (field.id !== id) return field;
+
+  //       if (key === "primaryKey" && value === "Yes") {
+  //         return {
+  //           ...field,
+  //           [key]: value,
+  //           autoIncrement: true,
+  //           allowNull: false,
+  //           unique: true,
+  //         };
+  //       }
+
+  //       return { ...field, [key]: value };
+  //     })
+  //   );
+  // };
 
   const addField = () => {
     setFields((prev) => [
@@ -242,6 +263,7 @@ const GenerateModel = () => {
 
     try {
       if (!modelName || fields.length === 0) {
+      if (!modelName || fields.length === 0) {
         toast.error("Please provide a model name and at least one attribute.");
         return;
       }
@@ -263,6 +285,7 @@ const GenerateModel = () => {
         } else {
           toast.error("Failed to update the model.");
         }
+
       } else {
         
         // Model doesn't exist — Perform CREATE
@@ -271,6 +294,7 @@ const GenerateModel = () => {
           fields,
         });
 
+        if (createResponse.status === 201 || createResponse.status === 200) {
         if (createResponse.status === 201 || createResponse.status === 200) {
           toast.success("Model created successfully!");
           addModel(createResponse.data);
@@ -296,11 +320,13 @@ const GenerateModel = () => {
           toast.error("Failed to create the model.");
         }
       }
+
     } catch (error) {
       console.error("Error saving model:", error);
       toast.error("Something went wrong while saving the model.");
     }
   };
+
 
   useEffect(() => {
     generateCode();
@@ -310,8 +336,8 @@ const GenerateModel = () => {
     if (editMode && modelData) {
       setModelId(modelData.id || "");
       setFields(modelData.metadata.fields || []);
-      setModelName(modelData.name);
-      console.log("Loaded fields:", modelData.metadata.field);
+      setModelId(modelData.modelId);
+      // console.log("Loaded fields:", modelData.metadata.field);
     }
   }, [editMode, modelData]);
 
