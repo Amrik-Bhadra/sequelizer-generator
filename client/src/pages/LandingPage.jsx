@@ -1,9 +1,9 @@
-import React from "react";
-import { FaRocket, FaCode, FaDatabase, FaMoon, FaSun } from "react-icons/fa";
+import React, { useState } from "react";
+import { FaRocket, FaCode, FaDatabase, FaBars, FaTimes } from "react-icons/fa";
 import { motion } from "framer-motion";
 import SolidIconButton from "../components/buttons/SolidIconBtn";
 import { useNavigate } from "react-router-dom";
-import hero_bg from "../assets/hero_bg.svg"
+import hero_bg from "../assets/hero_bg.svg";
 
 const features = [
   {
@@ -30,6 +30,8 @@ const scrollTo = (id) => {
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-black text-white font-sans">
       {/* Hero Section */}
@@ -41,11 +43,13 @@ const LandingPage = () => {
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/70 z-0"></div>
 
-        {/* Header Navigation */}
+        {/* Header */}
         <header className="absolute top-0 left-0 w-full px-6 py-4 flex justify-between items-center bg-black/10 backdrop-blur-md z-50">
-          <nav className="md:flex md:justify-between w-[88%] mx-auto z-50">
+          <div className="w-[88%] mx-auto flex items-center justify-between">
             <h1 className="text-xl font-bold tracking-wide">SequelizeGen</h1>
-            <div className="flex items-center gap-x-5">
+
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-x-6">
               <button
                 onClick={() => scrollTo("about")}
                 className="hover:text-indigo-400 transition"
@@ -70,28 +74,109 @@ const LandingPage = () => {
               >
                 Contact
               </button>
-            </div>
+            </nav>
 
             <div className="flex items-center gap-x-3">
               <SolidIconButton
                 icon={null}
-                text={"Login"}
-                onClick={() => {
-                  navigate("/auth/login");
-                }}
+                text="Login"
+                onClick={() => navigate("/auth/login")}
                 className="text-white text-sm hover:bg-primary"
               />
               <SolidIconButton
                 icon={null}
-                text={"SignUp"}
-                onClick={() => {
-                  navigate("/auth/registration");
-                }}
+                text="SignUp"
+                onClick={() => navigate("/auth/registration")}
                 className="bg-white text-secondary text-sm"
               />
+              {/* Hamburger (Mobile) */}
+              <button
+                className="md:hidden z-50 text-xl"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <FaBars />
+              </button>
             </div>
-          </nav>
+          </div>
         </header>
+
+        {/* Sidebar (Mobile) */}
+        {isSidebarOpen && (
+          <>
+            {/* Overlay */}
+            <div
+              className="fixed inset-0 bg-black/50 z-[998]"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+
+            {/* Sidebar */}
+            <div className="fixed top-0 right-0 w-64 h-full bg-gray-900 z-[999] p-6 shadow-lg transition-all duration-300">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-bold">Menu</h2>
+                <button onClick={() => setIsSidebarOpen(false)}>
+                  <FaTimes className="text-xl" />
+                </button>
+              </div>
+              <nav className="flex flex-col gap-4">
+                <button
+                  onClick={() => {
+                    scrollTo("about");
+                    setIsSidebarOpen(false);
+                  }}
+                  className="hover:text-indigo-400"
+                >
+                  About
+                </button>
+                <button
+                  onClick={() => {
+                    scrollTo("features");
+                    setIsSidebarOpen(false);
+                  }}
+                  className="hover:text-indigo-400"
+                >
+                  Features
+                </button>
+                <button
+                  onClick={() => {
+                    scrollTo("subscription");
+                    setIsSidebarOpen(false);
+                  }}
+                  className="hover:text-indigo-400"
+                >
+                  Subscription
+                </button>
+                <button
+                  onClick={() => {
+                    scrollTo("contact");
+                    setIsSidebarOpen(false);
+                  }}
+                  className="hover:text-indigo-400"
+                >
+                  Contact
+                </button>
+                <hr className="my-2 border-gray-700" />
+                <SolidIconButton
+                  icon={null}
+                  text="Login"
+                  onClick={() => {
+                    navigate("/auth/login");
+                    setIsSidebarOpen(false);
+                  }}
+                  className="text-white text-sm hover:bg-primary"
+                />
+                <SolidIconButton
+                  icon={null}
+                  text="SignUp"
+                  onClick={() => {
+                    navigate("/auth/registration");
+                    setIsSidebarOpen(false);
+                  }}
+                  className="bg-white text-secondary text-sm"
+                />
+              </nav>
+            </div>
+          </>
+        )}
 
         {/* Main Content */}
         <motion.h1
@@ -154,7 +239,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Features Deep Dive */}
+      {/* Details Section */}
       <section id="details" className="py-20 bg-black px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div>
@@ -179,8 +264,8 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="text-center text-sm text-gray-500 py-8 border-t border-gray-800">
-        &copy; {new Date().getFullYear()} Sequelizer. Built for
-        developers, by developers.
+        &copy; {new Date().getFullYear()} Sequelizer. Built for developers, by
+        developers.
       </footer>
     </div>
   );
