@@ -4,7 +4,7 @@ const deleteRelationships = async (fromModel, toModel, userId) => {
     try {
         // Fetch 'from' model
         const [rowsFrom] = await db.execute(
-            `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+            `SELECT * FROM models WHERE user_id = ? AND name = ?`,
             [userId, fromModel]
         );
         if (rowsFrom.length === 0) {
@@ -31,13 +31,13 @@ const deleteRelationships = async (fromModel, toModel, userId) => {
         metadataFrom.associations = associationsFrom.filter(a => a.target !== toModel);
 
         await db.execute(
-            `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+            `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
             [codeFrom, JSON.stringify(metadataFrom), userId, fromModel]
         );
 
         // Fetch 'to' model
         const [rowsTo] = await db.execute(
-            `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+            `SELECT * FROM models WHERE user_id = ? AND name = ?`,
             [userId, toModel]
         );
         if (rowsTo.length === 0) {
@@ -81,7 +81,7 @@ const deleteRelationships = async (fromModel, toModel, userId) => {
         codeTo = codeTo.replace(/\n\s*\n/g, '\n');
         metadataTo.associations = associationsTo.filter(a => a.target !== fromModel);
         await db.execute(
-            `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+            `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
             [codeTo, JSON.stringify(metadataTo), userId, toModel]
         );
         return {
