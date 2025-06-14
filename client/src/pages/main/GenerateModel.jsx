@@ -296,7 +296,7 @@ const GenerateModel = () => {
           toast.error("Failed to create the model.");
         }
       }
-
+  
     } catch (error) {
       console.error("Error saving model:", error);
       toast.error("Something went wrong while saving the model.");
