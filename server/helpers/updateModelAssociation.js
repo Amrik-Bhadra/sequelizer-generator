@@ -3,7 +3,7 @@ const deleteRelationship = require("./deleteRelationship");
 
 async function updateModelAssociation(userId, modelName, targetModel, type, foreignKey, as) {
     const [rows] = await db.execute(
-        `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+        `SELECT * FROM models WHERE user_id = ? AND name = ?`,
         [userId, modelName]
     );
 
@@ -87,7 +87,7 @@ async function updateModelAssociation(userId, modelName, targetModel, type, fore
     const metadataString = JSON.stringify(metadata);
 
     await db.execute(
-        `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+        `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
         [code, metadataString, userId, modelName]
     );
 
