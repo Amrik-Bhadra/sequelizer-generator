@@ -16,7 +16,7 @@ const AuthLayout = () => {
   }, [matches]);
 
   return (
-    <div className="h-screen w-screen flex">
+    <div className="h-screen w-screen flex overflow-hidden">
       <div
         id="image-div"
         className="relative h-full w-0 md:w-[50%] lg:w-[65%] object-cover overflow-hidden"
