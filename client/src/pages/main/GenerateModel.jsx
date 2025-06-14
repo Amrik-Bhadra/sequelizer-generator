@@ -263,7 +263,6 @@ const GenerateModel = () => {
 
     try {
       if (!modelName || fields.length === 0) {
-      if (!modelName || fields.length === 0) {
         toast.error("Please provide a model name and at least one attribute.");
         return;
       }
@@ -295,7 +294,6 @@ const GenerateModel = () => {
         });
 
         if (createResponse.status === 201 || createResponse.status === 200) {
-        if (createResponse.status === 201 || createResponse.status === 200) {
           toast.success("Model created successfully!");
           addModel(createResponse.data);
           setSaveDeleteModal(false);
@@ -320,12 +318,13 @@ const GenerateModel = () => {
           toast.error("Failed to create the model.");
         }
       }
-
+  
     } catch (error) {
       console.error("Error saving model:", error);
       toast.error("Something went wrong while saving the model.");
     }
-  };
+  }
+
 
 
   useEffect(() => {
