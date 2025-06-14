@@ -7,8 +7,9 @@ import {
   LiaProjectDiagramSolid,
 } from "../../utils/iconsProvider";
 import SolidIconBtn from "../buttons/SolidIconBtn";
+import { formatDateToDMY } from "../../utils/helperFunctions";
 
-const RelationshipCard = ({ relationship, onEdit }) => {
+const RelationshipCard = ({ relationship, onEdit, onView }) => {
   return (
     <div className="flex justify-between items-center px-4 py-3 bg-white border border-gray-300 rounded-md mb-3 shadow-sm">
       {/* Left Side */}
@@ -45,7 +46,7 @@ const RelationshipCard = ({ relationship, onEdit }) => {
           {/* Created On */}
           <div className="flex flex-col">
             <div className="text-1.25rem font-semibold text-gray-800">
-              {relationship.createdAt}
+              {formatDateToDMY(relationship.createdAt)}
             </div>
             <div className="text-sm text-gray-500">Created On</div>
           </div>
@@ -57,7 +58,7 @@ const RelationshipCard = ({ relationship, onEdit }) => {
         {[
           { icon: MdEdit, text: "Edit", onClick: onEdit },
           { icon: MdDelete, text: "Delete", onClick: () => {} },
-          { icon: FaEye, text: "View", onClick: () => {} },
+          { icon: FaEye, text: "View", onClick: onView  },
           { icon: FiDownload, text: "Download", onClick: () => {} },
         ].map(({ icon, text, onClick }, index) => (
           <SolidIconBtn

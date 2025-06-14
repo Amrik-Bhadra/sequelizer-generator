@@ -1,6 +1,7 @@
 import React from "react";
 import SolidIconBtn from "../buttons/SolidIconBtn";
 import { IoIosWarning } from "../../utils/iconsProvider";
+import { capitalizeFirstLetter } from "../../utils/helperFunctions";
 
 const SaveDeleteModal = ({ onClick, onClose, purpose, item }) => {
   const getColor = () => {
@@ -16,15 +17,15 @@ const SaveDeleteModal = ({ onClick, onClose, purpose, item }) => {
         <div className={`flex items-center gap-x-3 text-2xl ${getColor()}`}>
           <IoIosWarning className="text-5xl" />{" "}
           <h1 className="font-semibold">
-            Confirm{" "}
-            {purpose.substring(0, 1).toUpperCase() + purpose.substring(1)}
+            Confirm {capitalizeFirstLetter(purpose)}
           </h1>
         </div>
 
         <p className="px-2">
           Are you sure you want to{" "}
-          <span className="font-semibold">{purpose}</span> the <span className="font-semibold">{item}</span> that you
-          have created? You can still go back and make changes if you want.
+          <span className="font-semibold">{purpose}</span> the{" "}
+          <span className="font-semibold">{item}</span> that you have created?
+          You can still go back and make changes if you want.
         </p>
 
         <div className="flex justify-end gap-2 mt-4">
@@ -37,8 +38,8 @@ const SaveDeleteModal = ({ onClick, onClose, purpose, item }) => {
 
           <SolidIconBtn
             icon={null}
-            text={`${purpose} Model`}
-            onClick={(e)=>{
+            text={`${capitalizeFirstLetter(purpose)} Model`}
+            onClick={(e) => {
               onClick(e);
               onClose();
             }}

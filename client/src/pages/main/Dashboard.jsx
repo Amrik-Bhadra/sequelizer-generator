@@ -53,16 +53,16 @@ const Dashboard = () => {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [selectedModel, setModel] = useState(null);
 
-  const [code1, setCode1] = useState("");
-  const [code2, setCode2] = useState("");
-  const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
-
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [selectModel, setSelectModel] = useState("");
   const [purpose, setPurpose] = useState("");
   const [item, setItem] = useState("");
   const [downloadModal, setDownloadModalClose] = useState(false);
   const [modelName, setModelName] = useState("");
+
+  const [code1, setCode1] = useState(""); // use this to store code of model1
+  const [code2, setCode2] = useState(""); // use this to store code of model2
+  const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -294,10 +294,10 @@ const Dashboard = () => {
                 <RelationshipCard
                   key={index}
                   relationship={rel}
-                  onView={() => {}}
-                  onEdit={() => {
+                  onView={() => {
                     setShowRelationCodeModal(true);
                   }}
+                  onEdit={() => {}}
                 />
               ))
             ) : (
