@@ -9,7 +9,7 @@ import {
 import SolidIconBtn from "../buttons/SolidIconBtn";
 import { formatDateToDMY } from "../../utils/helperFunctions";
 
-const RelationshipCard = ({ relationship, onEdit, onView }) => {
+const RelationshipCard = ({ relationship, onEdit, onDelete ,onView, onDownload }) => {
   return (
     <div className="flex justify-between items-center px-4 py-3 bg-white border border-gray-300 rounded-md mb-3 shadow-sm">
       {/* Left Side */}
@@ -57,9 +57,9 @@ const RelationshipCard = ({ relationship, onEdit, onView }) => {
       <div className="flex gap-4">
         {[
           { icon: MdEdit, text: "Edit", onClick: onEdit },
-          { icon: MdDelete, text: "Delete", onClick: () => {} },
+          { icon: MdDelete, text: "Delete", onClick: onDelete },
           { icon: FaEye, text: "View", onClick: onView  },
-          { icon: FiDownload, text: "Download", onClick: () => {} },
+          { icon: FiDownload, text: "Download", onClick: onDownload },
         ].map(({ icon, text, onClick }, index) => (
           <SolidIconBtn
             key={index}
