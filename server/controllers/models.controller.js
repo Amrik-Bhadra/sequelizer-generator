@@ -4,13 +4,13 @@ const db = require('../config/db');
 
 // SQL Helpers
 const getModelById = async (id) => {
-  const [rows] = await db.execute(`SELECT * FROM Models WHERE id = ?`, [id]);
+  const [rows] = await db.execute(`SELECT * FROM models WHERE id = ?`, [id]);
   return rows[0]; // always return single object
 };
 
 const insertModel = async (name, code, metadata, userId) => {
   const [result] = await db.execute(
-    `INSERT INTO Models (name, code, metadata, user_id) VALUES (?, ?, ?, ?)`,
+    `INSERT INTO models (name, code, metadata, user_id) VALUES (?, ?, ?, ?)`,
     [name, code, JSON.stringify(metadata), userId]
   );
   return result;
@@ -18,7 +18,7 @@ const insertModel = async (name, code, metadata, userId) => {
 
 const updateModelCode = async (id, newName, regeneratedCode, updatedMetadata) => {
   const [result] = await db.execute(
-    `UPDATE Models SET name = ?, code = ?, metadata = ? WHERE id = ?`,
+    `UPDATE models SET name = ?, code = ?, metadata = ? WHERE id = ?`,
     [newName, regeneratedCode, JSON.stringify(updatedMetadata), id]
   );
   return result;
@@ -26,19 +26,19 @@ const updateModelCode = async (id, newName, regeneratedCode, updatedMetadata) =>
 
 const getModelByNameAndUser = async (name, userId) => {
   const [rows] = await db.execute(
-    `SELECT * FROM Models WHERE name = ? AND user_id = ?`,
+    `SELECT * FROM models WHERE name = ? AND user_id = ?`,
     [name, userId]
   );
   return rows[0];
 };
 
 const getAllModelsForUser = async (userId) => {
-  const [rows] = await db.execute(`SELECT * FROM Models WHERE user_id = ?`, [userId]);
+  const [rows] = await db.execute(`SELECT * FROM models WHERE user_id = ?`, [userId]);
   return rows;
 };
 
 const deleteModelById = async (id) => {
-  const [result] = await db.execute(`DELETE FROM Models WHERE id = ?`, [id]);
+  const [result] = await db.execute(`DELETE FROM models WHERE id = ?`, [id]);
   return result;
 };
 

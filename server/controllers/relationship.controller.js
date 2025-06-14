@@ -12,7 +12,7 @@ const updateRelationship = async (req, res) => {
 
             const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
             const [rows] = await db.execute(
-                `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+                `SELECT * FROM models WHERE user_id = ? AND name = ?`,
                 [userId, fromModel]
             );
             if (rows.length === 0) {
@@ -79,6 +79,12 @@ const deleteRelationship = async (req, res) => {
 
         // const [rowsFrom] = await db.execute(
         //     `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+
+        await deleteRelationships(fromModel, toModel, userId);
+        // const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
+
+        // const [rowsFrom] = await db.execute(
+        //     `SELECT * FROM models WHERE user_id = ? AND name = ?`,
         //     [userId, fromModel]
         // );
 
@@ -127,11 +133,13 @@ const deleteRelationship = async (req, res) => {
 
         // await db.execute(
         //     `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+        //     `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
         //     [codeFrom, JSON.stringify(cleanMetadataFrom), userId, fromModel]
         // );
 
         // const [rowsTo] = await db.execute(
         //     `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+        //     `SELECT * FROM models WHERE user_id = ? AND name = ?`,
         //     [userId, toModel]
         // );
 
@@ -179,12 +187,12 @@ const deleteRelationship = async (req, res) => {
 
         // await db.execute(
         //     `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+        //     `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
         //     [codeTo, JSON.stringify(cleanMetadataTo), userId, toModel]
         // );
 
         return res.status(200).json({
             message: "Relationship deleted successfully (both directions)",
-            
         });
 
     } catch (error) {

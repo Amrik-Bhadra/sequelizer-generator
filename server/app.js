@@ -44,6 +44,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/relationship', relationshipRoutes);
 
+
+app.get('/', (req, res)=>{
+  res.send('welcome to sequelizer');
+})
+
 //listen to server
 app.listen(port, ()=>{
     console.log(`App is listening to the port ${port} ✅`);
