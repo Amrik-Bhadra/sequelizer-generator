@@ -72,124 +72,119 @@ const updateRelationship = async (req, res) => {
 const deleteRelationship = async (req, res) => {
     try {
         const { userId, fromModel, toModel, relationshipType, foreignKey } = req.body;
+        await deleteRelationships (fromModel,toModel,userId);
 
-        const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
 
-        const [rowsFrom] = await db.execute(
-            `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
-            [userId, fromModel]
-        );
+        // const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
 
-        if (rowsFrom.length === 0) {
-            return res.status(404).json({ message: "From Model not found" });
-        }
+        // const [rowsFrom] = await db.execute(
+        //     `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+        //     [userId, fromModel]
+        // );
 
-        let codeFrom = rowsFrom[0].code;
-        let metadataFrom = typeof rowsFrom[0].metadata === 'string'
-            ? JSON.parse(rowsFrom[0].metadata)
-            : rowsFrom[0].metadata;
+        // if (rowsFrom.length === 0) {
+        //     return res.status(404).json({ message: "From Model not found" });
+        // }
 
-        let forwardAssoc = metadataFrom.associations?.find(assoc =>
-            assoc.type === forwardMethod &&
-            assoc.target === toModel &&
-            assoc.foreignKey === foreignKey
-        );
+        // let codeFrom = rowsFrom[0].code;
+        // let metadataFrom = typeof rowsFrom[0].metadata === 'string'
+        //     ? JSON.parse(rowsFrom[0].metadata)
+        //     : rowsFrom[0].metadata;
 
-        let forwardAs = forwardAssoc?.as || null;
+        // let forwardAssoc = metadataFrom.associations?.find(assoc =>
+        //     assoc.type === forwardMethod &&
+        //     assoc.target === toModel &&
+        //     assoc.foreignKey === foreignKey
+        // );
 
-        let forwardAssociationPattern;
-        if(forwardMethod === 'belongsToMany') {
-            const [modelA, modelB] = [fromModel, toModel].sort();
-            const throughTable = `${modelA}_${modelB}`;
-            if (!forwardAs) {
-                forwardAssociationPattern = `${fromModel}\\.${forwardMethod}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}' \\}\\);`;
-            } else {
-                forwardAssociationPattern = `${fromModel}\\.${forwardMethod}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}', as: '${forwardAs}' \\}\\);`;
-            }
-        }
-        const forwardRegex = new RegExp(forwardAssociationPattern, 'g');
-        codeFrom = codeFrom.replace(forwardRegex, '');
-        codeFrom = codeFrom.replace(/\n\s*\n/g, '\n');
+        // let forwardAs = forwardAssoc?.as || null;
 
-        if (metadataFrom.associations) {
-            metadataFrom.associations = metadataFrom.associations.filter(assoc => {
-                return !(
-                    assoc.type === forwardMethod &&
-                    assoc.target === toModel &&
-                    assoc.foreignKey === foreignKey
-                );
-            });
-        }
+        // let forwardAssociationPattern;
+        // if(forwardMethod === 'belongsToMany') {
+        //     const [modelA, modelB] = [fromModel, toModel].sort();
+        //     const throughTable = `${modelA}_${modelB}`;
+        //     if (!forwardAs) {
+        //         forwardAssociationPattern = `${fromModel}\\.${forwardMethod}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}' \\}\\);`;
+        //     } else {
+        //         forwardAssociationPattern = `${fromModel}\\.${forwardMethod}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}', as: '${forwardAs}' \\}\\);`;
+        //     }
+        // }
+        // const forwardRegex = new RegExp(forwardAssociationPattern, 'g');
+        // codeFrom = codeFrom.replace(forwardRegex, '');
+        // codeFrom = codeFrom.replace(/\n\s*\n/g, '\n');
 
-        const cleanMetadataFrom = JSON.parse(JSON.stringify(metadataFrom));
+        // if (metadataFrom.associations) {
+        //     metadataFrom.associations = metadataFrom.associations.filter(assoc => {
+        //         return !(
+        //             assoc.type === forwardMethod &&
+        //             assoc.target === toModel &&
+        //             assoc.foreignKey === foreignKey
+        //         );
+        //     });
+        // }
 
-        await db.execute(
-            `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
-            [codeFrom, JSON.stringify(cleanMetadataFrom), userId, fromModel]
-        );
+        // const cleanMetadataFrom = JSON.parse(JSON.stringify(metadataFrom));
 
-        const [rowsTo] = await db.execute(
-            `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
-            [userId, toModel]
-        );
+        // await db.execute(
+        //     `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+        //     [codeFrom, JSON.stringify(cleanMetadataFrom), userId, fromModel]
+        // );
 
-        if (rowsTo.length === 0) {
-            return res.status(404).json({ message: "To Model not found" });
-        }
+        // const [rowsTo] = await db.execute(
+        //     `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
+        //     [userId, toModel]
+        // );
 
-        let codeTo = rowsTo[0].code;
-        let metadataTo = typeof rowsTo[0].metadata === 'string'
-            ? JSON.parse(rowsTo[0].metadata)
-            : rowsTo[0].metadata;
-        console.log("Metadata To:", metadataTo);
-        console.log(reverseMethod, fromModel, foreignKey);
-        let reverseAssoc = metadataTo.associations?.find(assoc =>
-            assoc.type === reverseMethod &&
-            assoc.target === fromModel &&
-            assoc.foreignKey === foreignKey
-        );
+        // if (rowsTo.length === 0) {
+        //     return res.status(404).json({ message: "To Model not found" });
+        // }
 
-        let reverseAs = reverseAssoc?.as || null;
-        let reverseAssociationPattern;
-        if(reverseMethod === 'belongsToMany') {
-            const [modelA, modelB] = [toModel, fromModel].sort();
-            const throughTable = `${modelA}_${modelB}`;
-            if (!reverseAs) {
-                reverseAssociationPattern = `${toModel}\\.${reverseMethod}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}' \\}\\);`;
-            } else {
-                reverseAssociationPattern = `${toModel}\\.${reverseMethod}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}', as: '${reverseAs}' \\}\\);`;
-            }
-        }
-        const reverseRegex = new RegExp(reverseAssociationPattern, 'g');
-        codeTo = codeTo.replace(reverseRegex, '');
-        codeTo = codeTo.replace(/\n\s*\n/g, '\n');
-        if (metadataTo.associations) {
-            metadataTo.associations = metadataTo.associations.filter(assoc => {
-                return !(
-                    assoc.type === reverseMethod &&
-                    assoc.target === fromModel &&
-                    assoc.foreignKey === foreignKey
-                );
-            });
-        }
+        // let codeTo = rowsTo[0].code;
+        // let metadataTo = typeof rowsTo[0].metadata === 'string'
+        //     ? JSON.parse(rowsTo[0].metadata)
+        //     : rowsTo[0].metadata;
+        // console.log("Metadata To:", metadataTo);
+        // console.log(reverseMethod, fromModel, foreignKey);
+        // let reverseAssoc = metadataTo.associations?.find(assoc =>
+        //     assoc.type === reverseMethod &&
+        //     assoc.target === fromModel &&
+        //     assoc.foreignKey === foreignKey
+        // );
 
-        const cleanMetadataTo = JSON.parse(JSON.stringify(metadataTo));
+        // let reverseAs = reverseAssoc?.as || null;
+        // let reverseAssociationPattern;
+        // if(reverseMethod === 'belongsToMany') {
+        //     const [modelA, modelB] = [toModel, fromModel].sort();
+        //     const throughTable = `${modelA}_${modelB}`;
+        //     if (!reverseAs) {
+        //         reverseAssociationPattern = `${toModel}\\.${reverseMethod}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}' \\}\\);`;
+        //     } else {
+        //         reverseAssociationPattern = `${toModel}\\.${reverseMethod}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}', as: '${reverseAs}' \\}\\);`;
+        //     }
+        // }
+        // const reverseRegex = new RegExp(reverseAssociationPattern, 'g');
+        // codeTo = codeTo.replace(reverseRegex, '');
+        // codeTo = codeTo.replace(/\n\s*\n/g, '\n');
+        // if (metadataTo.associations) {
+        //     metadataTo.associations = metadataTo.associations.filter(assoc => {
+        //         return !(
+        //             assoc.type === reverseMethod &&
+        //             assoc.target === fromModel &&
+        //             assoc.foreignKey === foreignKey
+        //         );
+        //     });
+        // }
 
-        await db.execute(
-            `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
-            [codeTo, JSON.stringify(cleanMetadataTo), userId, toModel]
-        );
+        // const cleanMetadataTo = JSON.parse(JSON.stringify(metadataTo));
+
+        // await db.execute(
+        //     `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+        //     [codeTo, JSON.stringify(cleanMetadataTo), userId, toModel]
+        // );
 
         return res.status(200).json({
             message: "Relationship deleted successfully (both directions)",
-            forward: {
-                code: codeFrom,
-                metadata: metadataFrom
-            },
-            reverse: {
-                code: codeTo,
-                metadata: metadataTo
-            }
+            
         });
 
     } catch (error) {

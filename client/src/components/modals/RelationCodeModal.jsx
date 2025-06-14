@@ -18,7 +18,7 @@ import {
   duotoneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-const RelationCodeModal = ({ code1, code2, onClose }) => {
+const RelationCodeModal = ({ code1, code2, model1Name, model2Name, onClose }) => {
   const themeOptions = {
     oneDark,
     prism,
@@ -34,9 +34,9 @@ const RelationCodeModal = ({ code1, code2, onClose }) => {
 
   const [downloadModal, setDownloadModalClose] = useState(false);
   const [code, setCode] = useState("");
-  const [selectedTheme, setSelectedTheme] = useState("vscDarkPlus");
+  const [selectedTheme] = useState("vscDarkPlus");
   return (
-    <div className="absolute top-0 left-0 z-10 bg-black/60 h-screen w-screen flex items-center justify-center">
+    <div className="absolute top-0 left-0 z-10 p-6 bg-black/60 min-h-screen w-screen flex items-center justify-center">
       <div
         id="code-container"
         className="relative bg-white p-4 rounded-md w-full max-w-[95%] md:max-w-[90%] grid grid-cols-2 gap-x-10 pt-16"
@@ -48,7 +48,7 @@ const RelationCodeModal = ({ code1, code2, onClose }) => {
         />
         <div className="w-full">
           <header className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-primary">Prodct Modal</h1>
+            <h1 className="text-xl font-semibold text-primary">{model1Name} Modal</h1>
             <div id="button-div" className="flex items-center gap-x-3">
               <SolidIconBtn
                 icon={MdContentCopy}
@@ -86,7 +86,7 @@ const RelationCodeModal = ({ code1, code2, onClose }) => {
 
         <div className="w-full">
           <header className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-primary">Prodct Modal</h1>
+            <h1 className="text-xl font-semibold text-primary">{model2Name} Modal</h1>
             <div id="button-div" className="flex items-center gap-x-3">
               <SolidIconBtn
                 icon={MdContentCopy}
