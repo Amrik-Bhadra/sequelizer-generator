@@ -12,7 +12,8 @@ const relationshipRoutes = require('./routes/relationship.routes');
 
 // cors setup
 const corsOption = {
-    origin: 'http://localhost:5173',
+    // origin: 'http://localhost:5173',
+    origin: 'https://sequelizer-generator.vercel.app/',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
     optionsSuccessStatus: 200
