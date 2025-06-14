@@ -72,6 +72,13 @@ const updateRelationship = async (req, res) => {
 const deleteRelationship = async (req, res) => {
     try {
         const { userId, fromModel, toModel, relationshipType, foreignKey } = req.body;
+        await deleteRelationships (fromModel,toModel,userId);
+
+
+        // const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
+
+        // const [rowsFrom] = await db.execute(
+        //     `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
 
         await deleteRelationships(fromModel, toModel, userId);
         // const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
@@ -125,11 +132,13 @@ const deleteRelationship = async (req, res) => {
         // const cleanMetadataFrom = JSON.parse(JSON.stringify(metadataFrom));
 
         // await db.execute(
+        //     `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
         //     `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
         //     [codeFrom, JSON.stringify(cleanMetadataFrom), userId, fromModel]
         // );
 
         // const [rowsTo] = await db.execute(
+        //     `SELECT * FROM Models WHERE user_id = ? AND name = ?`,
         //     `SELECT * FROM models WHERE user_id = ? AND name = ?`,
         //     [userId, toModel]
         // );
@@ -177,6 +186,7 @@ const deleteRelationship = async (req, res) => {
         // const cleanMetadataTo = JSON.parse(JSON.stringify(metadataTo));
 
         // await db.execute(
+        //     `UPDATE Models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
         //     `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
         //     [codeTo, JSON.stringify(cleanMetadataTo), userId, toModel]
         // );

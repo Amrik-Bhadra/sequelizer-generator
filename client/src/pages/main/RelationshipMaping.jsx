@@ -11,6 +11,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import axiosInstance from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
+
 
 const associations = [
   { value: "one-to-one", label: "one-to-one" },
@@ -38,7 +40,29 @@ const RelationshipMapping = () => {
   const [modelCodes, setModelCodes] = useState({});
   const { user } = useAuth();
 
-  const { relations, addRelation, clearRelations } = useRelation();
+  const { relations, addRelation, clearRelations, editRelation, setEditRelation } = useRelation();
+
+  const location = useLocation();
+
+useEffect(() => {
+  console.log("Location state:", location.state);
+  if (location.state?.editMode && location.state.relationData) {
+    setEditRelation(location.state.relationData);
+  }
+}, [location]);
+
+useEffect(() => {
+  console.log("editRelation context updated:", editRelation);
+  if (editRelation) {
+    setSourceModel(editRelation.model1);
+    setTargetModel(editRelation.model2);
+    setAssociationType(editRelation.relationType.toLowerCase().replace(/\s/g, "-"));
+    setForeignKey(editRelation.foreignKey || "");
+    setThroughModel(editRelation.through || "");
+    setAsValue(editRelation.as || "");
+  }
+}, [editRelation]);
+
 
   const generateAssociationCode = () => {
     if (!sourceModel || !targetModel || !associationType) {
@@ -168,49 +192,50 @@ const RelationshipMapping = () => {
   }, []);
 
   const handleSave = () => {
-    if (!sourceModel || !targetModel || !associationType) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
+  if (!sourceModel || !targetModel || !associationType) {
+    toast.error("Please fill in all required fields.");
+    return;
+  }
 
-    const duplicate = relations.some(
-      (rel) =>
-        rel.sourceModel === sourceModel &&
-        rel.targetModel === targetModel &&
-        rel.associationType === associationType &&
-        rel.foreignKey === foreignKey &&
-        rel.throughModel === throughModel &&
-        rel.asValue === asValue
-    );
-
-    if (duplicate) {
-      toast.error("This relationship already exists!");
-      return;
-    }
-
-    const newRelation = {
-      id: uuidv4(),
-      sourceModel,
-      targetModel,
-      associationType,
-      foreignKey,
-      throughModel,
-      asValue,
-    };
-
-    addRelation(newRelation);
-
-    setSourceModel("");
-    setTargetModel("");
-    setAssociationType("");
-    setForeignKey("");
-    setThroughModel("");
-    setAsValue("");
-
-    setGeneratedCode({ sourceCode: "", targetCode: "" });
-
-    setSaveDeleteModal(false);
+  const newRelation = {
+    id: editRelation?.id || uuidv4(),
+    sourceModel,
+    targetModel,
+    associationType,
+    foreignKey,
+    throughModel,
+    asValue,
   };
+
+  if (editRelation) {
+    const updated = relations.map((r) =>
+      r.id === editRelation.id ? newRelation : r
+    );
+    setEditRelation(null);
+    toast.success("Relation updated successfully.");
+    return clearRelations(updated); // replace if you have updateRelation method
+  }
+
+  const duplicate = relations.some(
+    (rel) =>
+      rel.sourceModel === sourceModel &&
+      rel.targetModel === targetModel &&
+      rel.associationType === associationType &&
+      rel.foreignKey === foreignKey &&
+      rel.throughModel === throughModel &&
+      rel.asValue === asValue
+  );
+
+  if (duplicate) {
+    toast.error("This relationship already exists!");
+    return;
+  }
+
+  addRelation(newRelation);
+  toast.success("Relation saved.");
+  
+};
+
 
   const handleFinalSubmit = async () => {
     if (relations.length === 0) {

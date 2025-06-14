@@ -5,7 +5,10 @@ const RelationContext = createContext({
   setRelations: () => {},
   models: [],
   setModels: () => {},
+  editRelation: null,           
+  setEditRelation: () => {}, 
 });
+
 
 export const ModelContextProvider = ({ children }) => {
   const [relations, setRelations] = useState(() => {
@@ -67,10 +70,13 @@ const clearRelations = () => {
   localStorage.removeItem("relations");
 }
 
+const [editRelation, setEditRelation] = useState(null);
+
 
   return (
     <RelationContext.Provider
-      value={{ relations, setRelations, addRelation, updateRelation, addModel, updateModel, deleteRelation, clearRelations, models, setModels }}
+      value={{ relations, setRelations, addRelation, updateRelation, addModel, updateModel, deleteRelation, clearRelations, models, setModels, editRelation,
+    setEditRelation, }}
     >
       {children}
     </RelationContext.Provider>
