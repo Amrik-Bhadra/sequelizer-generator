@@ -1,105 +1,85 @@
 const db = require("../config/db");
 
+
 const deleteRelationships = async (fromModel, toModel, userId) => {
-    try {
-        // Fetch 'from' model
-        const [rowsFrom] = await db.execute(
-            `SELECT * FROM models WHERE user_id = ? AND name = ?`,
-            [userId, fromModel]
-        );
-        if (rowsFrom.length === 0) {
-            console.warn(`From Model not found: ${fromModel}`);
-            return;
-        }
+  const cleanModel = async (modelName, targetModel, userId) => {
+    const [rows] = await db.execute(
+      `SELECT * FROM models WHERE user_id = ? AND name = ?`,
+      [userId, modelName]
+    );
 
-        let codeFrom = rowsFrom[0].code;
-        let metadataFrom = typeof rowsFrom[0].metadata === 'string'
-            ? JSON.parse(rowsFrom[0].metadata)
-            : rowsFrom[0].metadata;
-
-        // Remove associations pointing to toModel
-        const associationsFrom = metadataFrom.associations || [];
-        for (const assoc of associationsFrom.filter(a => a.target === toModel)) {
-            const { type, foreignKey, as } = assoc;
-            const pattern = as
-                ? `${fromModel}\\.${type}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}', as: '${as}' \\}\\);`
-                : `${fromModel}\\.${type}\\(models\\.${toModel}, \\{ foreignKey: '${foreignKey}' \\}\\);`;
-            const regex = new RegExp(pattern, 'g');
-            codeFrom = codeFrom.replace(regex, '');
-        }
-        codeFrom = codeFrom.replace(/\n\s*\n/g, '\n');
-        metadataFrom.associations = associationsFrom.filter(a => a.target !== toModel);
-
-        await db.execute(
-            `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
-            [codeFrom, JSON.stringify(metadataFrom), userId, fromModel]
-        );
-
-        // Fetch 'to' model
-        const [rowsTo] = await db.execute(
-            `SELECT * FROM models WHERE user_id = ? AND name = ?`,
-            [userId, toModel]
-        );
-        if (rowsTo.length === 0) {
-            console.warn(`To Model not found: ${toModel}`);
-            return;
-        }
-
-        let codeTo = rowsTo[0].code;
-        let metadataTo = typeof rowsTo[0].metadata === 'string'
-            ? JSON.parse(rowsTo[0].metadata)
-            : rowsTo[0].metadata;
-
-        // Remove associations pointing to fromModel
-        const associationsTo = metadataTo.associations || [];
-        for (const assoc of associationsTo.filter(a => a.target === fromModel)) {
-            const { type, foreignKey, as } = assoc;
-
-            let pattern;
-
-            if (type === 'belongsToMany') {
-                const [modelA, modelB] = [toModel, fromModel].sort(); // to avoid inconsistencies
-                const throughTable = `${modelA}_${modelB}`;
-
-                if (!as) {
-                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}' \\}\\);`;
-                } else {
-                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', through: '${throughTable}', as: '${as}' \\}\\);`;
-                }
-            } else {
-                if (!as) {
-                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}' \\}\\);`;
-                } else {
-                    pattern = `${toModel}\\.${type}\\(models\\.${fromModel}, \\{ foreignKey: '${foreignKey}', as: '${as}' \\}\\);`;
-                }
-            }
-
-            const regex = new RegExp(pattern, 'g');
-            codeTo = codeTo.replace(regex, '');
-        }
-
-        codeTo = codeTo.replace(/\n\s*\n/g, '\n');
-        metadataTo.associations = associationsTo.filter(a => a.target !== fromModel);
-        await db.execute(
-            `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
-            [codeTo, JSON.stringify(metadataTo), userId, toModel]
-        );
-        return {
-            success: true,
-            message: "Relationship(s) deleted successfully (both directions)",
-            forward: { code: codeFrom, metadata: metadataFrom },
-            reverse: { code: codeTo, metadata: metadataTo }
-        };
-
-    } catch (error) {
-        console.error("Error deleting relationship:", error);
-        return {
-            success: false,
-            message: "Internal error deleting relationship",
-            error: error.message
-        };
-
+    if (rows.length === 0) {
+      console.warn(`Model not found: ${modelName}`);
+      return null;
     }
-}
+
+    let code = rows[0].code;
+    let metadata = typeof rows[0].metadata === 'string'
+      ? JSON.parse(rows[0].metadata)
+      : rows[0].metadata;
+
+    const originalAssociations = metadata.associations || [];
+    const updatedAssociations = [];
+    
+    for (const assoc of originalAssociations) {
+      if (assoc.target !== targetModel) {
+        updatedAssociations.push(assoc);
+        continue;
+      }
+
+      const { type, foreignKey, as } = assoc;
+      let pattern;
+
+      if (type === 'belongsToMany') {
+        const [modelA, modelB] = [modelName, targetModel].sort();
+        const throughTable = `${modelA}_${modelB}`;
+
+        pattern = `${modelName}\\.${type}\\(models\\.${targetModel},\\s*\\{[^}]*through:\\s*['"]${throughTable}['"][^}]*\\}\\);`;
+      } else {
+        const fkPart = foreignKey ? `foreignKey:\\s*['"]${foreignKey}['"]` : '';
+        const asPart = as ? `as:\\s*['"]${as}['"]` : '';
+        const inner = [fkPart, asPart].filter(Boolean).join(',\\s*');
+        pattern = `${modelName}\\.${type}\\(models\\.${targetModel},\\s*\\{\\s*${inner}\\s*\\}\\);`;
+      }
+
+      const regex = new RegExp(pattern, 'g');
+      const newCode = code.replace(regex, '');
+      if (newCode === code) {
+        console.warn(`No match found for pattern: ${pattern}`);
+      }
+      code = newCode;
+    }
+
+    code = code.replace(/\n\s*\n/g, '\n');
+    metadata.associations = updatedAssociations;
+
+    await db.execute(
+      `UPDATE models SET code = ?, metadata = ? WHERE user_id = ? AND name = ?`,
+      [code, JSON.stringify(metadata), userId, modelName]
+    );
+
+    return { code, metadata };
+  };
+
+  try {
+    const forward = await cleanModel(fromModel, toModel, userId);
+    const reverse = await cleanModel(toModel, fromModel, userId);
+
+    return {
+      success: true,
+      message: "Relationship(s) deleted successfully (both directions)",
+      forward,
+      reverse,
+    };
+  } catch (error) {
+    console.error("Error deleting relationship:", error);
+    return {
+      success: false,
+      message: "Internal error deleting relationship",
+      error: error.message,
+    };
+  }
+};
+
 
 module.exports = { deleteRelationships };
