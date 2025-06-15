@@ -41,7 +41,6 @@ const RelationshipMapping = () => {
   const { user } = useAuth();
 
   const { relations, addRelation, clearRelations, editRelation, setEditRelation } = useRelation();
-
   const location = useLocation();
 
 useEffect(() => {
@@ -54,8 +53,8 @@ useEffect(() => {
 useEffect(() => {
   console.log("editRelation context updated:", editRelation);
   if (editRelation) {
-    setSourceModel(editRelation.model1);
-    setTargetModel(editRelation.model2);
+    setSourceModel(editRelation.model2);
+    setTargetModel(editRelation.model1);
     setAssociationType(editRelation.relationType.toLowerCase().replace(/\s/g, "-"));
     setForeignKey(editRelation.foreignKey || "");
     setThroughModel(editRelation.through || "");
@@ -244,13 +243,13 @@ useEffect(() => {
     }
     // console.log("User:", user);
 
-    if (!user || !user.id) {
+    if (!user || !user.user_id) {
       toast.error("User not logged in!");
       return;
     }
 
     const payload = {
-      userId: user.id,
+      userId: user.user_id,
       relationships: relations.map((rel) => ({
         fromModel: rel.sourceModel,
         toModel: rel.targetModel,

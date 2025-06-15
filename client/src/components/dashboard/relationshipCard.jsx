@@ -23,7 +23,7 @@ const RelationshipCard = ({ relationship, onEdit, onDelete ,onView, onDownload }
           {/* Model Names */}
           <div className="flex flex-col">
             <div className="text-1.25rem font-semibold text-gray-800">
-              {relationship.model1}
+              {relationship.model2}
             </div>
             <div className="text-sm text-gray-500">Model 1</div>
           </div>
@@ -38,7 +38,7 @@ const RelationshipCard = ({ relationship, onEdit, onDelete ,onView, onDownload }
           </div>
           <div className="flex flex-col">
             <div className="text-1.25rem font-semibold text-gray-800">
-              {relationship.model2}
+              {relationship.model1}
             </div>
             <div className="text-sm text-gray-500">Model 2</div>
           </div>

@@ -11,10 +11,13 @@ const modelRoutes = require('./routes/models.routes');
 console.log('modelRoutes:', typeof modelRoutes);
 const relationshipRoutes = require('./routes/relationship.routes');
 
+let myOrigin = process.env.ENVIRONMENT === 'prod'
+  ? 'https://sequelizer.netlify.app'
+  : 'http://localhost:5173';
+
 // cors setup
 const corsOption = {
-    origin: 'http://localhost:5173',
-    // origin: 'https://sequelizer-generator.vercel.app',
+    origin: myOrigin,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
     optionsSuccessStatus: 200
@@ -29,17 +32,17 @@ app.use(cors(corsOption));
 app.use(cookieparser());
 
 // session setup
-app.use(session({
-  secret: process.env.SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: true,        
-    sameSite: 'none',
-    maxAge: 1000 * 60 * 60 * 24,
-  }
-}));
+// app.use(session({
+//   secret: 'FJKBWRBRFHB3+3$@%^&fretegVGRG',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     httpOnly: true,
+//     secure: true,        
+//     sameSite: 'none',
+//     maxAge: 1000 * 60 * 60 * 24,
+//   }
+// }));
 
 
 app.use('/api/auth', authRoutes);

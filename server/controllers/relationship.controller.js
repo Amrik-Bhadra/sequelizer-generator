@@ -3,7 +3,6 @@ const { mapRelationshipType } = require('../helpers/mapRelationshipType');
 const {deleteRelationships} = require('../helpers/deleteRelationship');
 const { updateModelAssociation } = require('../helpers/updateModelAssociation');
 
-
 const updateRelationship = async (req, res) => {
     try {
         const { userId, relationships } = req.body;
@@ -67,7 +66,6 @@ const updateRelationship = async (req, res) => {
         });
     }
 }
-
 
 const deleteRelationship = async (req, res) => {
     try {

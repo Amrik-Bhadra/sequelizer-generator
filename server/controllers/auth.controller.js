@@ -2,6 +2,7 @@ const md5 = require('md5');
 const { createUser, findUserByEmail, updateUserOtp, getUserById, clearUserOtp, updateUserPassword, findUserByEmailUid, createUserGoogleAuth, getUserData } = require('../models/User.model');
 const sendEmail = require('../utils/emailService');
 const { otpEmailTemplate, welcomeEmailTemplate, oneTimePasswordEmailTemplate } = require('../utils/emailTemplates');
+const { createToken } = require('../utils/jwtService');
 
 function generateOTP() {
     return Math.floor(10000 + Math.random() * 90000).toString();
@@ -124,40 +125,77 @@ const googleLogin = async (req, res) => {
     }
 }
 
+// const verifyOtp = async (req, res) => {
+//     try {
+//         const { user_id, otp, purpose } = req.body;
+//         const user = await getUserById(user_id);
+
+//         if (!user) {
+//             return res.status(400).json({ message: 'Invalid user.' });
+//         }
+
+//         if (user.otp !== otp) {
+//             return res.status(401).json({ message: 'Invalid OTP.' });
+//         }
+
+//         await clearUserOtp(user_id);
+//         if (purpose === 'login') {
+//             req.session.user = {
+//                 id: user.user_id,
+//                 username: user.username,
+//                 email: user.email
+//             };
+
+//             return res.status(200).json({ message: 'OTP verified, login successful.', user: req.session.user });
+//         }
+
+//         if (purpose === 'forgot_password') {
+//             return res.status(200).json({ message: 'OTP verified. Proceed to reset password.' });
+//         }
+
+//         return res.status(400).json({ message: 'Invalid purpose provided.' });
+//     } catch (error) {
+//         console.error('Error in verifyotp:', error);
+//         res.status(500).json({ message: 'Server error' });
+//     }
+// };
+
+
 const verifyOtp = async (req, res) => {
-    try {
-        const { user_id, otp, purpose } = req.body;
-        const user = await getUserById(user_id);
+  try {
+    const { user_id, otp, purpose } = req.body;
+    console.log('user_id in verify otp controller: ', user_id);
+    const user = await getUserById(user_id);
 
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid user.' });
-        }
+    if (!user) return res.status(400).json({ message: "Invalid user." });
+    if (user.otp !== otp) return res.status(401).json({ message: "Invalid OTP." });
 
-        if (user.otp !== otp) {
-            return res.status(401).json({ message: 'Invalid OTP.' });
-        }
+    await clearUserOtp(user_id);
 
-        await clearUserOtp(user_id);
-        if (purpose === 'login') {
-            req.session.user = {
-                id: user.user_id,
-                username: user.username,
-                email: user.email
-            };
+    if (purpose === "login") {
+      const token = createToken(user);
 
-            return res.status(200).json({ message: 'OTP verified, login successful.', user: req.session.user });
-        }
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+        maxAge: 1000 * 60 * 60 * 24, 
+      });
 
-        if (purpose === 'forgot_password') {
-            return res.status(200).json({ message: 'OTP verified. Proceed to reset password.' });
-        }
-
-        return res.status(400).json({ message: 'Invalid purpose provided.' });
-    } catch (error) {
-        console.error('Error in verifyotp:', error);
-        res.status(500).json({ message: 'Server error' });
+      return res.status(200).json({ message: "OTP verified, login successful.", user });
     }
+
+    if (purpose === "forgot_password") {
+      return res.status(200).json({ message: "OTP verified. Proceed to reset password." });
+    }
+
+    return res.status(400).json({ message: "Invalid purpose provided." });
+  } catch (error) {
+    console.error("Error in verifyotp:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
 
 const forgotPassword = async (req, res) => {
     try {
@@ -201,12 +239,22 @@ const resetPassword = async (req, res) => {
     }
 };
 
+// const logout = (req, res) => {
+//     req.session.destroy(err => {
+//         if (err) return res.status(500).json({ message: "Logout failed" });
+//         res.clearCookie('connect.sid');
+//         res.status(200).json({ message: "Logged out successfully" });
+//     });
+// };
+
+
 const logout = (req, res) => {
-    req.session.destroy(err => {
-        if (err) return res.status(500).json({ message: "Logout failed" });
-        res.clearCookie('connect.sid');
-        res.status(200).json({ message: "Logged out successfully" });
-    });
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+  });
+  res.status(200).json({ message: "Logged out successfully" });
 };
 
 module.exports = {
