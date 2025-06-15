@@ -65,9 +65,10 @@ const generateModelCode = (modelName, fields) => {
 
 // CREATE RECORD and MODEL TABLE
 const createRecord = async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const { modelName, fields, data } = req.body;
-  const userId = req.session.user.id;
+  const userId = req.user.id;
+  console.log(`USER id in createRecord: ${userId}`);
 
   try {
     // Check if model exists for user
@@ -90,8 +91,9 @@ const createRecord = async (req, res) => {
 
 // READ all models
 const getAllModels = async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-  const userId = req.session.user.id; 
+  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  const userId = req.user.id;
+  console.log(`USER id in getAllModels: ${userId}`);
 
   try {
     const models = await getAllModelsForUser(userId);
@@ -103,9 +105,10 @@ const getAllModels = async (req, res) => {
 };
 
 const getOneModel = async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
 
-  const userId = req.session.user.id;
+  const userId = req.user.id;
+  console.log(`USER id in createRecord: ${userId}`);
   const { modelName } = req.params;
 
   try {
@@ -140,7 +143,7 @@ const getOneModelByID = async (req, res) => {
 
 // UPDATE model metadata/code
 const updateModel = async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
 
   const id = req.params.id;
   const { modelName, metadata } = req.body; 
@@ -169,7 +172,7 @@ const updateModel = async (req, res) => {
 
 // DELETE model (metadata only)
 const deleteModel = async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
+  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const { id } = req.params;
 
   try {

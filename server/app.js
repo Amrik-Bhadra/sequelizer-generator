@@ -13,7 +13,7 @@ const relationshipRoutes = require('./routes/relationship.routes');
 // cors setup
 const corsOption = {
     // origin: 'http://localhost:5173',
-    origin: 'https://sequelizer-generator.vercel.app/',
+    origin: 'https://sequelizer.netlify.app',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
     optionsSuccessStatus: 200
@@ -29,13 +29,13 @@ app.use(cookieparser());
 
 // session setup
 app.use(session({
-  secret: process.env.SECRET,
+  secret: 'FJKBWRBRFHB3+3$@%^&fretegVGRG',
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false,        
-    sameSite: 'lax',
+    secure: true,        
+    sameSite: 'none',
     maxAge: 1000 * 60 * 60 * 24,
   }
 }));
