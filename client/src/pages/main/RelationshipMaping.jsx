@@ -283,10 +283,10 @@ useEffect(() => {
         {/* left*/}
         <div className="col-span-1 md:col-span-4 flex flex-col gap-y-2">
           {/* upper box */}
-          <div className="bg-white p-6 rounded-md shadow-sm">
+          <div className="bg-white dark:bg-dark-sec-bg p-6 rounded-md shadow-sm">
             {/* header */}
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-semibold text-blue-600">
+              <h2 className="text-xl font-semibold text-primary">
                 Relationship Mapping
               </h2>
               <div className="flex gap-2">
@@ -294,7 +294,7 @@ useEffect(() => {
                   icon={null}
                   text={"Save"}
                   onClick={handleSave}
-                  className="bg-secondary text-white text-sm"
+                  className="bg-secondary text-white text-sm dark:bg-[#474747]"
                 />
               </div>
             </div>
@@ -381,7 +381,7 @@ useEffect(() => {
         </div>
 
         {/* right */}
-        <div className="col-span-1 bg-white rounded-md shadow-sm h-fit p-3">
+        <div className="col-span-1 bg-white dark:bg-dark-sec-bg rounded-md shadow-sm h-fit p-3">
           <h1 className="text-base text-primary font-semibold">
             Saved Relations
           </h1>
@@ -393,7 +393,7 @@ useEffect(() => {
           <SolidIconBtn
             icon={null}
             text={"Final Submit"}
-            className="w-full bg-secondary text-sm text-white mt-4 hover:bg-[#464646]"
+            className="w-full bg-secondary dark:bg-[#eee] text-sm text-white dark:text-secondary mt-4 hover:bg-[#464646]"
             onClick={() => {
               setPurpose("save");
               setItem("relationship");

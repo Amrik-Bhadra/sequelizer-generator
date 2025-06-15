@@ -35,12 +35,12 @@ const ModelCard = ({
           </div>
         </div>
         <div className="ml-10">
-          <div className="text-1.25rem font-semibold text-blue-700 ml-4">
+          <div className="text-1.25rem font-semibold text-secondary dark:text-white ml-4">
             {model.metadata?.fields
               ? Object.keys(model.metadata.fields).length
               : 0}
           </div>
-          <div className="text-sm text-cyan-600">Attributes</div>
+          <div className="text-sm text-gray-500 dark:text-gray-light1">Attributes</div>
         </div>
       </div>
 
