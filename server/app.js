@@ -13,7 +13,7 @@ const relationshipRoutes = require('./routes/relationship.routes');
 // cors setup
 const corsOption = {
     // origin: 'http://localhost:5173',
-    origin: 'https://sequelizer.netlify.app/',
+    origin: 'https://sequelizer.netlify.app',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
     optionsSuccessStatus: 200
