@@ -14,7 +14,6 @@ import RelationCodeModal from "../../components/modals/RelationCodeModal";
 import { mapRelations } from "../../utils/mapRelationships";
 import JSZip from "jszip";
 
-
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => (
@@ -63,8 +62,8 @@ const Dashboard = () => {
   const [downloadModal, setDownloadModalClose] = useState(false);
   const [modelName, setModelName] = useState("");
 
-  const [code1, setCode1] = useState(""); 
-  const [code2, setCode2] = useState(""); 
+  const [model1, setModel1] = useState("");
+  const [model2, setModel2] = useState("");
   const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
 
   const fetchData = async () => {
@@ -117,30 +116,9 @@ const Dashboard = () => {
   };
 
   const normalizeRelationshipType = (type) => {
-  if (!type) return "";
-  return type.toLowerCase().replace(/\s+/g, "-");
-};
-
-
-const handleRelationshipDelete = async (rel) => {
-  try {
-    const response = await axiosInstance.post("/relationship/delete", {
-      userId: rel.userId || 2,
-      fromModel: rel.model1,
-      toModel: rel.model2,
-      relationshipType: normalizeRelationshipType(rel.relationType),
-      foreignKey: rel.foreignKey || "",
-      as: rel.as || ""
-    });
-
-    console.log("Delete response:", response.data);
-    toast.success("Relationship deleted successfully!");
-    fetchData();
-  } catch (err) {
-    console.error("Delete failed:", err.response?.data || err.message);
-    toast.error("Delete failed!");
-  }
-};
+    if (!type) return "";
+    return type.toLowerCase().replace(/\s+/g, "-");
+  };
 
   //View
   const handleView = async (model) => {
@@ -158,33 +136,53 @@ const handleRelationshipDelete = async (rel) => {
     });
   };
 
+  const handleRelationshipDelete = async (rel) => {
+    try {
+      const response = await axiosInstance.post("/relationship/delete", {
+        userId: rel.userId || 2,
+        fromModel: rel.model1,
+        toModel: rel.model2,
+        relationshipType: normalizeRelationshipType(rel.relationType),
+        foreignKey: rel.foreignKey || "",
+        as: rel.as || "",
+      });
+
+      console.log("Delete response:", response.data);
+      toast.success("Relationship deleted successfully!");
+      fetchData();
+    } catch (err) {
+      console.error("Delete failed:", err.response?.data || err.message);
+      toast.error("Delete failed!");
+    }
+  };
+
   const handleRelationshipDownload = async (rel) => {
-  const model1 = models.find((m) => m.name === rel.model1);
-  const model2 = models.find((m) => m.name === rel.model2);
+    const model1 = models.find((m) => m.name === rel.model1);
+    const model2 = models.find((m) => m.name === rel.model2);
 
-  if (!model1 || !model2) {
-    toast.error("One or both related models not found.");
-    return;
-  }
+    if (!model1 || !model2) {
+      toast.error("One or both related models not found.");
+      return;
+    }
 
-  try {
-    const zip = new JSZip();
-    zip.file(`${model1.name}.js`, model1.code || "");
-    zip.file(`${model2.name}.js`, model2.code || "");
+    try {
+      const zip = new JSZip();
+      zip.file(`${model1.name}.js`, model1.code || "");
+      zip.file(`${model2.name}.js`, model2.code || "");
 
-    const blob = await zip.generateAsync({ type: "blob" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${model1.name}_${model2.name}_relationship.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("Download started!");
-  } catch (err) {
-    console.error("Error generating ZIP:", err);
-    toast.error("Download failed.");
-  }
-};
+      const blob = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${model1.name}_${model2.name}_relationship.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Download started!");
+    } catch (err) {
+      console.error("Error generating ZIP:", err);
+      toast.error("Download failed.");
+    }
+  };
 
   //Duplicate
   const handleDuplicate = async (model) => {
@@ -354,22 +352,27 @@ const handleRelationshipDelete = async (rel) => {
                   onView={() => {
                     const model1 = models.find((m) => m.name === rel.model1);
                     const model2 = models.find((m) => m.name === rel.model2);
-                      if (!model1 || !model2) {
-                          console.error("Model not found in models list", { model1, model2, rel });
-                          return;
-                      }
-                      setCode1(model1.code || "// No code available for model1");
-                      setCode2(model2.code || "// No code available for model2");
-                      setSelectedRelation(rel);
-                      setShowRelationCodeModal(true);
-                    }}
-                  onEdit={() => {navigate("/seq/relationship", {
-                                  state: {
-                                    editMode: true,
-                                    relationData: rel,
-                                  },
-                                });
-                              }}
+                    if (!model1 || !model2) {
+                      console.error("Model not found in models list", {
+                        model1,
+                        model2,
+                        rel,
+                      });
+                      return;
+                    }
+                    setModel1(model2 || "// No code available for model1");
+                    setModel2(model1 || "// No code available for model2");
+                    setSelectedRelation(rel);
+                    setShowRelationCodeModal(true);
+                  }}
+                  onEdit={() => {
+                    navigate("/seq/relationship", {
+                      state: {
+                        editMode: true,
+                        relationData: rel,
+                      },
+                    });
+                  }}
                   onDelete={() => {
                     setSaveDeleteModal(true);
                     setSelectedRelation(rel.id);
@@ -423,32 +426,33 @@ const handleRelationshipDelete = async (rel) => {
 
       {showRelationCodeModal && (
         <RelationCodeModal
-          code1={code1}
-          code2={code2}
+          model1Name={model1.name}
+          model2Name={model2.name}
+          code1={model1.code}
+          code2={model2.code}
           onClose={() => setShowRelationCodeModal(false)}
         />
       )}
 
       {saveDeleteModal && (
-  <SaveDeleteModal
-    onClick={
-      purpose === "Delete Relationship"
-        ? () => {
-            const rel = relationships.find(
-              (r) => `${r.model1} - ${r.model2}` === item
-            );
-            if (rel) handleRelationshipDelete(rel);
+        <SaveDeleteModal
+          onClick={
+            purpose === "Delete Relationship"
+              ? () => {
+                  const rel = relationships.find(
+                    (r) => `${r.model1} - ${r.model2}` === item
+                  );
+                  if (rel) handleRelationshipDelete(rel);
+                }
+              : handleDelete
           }
-        : handleDelete
-    }
-    onClose={() => {
-      setSaveDeleteModal(false);
-    }}
-    purpose={purpose}
-    item={item}
-  />
-)}
-
+          onClose={() => {
+            setSaveDeleteModal(false);
+          }}
+          purpose={purpose}
+          item={item}
+        />
+      )}
 
       {downloadModal && (
         <DownloadModal
