@@ -48,6 +48,7 @@ const Login = () => {
       if (response.status === 200) {
         toast.success(response?.data.message);
         const user_id = response.data.user_id;
+        console.log('user id obtained from login: ', user_id);
         navigate("/auth/verifyotp", { state: { user_id, purpose: "login" } });
       }
     } catch (error) {
