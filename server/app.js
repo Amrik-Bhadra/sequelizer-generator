@@ -4,6 +4,7 @@ const session = require('express-session');
 const app = express();
 const cors = require('cors');
 const cookieparser = require('cookie-parser');
+const serverless = require('serverless-http');
 
 const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
@@ -12,8 +13,8 @@ const relationshipRoutes = require('./routes/relationship.routes');
 
 // cors setup
 const corsOption = {
-    // origin: 'http://localhost:5173',
-    origin: 'https://sequelizer-generator.vercel.app',
+    origin: 'http://localhost:5173',
+    // origin: 'https://sequelizer-generator.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     credentials: true,
     optionsSuccessStatus: 200
