@@ -164,7 +164,6 @@ const googleLogin = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { user_id, otp, purpose } = req.body;
-    console.log('user_id in verify otp controller: ', user_id);
     const user = await getUserById(user_id);
 
     if (!user) return res.status(400).json({ message: "Invalid user." });

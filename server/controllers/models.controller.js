@@ -65,10 +65,8 @@ const generateModelCode = (modelName, fields) => {
 
 // CREATE RECORD and MODEL TABLE
 const createRecord = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const { modelName, fields, data } = req.body;
   const userId = req.user.id;
-  console.log(`USER id in createRecord: ${userId}`);
 
   try {
     // Check if model exists for user
@@ -91,9 +89,7 @@ const createRecord = async (req, res) => {
 
 // READ all models
 const getAllModels = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const userId = req.user.id;
-  console.log(`USER id in getAllModels: ${userId}`);
 
   try {
     const models = await getAllModelsForUser(userId);
@@ -105,10 +101,7 @@ const getAllModels = async (req, res) => {
 };
 
 const getOneModel = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-
   const userId = req.user.id;
-  console.log(`USER id in createRecord: ${userId}`);
   const { modelName } = req.params;
 
   try {
@@ -117,21 +110,17 @@ const getOneModel = async (req, res) => {
       return res.status(404).json({ message: 'Model not found' });  
     }
 
-    res.status(200).json(model); // ✅ model found
+    res.status(200).json(model);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching model', error: err.message });
   }
 };
 
 const getOneModelByID = async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-
   const id = req.params.id;
-  console.log(id);
 
   try {
     const model = await getModelById(id);
-    console.log(model);
     if (!model) {
       return res.status(404).json({ message: 'Model not found' });  
     }
@@ -143,11 +132,8 @@ const getOneModelByID = async (req, res) => {
 
 // UPDATE model metadata/code
 const updateModel = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
-
   const id = req.params.id;
   const { modelName, metadata } = req.body; 
-  console.log(modelName);
 
   try {
     const existingModel = await getModelById(id);
@@ -172,7 +158,6 @@ const updateModel = async (req, res) => {
 
 // DELETE model (metadata only)
 const deleteModel = async (req, res) => {
-  // if (!req.session.user) return res.status(401).json({ message: 'Unauthorized' });
   const { id } = req.params;
 
   try {
