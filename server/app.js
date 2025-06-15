@@ -4,7 +4,6 @@ const session = require('express-session');
 const app = express();
 const cors = require('cors');
 const cookieparser = require('cookie-parser');
-const serverless = require('serverless-http');
 
 const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
