@@ -285,7 +285,7 @@ const Dashboard = () => {
                   />
                 ))
             ) : (
-              <h2>No Models Yet</h2>
+              <h2 className="dark:text-white">No Models Yet</h2>
             )}
           </div>
 
