@@ -30,8 +30,8 @@ app.use(cookieparser());
 // session setup
 app.use(session({
   secret: 'FJKBWRBRFHB3+3$@%^&fretegVGRG',
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   cookie: {
     httpOnly: true,
     secure: true,        
