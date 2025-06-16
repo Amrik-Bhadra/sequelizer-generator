@@ -55,12 +55,12 @@ const AddedRelations = () => {
               text={"Edit"}
               onClick={() => {
                 setEditRelation(relation);
-                navigate("/seq/relationship", {
-                  state: {
-                    editMode: true,
-                    relationData: relation,
-                  },
-                });
+                // navigate("/seq/relationship", {
+                //   state: {
+                //     editMode: true,
+                //     relationData: relation,
+                //   },
+                // });
               }}
               className="bg-[#eee] text-secondary text-xs hover:bg-[#ccc] w-full"
             />
