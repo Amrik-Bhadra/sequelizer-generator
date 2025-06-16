@@ -10,7 +10,10 @@ import { useRelation } from "../../contexts/ModelContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import axiosInstance from "../../utils/axiosInstance";
-import { generateAssociationCode, generateEditAssociationCode } from "../../utils/relationshipCodeGeneration";
+import {
+  generateAssociationCode,
+  generateEditAssociationCode,
+} from "../../utils/relationshipCodeGeneration";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 
@@ -36,7 +39,7 @@ const RelationshipMapping = () => {
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [purpose, setPurpose] = useState("");
   const [item, setItem] = useState("");
-  const [modelList, setModelList] = useState([]);
+  const [modelList, setModelList] = useState({});
   const [modelCodes, setModelCodes] = useState({});
   const [metadata, setMetadata] = useState({});
   const { user } = useAuth();
@@ -58,7 +61,7 @@ const RelationshipMapping = () => {
     console.log(`useEffect 1: ${location.state}`);
     if (location.state?.editMode && location.state.relationData) {
       let relation = location.state.relationData;
-      console.log('yaha hu mai' + JSON.stringify(relation.model1));
+      console.log("yaha hu mai" + JSON.stringify(relation.model1));
       setSourceModel(relation.model2);
       setTargetModel(relation.model1);
       setAssociationType(
@@ -66,7 +69,7 @@ const RelationshipMapping = () => {
           ? ""
           : relation.relationType.toLowerCase().replace(/\s/g, "-")
       );
-      setForeignKey(relation.foreignKey === "-" ? "" : relation.foreignKey);
+
       setThroughModel(relation.through === "-" ? "" : relation.through);
       setAsValue(relation.as === "-" ? "" : relation.as);
     }
@@ -82,13 +85,10 @@ const RelationshipMapping = () => {
       setAssociationType(
         editRelation.associationType.toLowerCase().replace(/\s/g, "-")
       );
-      setForeignKey(editRelation.foreignKey || "");
       setThroughModel(editRelation.throughModel || "");
       setAsValue(editRelation.asValue || "");
     }
   }, [editRelation]);
-
- 
 
   useEffect(() => {
     generateAssociationCode(
@@ -145,8 +145,24 @@ const RelationshipMapping = () => {
       try {
         const response = await axiosInstance.get("/models");
         const data = response.data;
-        const names = data.map((model) => model.name);
-        setModelList(names);
+        const myOb = {};
+
+        data.forEach((model) => {
+          const name = model.name;
+          const fields = model.metadata.fields;
+          let primaryKey = "";
+
+          fields.forEach((field) => {
+            if (Object.prototype.hasOwnProperty.call(field, "primaryKey")) {
+              console.log(field);
+              primaryKey = field.name;
+            }
+          });
+
+          myOb[name] = primaryKey;
+        });
+
+        setModelList(myOb);
 
         const codes = {};
         const metadata = {};
@@ -170,7 +186,7 @@ const RelationshipMapping = () => {
 
   const handleSave = () => {
     try {
-      if (!sourceModel || !targetModel || !associationType) {
+      if (!sourceModel || !targetModel || !associationType || !foreignKey) {
         toast.error("Please fill in all required fields.");
         return;
       }
@@ -181,7 +197,10 @@ const RelationshipMapping = () => {
         targetModel,
         associationType,
         foreignKey,
-        throughModel: (associationType === 'one-to-one' || associationType === 'one-to-many') ? "" : throughModel,
+        throughModel:
+          associationType === "one-to-one" || associationType === "one-to-many"
+            ? ""
+            : throughModel,
         asValue,
       };
 
@@ -224,7 +243,6 @@ const RelationshipMapping = () => {
         setThroughModel("");
         setAsValue("");
       }
-      
     } catch (err) {
       console.log(err);
     }
@@ -277,6 +295,12 @@ const RelationshipMapping = () => {
     }
   };
 
+  useEffect(() => {
+    if (sourceModel && modelList[sourceModel]) {
+      setForeignKey(modelList[sourceModel]);
+    }
+  }, [sourceModel, modelList]);
+
   return (
     <>
       <div className="min-h-screen max-w-[90vw] mx-auto grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -305,11 +329,14 @@ const RelationshipMapping = () => {
                 label="Select Model 1"
                 selectedValue={sourceModel}
                 onChange={setSourceModel}
-                options={modelList.map((name) => ({
-                  value: name,
-                  label: name,
-                }))}
+                options={Object.keys(modelList).map((name) => {
+                  return {
+                    value: name,
+                    label: name,
+                  };
+                })}
                 placeholder="Select Model"
+                required={true}
               />
               <DropdownComponent
                 label="Relation Type"
@@ -317,40 +344,34 @@ const RelationshipMapping = () => {
                 onChange={setAssociationType}
                 options={associations}
                 placeholder="Select Type"
+                required={true}
               />
               <DropdownComponent
                 label="Select Model 2"
                 selectedValue={targetModel}
                 onChange={setTargetModel}
-                options={modelList.map((name) => ({
-                  value: name,
-                  label: name,
-                }))}
+                options={Object.keys(modelList).map((name) => {
+                  return {
+                    value: name,
+                    label: name,
+                  };
+                })}
                 placeholder="Select Model"
+                required={true}
               />
               {associationType != "many-to-many" && (
                 <InputField
-                  label="Foreign Key (optional)"
+                  label="Foreign Key"
                   type="text"
                   name="foreignKey"
                   id="foreignKey"
                   placeholder="e.g. userId"
                   value={foreignKey}
                   onChange={setForeignKey}
+                  required={true}
                 />
               )}
 
-              {associationType === "many-to-many" && (
-                <InputField
-                  label="Through Model"
-                  type="text"
-                  name="throughModel"
-                  id="throughModel"
-                  placeholder="e.g. UserRole"
-                  value={throughModel}
-                  onChange={setThroughModel}
-                />
-              )}
               <InputField
                 label="Alias (as:) (optional)"
                 type="text"

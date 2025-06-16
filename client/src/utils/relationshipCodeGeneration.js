@@ -205,7 +205,8 @@ const generateEditAssociationCode = (metadata,
                 case "date":
                     sequelizeType = "DataTypes.DATE";
                     break;
-                case "array":
+                
+                case "array": {
                     const base = (field.arrayType || "string").toLowerCase();
                     const map = {
                         string: "DataTypes.STRING",
@@ -215,9 +216,10 @@ const generateEditAssociationCode = (metadata,
                         object: "DataTypes.JSON",
                         uuid: "DataTypes.UUID",
                     };
-                    sequelizeType = `DataTypes.ARRAY(${map[base] || "DataTypes.STRING"
-                        })`;
+                    sequelizeType = `DataTypes.ARRAY(${map[base] || "DataTypes.STRING"})`;
                     break;
+                }
+
                 case "object":
                     sequelizeType = "DataTypes.JSON";
                     break;
