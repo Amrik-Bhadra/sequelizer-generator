@@ -13,6 +13,7 @@ import DownloadModal from "../../components/modals/DownloadModal";
 import RelationCodeModal from "../../components/modals/RelationCodeModal";
 import { mapRelations } from "../../utils/mapRelationships";
 import JSZip from "jszip";
+import { useAuth } from "../../contexts/AuthContext";
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -65,7 +66,8 @@ const Dashboard = () => {
   const [model1, setModel1] = useState("");
   const [model2, setModel2] = useState("");
   const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
-
+  const { user } = useAuth();
+  
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -139,7 +141,7 @@ const Dashboard = () => {
   const handleRelationshipDelete = async (rel) => {
     try {
       const response = await axiosInstance.post("/relationship/delete", {
-        userId: rel.userId || 2,
+        userId: user.id,
         fromModel: rel.model1,
         toModel: rel.model2,
         relationshipType: normalizeRelationshipType(rel.relationType),
