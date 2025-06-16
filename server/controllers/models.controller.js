@@ -46,8 +46,7 @@ const deleteModelById = async (id) => {
 const generateModelCode = (modelName, fields) => {
   let attrString = '';
   for (const [key, options] of Object.entries(fields)) {
-    console.log(`Processing field: ${key}, options:`, options);
-    let type;
+    let sequelizeType;
     switch (options.type.toLowerCase()) {
       case "string":
         sequelizeType = "DataTypes.STRING";
@@ -80,10 +79,9 @@ const generateModelCode = (modelName, fields) => {
         sequelizeType = "DataTypes.UUID";
         break;
       default:
-        console.warn(`Unknown type for field ${key}: ${options.type}`);
-        sequelizeType = "DataTypes.STRING"; // default to string
+        sequelizeType = "DataTypes.STRING";
     }
-    // let line = `    ${options.name}: {\n      type: DataTypes.${options.type.toUpperCase()}`;
+
     let line = `    ${options.name}: {\n      type: ${sequelizeType}`;
     if (options.allowNull !== true && options.allowNull !== "Yes")
       line += ",\n      allowNull: false";
@@ -92,19 +90,42 @@ const generateModelCode = (modelName, fields) => {
       line += ",\n      autoIncrement: true";
     if (options.unique === "Yes") line += ",\n      unique: true";
     if (options.defaultValue && options.defaultValue !== "")
-      line += `,\n      defaultValue: ${JSON.stringify(
-        options.defaultValue
-      )}`;
+      line += `,\n      defaultValue: ${JSON.stringify(options.defaultValue)}`;
+
+    if (options.validate && options.validate !== "none") {
+      line += ",\n      validate: {\n";
+      if (options.validate === "len") {
+        const min = options.validateArgs?.min || 0;
+        const max = options.validateArgs?.max || 255;
+        line += `        len: [${min}, ${max}],\n`;
+      } else if (options.validate === "is") {
+        const regex = options.validateArgs?.regex || "/.*/";
+        line += `        is: ${regex},\n`;
+      } else if (options.validate === "isEmail") {
+        line += "        isEmail: true,\n";
+      } else if (options.validate === "isNumeric") {
+        line += "        isNumeric: true,\n";
+      } else if (options.validate === "customValidator") {
+        const funcBody = options.validateArgs?.functionBody || "";
+        line += `        customValidator(value) {\n          ${funcBody}\n        },\n`;
+      }
+      line += "      }";
+    }
+
     line += "\n    },\n";
     attrString += line;
   }
 
-  return `const { Model, DataTypes } = require('sequelize');\nconst sequelize = require('../config/db');\n\n` +
+  return (
+    `const { Model, DataTypes } = require('sequelize');\n` +
+    `const sequelize = require('../config/db');\n\n` +
     `class ${modelName} extends Model {}\n\n` +
     `${modelName}.init({\n${attrString}}, {\n` +
     `  sequelize,\n  modelName: '${modelName}',\n  tableName: '${modelName.toLowerCase()}s',\n  timestamps: false\n});\n\n` +
-    `module.exports = ${modelName};\n`;
+    `module.exports = ${modelName};\n`
+  );
 };
+
 
 // ------------------------ CRUD APIs ------------------------ //
 
