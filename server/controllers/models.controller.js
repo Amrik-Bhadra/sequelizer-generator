@@ -1,6 +1,6 @@
 // models.controller.js
 
-const db = require('../config/db'); 
+const db = require('../config/db');
 
 // SQL Helpers
 const getModelById = async (id) => {
@@ -46,11 +46,56 @@ const deleteModelById = async (id) => {
 const generateModelCode = (modelName, fields) => {
   let attrString = '';
   for (const [key, options] of Object.entries(fields)) {
-    let line = `    ${options.name}: {\n      type: DataTypes.${options.type.toUpperCase()}`;
-    if (options.allowNull === false) {
-      line += ',\n      allowNull: false';
+    console.log(`Processing field: ${key}, options:`, options);
+    let type;
+    switch (options.type.toLowerCase()) {
+      case "string":
+        sequelizeType = "DataTypes.STRING";
+        break;
+      case "number":
+        sequelizeType = "DataTypes.INTEGER";
+        break;
+      case "boolean":
+        sequelizeType = "DataTypes.BOOLEAN";
+        break;
+      case "date":
+        sequelizeType = "DataTypes.DATE";
+        break;
+      case "array":
+        const base = (options.arrayType || "string").toLowerCase();
+        const map = {
+          string: "DataTypes.STRING",
+          number: "DataTypes.INTEGER",
+          boolean: "DataTypes.BOOLEAN",
+          date: "DataTypes.DATE",
+          object: "DataTypes.JSON",
+          uuid: "DataTypes.UUID",
+        };
+        sequelizeType = `DataTypes.ARRAY(${map[base] || "DataTypes.STRING"})`;
+        break;
+      case "object":
+        sequelizeType = "DataTypes.JSON";
+        break;
+      case "uuid":
+        sequelizeType = "DataTypes.UUID";
+        break;
+      default:
+        console.warn(`Unknown type for field ${key}: ${options.type}`);
+        sequelizeType = "DataTypes.STRING"; // default to string
     }
-    line += '\n    },\n';
+    // let line = `    ${options.name}: {\n      type: DataTypes.${options.type.toUpperCase()}`;
+    let line = `    ${options.name}: {\n      type: ${sequelizeType}`;
+    if (options.allowNull !== true && options.allowNull !== "Yes")
+      line += ",\n      allowNull: false";
+    if (options.primaryKey === "Yes") line += ",\n      primaryKey: true";
+    if (options.autoIncrement === true || options.autoIncrement === "Yes")
+      line += ",\n      autoIncrement: true";
+    if (options.unique === "Yes") line += ",\n      unique: true";
+    if (options.defaultValue && options.defaultValue !== "")
+      line += `,\n      defaultValue: ${JSON.stringify(
+        options.defaultValue
+      )}`;
+    line += "\n    },\n";
     attrString += line;
   }
 
@@ -93,7 +138,7 @@ const getAllModels = async (req, res) => {
 
   try {
     const models = await getAllModelsForUser(userId);
-    
+
     res.status(200).json(models);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching models', error: err.message });
@@ -107,7 +152,7 @@ const getOneModel = async (req, res) => {
   try {
     const model = await getModelByNameAndUser(modelName, userId);
     if (!model) {
-      return res.status(404).json({ message: 'Model not found' });  
+      return res.status(404).json({ message: 'Model not found' });
     }
 
     res.status(200).json(model);
@@ -122,9 +167,9 @@ const getOneModelByID = async (req, res) => {
   try {
     const model = await getModelById(id);
     if (!model) {
-      return res.status(404).json({ message: 'Model not found' });  
+      return res.status(404).json({ message: 'Model not found' });
     }
-    res.status(200).json(model); 
+    res.status(200).json(model);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching model', error: err.message });
   }
@@ -133,7 +178,7 @@ const getOneModelByID = async (req, res) => {
 // UPDATE model metadata/code
 const updateModel = async (req, res) => {
   const id = req.params.id;
-  const { modelName, metadata } = req.body; 
+  const { modelName, metadata } = req.body;
 
   try {
     const existingModel = await getModelById(id);
