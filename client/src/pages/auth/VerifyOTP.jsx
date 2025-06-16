@@ -61,6 +61,7 @@ const VerifyOTP = () => {
   try {
     const user_id = state.user_id;
     const purpose = state.purpose;
+    console.log(`User id in verify otp frontend: ${user_id}`);
 
     const response = await axiosInstance.post(
       "/auth/verifyotp",

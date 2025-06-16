@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SolidIconBtn from "../buttons/SolidIconBtn";
 import { MdDelete } from "../../utils/iconsProvider";
 import { useRelation } from "../../contexts/ModelContext";
@@ -20,6 +20,10 @@ const AddedRelations = () => {
     setRelations((prev) => prev.filter((rel) => rel.id !== relationToDelete));
     setShowModal(false);
   };
+
+  useEffect(()=>{
+    console.log('added relations chal gya!!!');
+  }, [relations]);
 
   return (
     <>
@@ -51,12 +55,12 @@ const AddedRelations = () => {
               text={"Edit"}
               onClick={() => {
                 setEditRelation(relation);
-                navigate("/seq/relationship", {
-                  state: {
-                    editMode: true,
-                    relationData: relation,
-                  },
-                });
+                // navigate("/seq/relationship", {
+                //   state: {
+                //     editMode: true,
+                //     relationData: relation,
+                //   },
+                // });
               }}
               className="bg-[#eee] text-secondary text-xs hover:bg-[#ccc] w-full"
             />

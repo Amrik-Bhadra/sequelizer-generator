@@ -5,10 +5,9 @@ const RelationContext = createContext({
   setRelations: () => {},
   models: [],
   setModels: () => {},
-  editRelation: null,           
-  setEditRelation: () => {}, 
+  editRelation: null,
+  setEditRelation: () => {},
 });
-
 
 export const ModelContextProvider = ({ children }) => {
   const [relations, setRelations] = useState(() => {
@@ -20,6 +19,8 @@ export const ModelContextProvider = ({ children }) => {
     const storedModels = localStorage.getItem("models");
     return storedModels ? JSON.parse(storedModels) : [];
   });
+
+  const [editRelation, setEditRelation] = useState(null);
 
   useEffect(() => {
     if (relations && relations.length > 0) {
@@ -37,7 +38,22 @@ export const ModelContextProvider = ({ children }) => {
     }
   }, [models]);
 
+  // models started
+  const addModel = (newModel) => {
+    setModels((prev) => [...prev, newModel]);
+  };
+
+  const updateModel = (updatedModel) => {
+    setModels((prev) =>
+      prev.map((model) => (model.id === updatedModel.id ? updatedModel : model))
+    );
+  };
+
+  // models end
+
+  // relations started
   const addRelation = (newRelation) => {
+    console.log(`adding new relation: ${newRelation}`);
     setRelations((prev) => [...prev, newRelation]);
   };
 
@@ -49,34 +65,33 @@ export const ModelContextProvider = ({ children }) => {
     );
   };
 
-  const addModel = (newModel) => {
-    setModels((prev) => [...prev, newModel]);
-  };
-
-  const updateModel = (updatedModel) => {
-    setModels((prev) =>
-      prev.map((model) =>
-        model.id === updatedModel.id ? updatedModel : model
-      )
-    );
-  };
-
   const deleteRelation = (id) => {
-  setRelations((prev) => prev.filter((rel) => rel.id !== id));
-};
+    setRelations((prev) => prev.filter((rel) => rel.id !== id));
+  };
 
-const clearRelations = () => {
-  setRelations([]);
-  localStorage.removeItem("relations");
-}
+  const clearRelations = () => {
+    setRelations([]);
+    localStorage.removeItem("relations");
+  };
 
-const [editRelation, setEditRelation] = useState(null);
-
+  // relations end
 
   return (
     <RelationContext.Provider
-      value={{ relations, setRelations, addRelation, updateRelation, addModel, updateModel, deleteRelation, clearRelations, models, setModels, editRelation,
-    setEditRelation, }}
+      value={{
+        relations,
+        setRelations,
+        addRelation,
+        updateRelation,
+        addModel,
+        updateModel,
+        deleteRelation,
+        clearRelations,
+        models,
+        setModels,
+        editRelation,
+        setEditRelation,
+      }}
     >
       {children}
     </RelationContext.Provider>
