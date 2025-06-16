@@ -45,6 +45,7 @@ const RelationshipMapping = () => {
     clearRelations,
     editRelation,
     setEditRelation,
+    updateRelation,
   } = useRelation();
   const location = useLocation();
 
@@ -52,9 +53,10 @@ const RelationshipMapping = () => {
 
   // useeffect 1
   useEffect(() => {
+    console.log(`useEffect 1: ${location.state}`);
     if (location.state?.editMode && location.state.relationData) {
-      const relation = location.state.relationData;
-      console.log(relation);
+      let relation = location.state.relationData;
+      console.log('yaha hu mai' + JSON.stringify(relation.model1));
       setSourceModel(relation.model2);
       setTargetModel(relation.model1);
       setAssociationType(
@@ -70,15 +72,17 @@ const RelationshipMapping = () => {
 
   // use effect2
   useEffect(() => {
+    console.log(`useEffect 2: ${JSON.stringify(editRelation)}`);
+
     if (editRelation) {
-      setSourceModel(editRelation.model2);
-      setTargetModel(editRelation.model1);
+      setSourceModel(editRelation.sourceModel);
+      setTargetModel(editRelation.targetModel);
       setAssociationType(
-        editRelation.relationType.toLowerCase().replace(/\s/g, "-")
+        editRelation.associationType.toLowerCase().replace(/\s/g, "-")
       );
       setForeignKey(editRelation.foreignKey || "");
-      setThroughModel(editRelation.through || "");
-      setAsValue(editRelation.as || "");
+      setThroughModel(editRelation.throughModel || "");
+      setAsValue(editRelation.asValue || "");
     }
   }, [editRelation]);
 
@@ -222,7 +226,7 @@ const RelationshipMapping = () => {
         targetModel,
         associationType,
         foreignKey,
-        throughModel,
+        throughModel: (associationType === 'one-to-one' || associationType === 'one-to-many') ? "" : throughModel,
         asValue,
       };
 
@@ -242,7 +246,9 @@ const RelationshipMapping = () => {
       }
 
       if (editRelation) {
-        relations.map((r) => (r.id === editRelation.id ? newRelation : r));
+        // relations.map((r) => (r.id === editRelation.id ? {...r, newRelation} : r));
+
+        updateRelation(newRelation);
 
         setEditRelation(null);
         toast.success("Relation updated successfully.");
@@ -471,7 +477,6 @@ const RelationshipMapping = () => {
 };
 
 export default RelationshipMapping;
-
 
 
 
