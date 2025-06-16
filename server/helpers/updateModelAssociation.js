@@ -1,8 +1,6 @@
 const db = require("../config/db")
 const deleteRelationship = require("./deleteRelationship");
 
-
-
 async function updateModelAssociation(userId, modelName, targetModel, type, foreignKey, as) {
   const [rows] = await db.execute(
     `SELECT * FROM models WHERE user_id = ? AND name = ?`,
@@ -37,7 +35,7 @@ async function updateModelAssociation(userId, modelName, targetModel, type, fore
   if (type === 'belongsToMany') {
     options.unshift(`through: '${throughTable}'`);
   }
-
+  console.log("Options for association:", options);
   const association = `${modelName}.${type}(models.${targetModel}, { ${options.join(', ')} });`;
 
   // Inject into static associate block

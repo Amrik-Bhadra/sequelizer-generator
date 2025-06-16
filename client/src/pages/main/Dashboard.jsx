@@ -67,7 +67,7 @@ const Dashboard = () => {
   const [model2, setModel2] = useState("");
   const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
   const { user } = useAuth();
-  
+
   const fetchData = async () => {
     setLoading(true);
     try {
