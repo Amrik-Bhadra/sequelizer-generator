@@ -10,6 +10,7 @@ import { useRelation } from "../../contexts/ModelContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { v4 as uuidv4 } from "uuid";
 import axiosInstance from "../../utils/axiosInstance";
+import { generateAssociationCode, generateEditAssociationCode } from "../../utils/relationshipCodeGeneration";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 
@@ -37,6 +38,7 @@ const RelationshipMapping = () => {
   const [item, setItem] = useState("");
   const [modelList, setModelList] = useState([]);
   const [modelCodes, setModelCodes] = useState({});
+  const [metadata, setMetadata] = useState({});
   const { user } = useAuth();
 
   const {
@@ -54,7 +56,8 @@ const RelationshipMapping = () => {
   useEffect(() => {
     if (location.state?.editMode && location.state.relationData) {
       const relation = location.state.relationData;
-      console.log(relation);
+      console.log("Editing relation:", relation.sourceModel);
+      console.log(JSON.stringify(relation, null, 2));
       setSourceModel(relation.model2);
       setTargetModel(relation.model1);
       setAssociationType(
@@ -82,105 +85,50 @@ const RelationshipMapping = () => {
     }
   }, [editRelation]);
 
-  const generateAssociationCode = () => {
-    if (!sourceModel || !targetModel || !associationType) {
-      setGeneratedCode({
-        sourceCode: "// Please select the models",
-        targetCode: "// Please select the models",
-      });
-      return;
-    }
-
-    let forwardMethod, reverseMethod;
-
-    switch (associationType) {
-      case "one-to-one":
-        forwardMethod = "hasOne";
-        reverseMethod = "belongsTo";
-        break;
-      case "one-to-many":
-        forwardMethod = "hasMany";
-        reverseMethod = "belongsTo";
-        break;
-      case "many-to-many":
-        forwardMethod = "belongsToMany";
-        reverseMethod = "belongsToMany";
-        break;
-      default:
-        throw new Error(`Unknown relationship type: ${associationType}`);
-    }
-
-    const buildOptions = (isReverse = false) => {
-      const opts = [];
-      if (foreignKey) opts.push(`foreignKey: "${foreignKey}"`);
-      if (throughModel && forwardMethod === "belongsToMany") {
-        opts.push(`through: "${throughModel}"`);
-      }
-      if (asValue && !isReverse) {
-        opts.push(`as: "${asValue}"`);
-      }
-      return opts.length > 0 ? `, \n\t\t{ ${opts.join(", ")} }` : "";
-    };
-
-    const forwardLine = `${sourceModel}.${forwardMethod}(models.${targetModel}${buildOptions(
-      false
-    )});`;
-    const reverseLine = `${targetModel}.${reverseMethod}(models.${sourceModel}${buildOptions(
-      true
-    )});`;
-
-    const updateModelCode = (modelName, relationLine) => {
-      let baseCode = modelCodes[modelName] || "";
-
-      if (baseCode.includes("static associate(models)")) {
-        baseCode = baseCode.replace(
-          /static associate\(models\) \{([\s\S]*?)\n\s*\}/,
-          (match, inner) => {
-            const lines = inner
-              .trim()
-              .split("\n")
-              .map((line) => line.trim())
-              .filter(Boolean);
-
-            if (!lines.includes(relationLine)) {
-              lines.push(relationLine);
-            }
-
-            const newInner = lines.map((line) => `    ${line}`).join("\n");
-            return `static associate(models) {\n${newInner}\n  }`;
-          }
-        );
-      } else {
-        const classRegex = new RegExp(
-          `class\\s+${modelName}\\s+extends\\s+Model\\s*\\{`
-        );
-        const match = baseCode.match(classRegex);
-
-        if (match) {
-          baseCode = baseCode.replace(
-            classRegex,
-            `${match[0]}\n  static associate(models) {\n    ${relationLine}\n  }`
-          );
-        } else {
-          baseCode += `\n\nstatic associate(models) {\n    ${relationLine}\n  }\n`;
-        }
-      }
-
-      return baseCode;
-    };
-
-    const sourceUpdatedCode = updateModelCode(sourceModel, forwardLine);
-    const targetUpdatedCode = updateModelCode(targetModel, reverseLine);
-
-    setGeneratedCode({
-      sourceCode: sourceUpdatedCode,
-      targetCode: targetUpdatedCode,
-    });
-  };
+ 
 
   useEffect(() => {
-    generateAssociationCode();
+    generateAssociationCode(
+      sourceModel,
+      targetModel,
+      associationType,
+      foreignKey,
+      throughModel,
+      asValue,
+      modelCodes,
+      setGeneratedCode
+    );
   }, [
+    sourceModel,
+    targetModel,
+    associationType,
+    foreignKey,
+    throughModel,
+    asValue,
+  ]);
+
+  useEffect(() => {
+    if (
+      Object.keys(modelCodes).length > 0 &&
+      sourceModel &&
+      targetModel &&
+      associationType
+    ) {
+      if (location.state?.editMode || editRelation) {
+        generateEditAssociationCode(
+          metadata,
+          sourceModel,
+          targetModel,
+          associationType,
+          foreignKey,
+          throughModel,
+          asValue,
+          setGeneratedCode
+        );
+      }
+    }
+  }, [
+    modelCodes,
     sourceModel,
     targetModel,
     associationType,
@@ -198,10 +146,18 @@ const RelationshipMapping = () => {
         setModelList(names);
 
         const codes = {};
+        const metadata = {};
         data.forEach((model) => {
           codes[model.name] = model.code;
+          console.log("Metadata:", model.metadata);
+          metadata[model.name] =
+            typeof model.metadata === "string"
+              ? JSON.parse(model.metadata)
+              : model.metadata;
         });
         setModelCodes(codes);
+        setMetadata(metadata);
+        console.log("Metadata:", metadata);
       } catch (error) {
         console.error("Error fetching models:", error);
       }
