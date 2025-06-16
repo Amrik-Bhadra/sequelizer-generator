@@ -62,7 +62,8 @@ const updateRelationship = async (req, res) => {
       // Omit foreignKey for many-to-many
       const forwardFK = isManyToMany ? null : foreignKey;
       const reverseFK = isManyToMany ? null : foreignKey;
-      const reverseAs = as ? `reverse_${as}` : fromModel.toLowerCase();
+      const reverseAs = as ? `reverse_${as}` : null;
+
 
       await updateModelAssociation(userId, fromModel, toModel, forwardMethod, forwardFK, as);
       await updateModelAssociation(userId, toModel, fromModel, reverseMethod, reverseFK, reverseAs);
