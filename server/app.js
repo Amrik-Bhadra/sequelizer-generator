@@ -4,7 +4,6 @@ const session = require('express-session');
 const app = express();
 const cors = require('cors');
 const cookieparser = require('cookie-parser');
-const serverless = require('serverless-http');
 
 const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
@@ -32,17 +31,17 @@ app.use(cors(corsOption));
 app.use(cookieparser());
 
 // session setup
-// app.use(session({
-//   secret: 'FJKBWRBRFHB3+3$@%^&fretegVGRG',
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: {
-//     httpOnly: true,
-//     secure: true,        
-//     sameSite: 'none',
-//     maxAge: 1000 * 60 * 60 * 24,
-//   }
-// }));
+app.use(session({
+  secret: 'FJKBWRBRFHB3+3$@%^&fretegVGRG',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: false,        
+    sameSite: 'lax',
+    maxAge: 1000 * 60 * 60 * 24,
+  }
+}));
 
 
 app.use('/api/auth', authRoutes);

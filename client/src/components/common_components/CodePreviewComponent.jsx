@@ -41,9 +41,9 @@ const CodePreviewComponent = ({ title, generatedCode, downloadModal, setDownload
   const [fontSize, setFontSize] = useState(16);
   const [selectedTheme, setSelectedTheme] = useState("vscDarkPlus");
   return (
-    <div className="bg-white p-6 rounded-md shadow-sm flex flex-col">
+    <div className="bg-white dark:bg-dark-sec-bg p-6 rounded-md shadow-sm flex flex-col">
       <div className="flex justify-between items-center mb-3">
-        <h2 className="text-blue-600 text-xl font-semibold">{title}</h2>
+        <h2 className="text-primary text-xl font-semibold">{title}</h2>
         <div className="flex gap-2">
           <SolidIconBtn
             icon={MdContentCopy}
@@ -56,14 +56,14 @@ const CodePreviewComponent = ({ title, generatedCode, downloadModal, setDownload
             icon={FiDownload}
             text={"Download"}
             onClick={() => setDownloadModalClose(!downloadModal)}
-            className="bg-secondary text-white text-sm hover:bg-dark-ter-bg "
+            className="bg-secondary text-white text-sm hover:bg-dark-ter-bg dark:bg-[#474747]"
           />
         </div>
       </div>
 
       <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
         <div className="flex flex-col gap-2">
-          <span className="text-base text-blue-600">Font Size:</span>
+          <span className="text-base text-gray-800 dark:text-gray-light1">Font Size:</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFontSize((prev) => Math.max(prev - 2, 10))}
@@ -71,7 +71,7 @@ const CodePreviewComponent = ({ title, generatedCode, downloadModal, setDownload
             >
               <RiSubtractLine />
             </button>
-            <span className="w-8 text-center">{fontSize}px</span>
+            <span className="w-8 text-center dark:text-white">{fontSize}px</span>
             <button
               onClick={() => setFontSize((prev) => Math.min(prev + 2, 32))}
               className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
@@ -82,7 +82,7 @@ const CodePreviewComponent = ({ title, generatedCode, downloadModal, setDownload
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-blue-600 text-base">Theme:</span>
+          <span className="text-gray-800 dark:text-gray-light1 text-base">Theme:</span>
           <DropdownComponent
             name="theme"
             selectedValue={selectedTheme}

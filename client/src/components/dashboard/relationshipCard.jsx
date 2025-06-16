@@ -11,7 +11,7 @@ import { formatDateToDMY } from "../../utils/helperFunctions";
 
 const RelationshipCard = ({ relationship, onEdit, onDelete ,onView, onDownload }) => {
   return (
-    <div className="flex justify-between items-center px-4 py-3 bg-white border border-gray-300 rounded-md mb-3 shadow-sm">
+    <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-dark-ter-bg border border-gray-300 dark:border-none rounded-md mb-3 shadow-sm">
       {/* Left Side */}
       <div className="flex items-center gap-6">
         <div className="border border-primary text-primary bg-primary/10 p-1 rounded-md">
@@ -22,33 +22,33 @@ const RelationshipCard = ({ relationship, onEdit, onDelete ,onView, onDownload }
         <div className="flex gap-8">
           {/* Model Names */}
           <div className="flex flex-col">
-            <div className="text-1.25rem font-semibold text-gray-800">
+            <div className="text-1.25rem font-semibold text-gray-800 dark:text-white">
               {relationship.model2}
             </div>
-            <div className="text-sm text-gray-500">Model 1</div>
+            <div className="text-sm text-gray-500 dark:text-gray-light2">Model 1</div>
           </div>
 
 
           {/* Relation Type */}
           <div className="flex flex-col">
-            <div className="text-1.25 rem font-semibold text-green-600">
+            <div className="text-1.25 rem font-semibold dark:text-white text-gray-800">
               {relationship.relationType}
             </div>
-            <div className="text-sm text-gray-500">Relation Type</div>
+            <div className="text-sm text-gray-500 dark:text-gray-light2">Relation Type</div>
           </div>
           <div className="flex flex-col">
-            <div className="text-1.25rem font-semibold text-gray-800">
+            <div className="text-1.25rem font-semibold text-gray-800 dark:text-white">
               {relationship.model1}
             </div>
-            <div className="text-sm text-gray-500">Model 2</div>
+            <div className="text-sm text-gray-500 dark:text-gray-light2">Model 2</div>
           </div>
 
           {/* Created On */}
           <div className="flex flex-col">
-            <div className="text-1.25rem font-semibold text-gray-800">
+            <div className="text-1.25rem font-semibold text-gray-800 dark:text-white">
               {formatDateToDMY(relationship.createdAt)}
             </div>
-            <div className="text-sm text-gray-500">Created On</div>
+            <div className="text-sm text-gray-500 dark:text-gray-light2">Created On</div>
           </div>
         </div>
       </div>

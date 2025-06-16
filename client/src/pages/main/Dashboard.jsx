@@ -235,7 +235,7 @@ const Dashboard = () => {
         {/* Models */}
         <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
-            <h2 className="text-xl font-semibold text-blue-600">
+            <h2 className="text-xl font-semibold text-primary">
               Models ({models.length})
             </h2>
             <div className="flex gap-2 flex-wrap">
@@ -285,7 +285,7 @@ const Dashboard = () => {
                   />
                 ))
             ) : (
-              <h2>No Models Yet</h2>
+              <h2 className="dark:text-white">No Models Yet</h2>
             )}
           </div>
 
@@ -321,7 +321,7 @@ const Dashboard = () => {
         {/* Relationships */}
         <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
-            <h2 className="text-xl font-semibold text-blue-600">
+            <h2 className="text-xl font-semibold text-primary">
               Relationships ({relationships.length})
             </h2>
             <div className="flex gap-2 flex-wrap">

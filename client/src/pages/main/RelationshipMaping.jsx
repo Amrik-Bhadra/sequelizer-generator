@@ -13,7 +13,6 @@ import axiosInstance from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 
-
 const associations = [
   { value: "one-to-one", label: "one-to-one" },
   { value: "one-to-many", label: "one-to-many" },
@@ -40,28 +39,48 @@ const RelationshipMapping = () => {
   const [modelCodes, setModelCodes] = useState({});
   const { user } = useAuth();
 
-  const { relations, addRelation, clearRelations, editRelation, setEditRelation } = useRelation();
+  const {
+    relations,
+    addRelation,
+    clearRelations,
+    editRelation,
+    setEditRelation,
+  } = useRelation();
   const location = useLocation();
 
-useEffect(() => {
-  console.log("Location state:", location.state);
-  if (location.state?.editMode && location.state.relationData) {
-    setEditRelation(location.state.relationData);
-  }
-}, [location]);
+  // const
 
-useEffect(() => {
-  console.log("editRelation context updated:", editRelation);
-  if (editRelation) {
-    setSourceModel(editRelation.model2);
-    setTargetModel(editRelation.model1);
-    setAssociationType(editRelation.relationType.toLowerCase().replace(/\s/g, "-"));
-    setForeignKey(editRelation.foreignKey || "");
-    setThroughModel(editRelation.through || "");
-    setAsValue(editRelation.as || "");
-  }
-}, [editRelation]);
+  // useeffect 1
+  useEffect(() => {
+    if (location.state?.editMode && location.state.relationData) {
+      const relation = location.state.relationData;
+      console.log(relation);
+      setSourceModel(relation.model2);
+      setTargetModel(relation.model1);
+      setAssociationType(
+        relation.relationType === "-"
+          ? ""
+          : relation.relationType.toLowerCase().replace(/\s/g, "-")
+      );
+      setForeignKey(relation.foreignKey === "-" ? "" : relation.foreignKey);
+      setThroughModel(relation.through === "-" ? "" : relation.through);
+      setAsValue(relation.as === "-" ? "" : relation.as);
+    }
+  }, [location]);
 
+  // use effect2
+  useEffect(() => {
+    if (editRelation) {
+      setSourceModel(editRelation.model2);
+      setTargetModel(editRelation.model1);
+      setAssociationType(
+        editRelation.relationType.toLowerCase().replace(/\s/g, "-")
+      );
+      setForeignKey(editRelation.foreignKey || "");
+      setThroughModel(editRelation.through || "");
+      setAsValue(editRelation.as || "");
+    }
+  }, [editRelation]);
 
   const generateAssociationCode = () => {
     if (!sourceModel || !targetModel || !associationType) {
@@ -191,65 +210,66 @@ useEffect(() => {
   }, []);
 
   const handleSave = () => {
-  if (!sourceModel || !targetModel || !associationType) {
-    toast.error("Please fill in all required fields.");
-    return;
-  }
+    try {
+      if (!sourceModel || !targetModel || !associationType) {
+        toast.error("Please fill in all required fields.");
+        return;
+      }
 
-  const newRelation = {
-    id: editRelation?.id || uuidv4(),
-    sourceModel,
-    targetModel,
-    associationType,
-    foreignKey,
-    throughModel,
-    asValue,
+      const newRelation = {
+        id: editRelation?.id || uuidv4(),
+        sourceModel,
+        targetModel,
+        associationType,
+        foreignKey,
+        throughModel,
+        asValue,
+      };
+
+      const duplicate = relations.some(
+        (rel) =>
+          rel.sourceModel === sourceModel &&
+          rel.targetModel === targetModel &&
+          rel.associationType === associationType &&
+          rel.foreignKey === foreignKey &&
+          rel.throughModel === throughModel &&
+          rel.asValue === asValue
+      );
+
+      if (duplicate) {
+        toast.error("This relationship already exists!");
+        return;
+      }
+
+      if (editRelation) {
+        relations.map((r) => (r.id === editRelation.id ? newRelation : r));
+
+        setEditRelation(null);
+        toast.success("Relation updated successfully.");
+        return;
+      } else {
+        addRelation(newRelation);
+        toast.success("Relation saved.");
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
-
-  if (editRelation) {
-    const updated = relations.map((r) =>
-      r.id === editRelation.id ? newRelation : r
-    );
-    setEditRelation(null);
-    toast.success("Relation updated successfully.");
-    return clearRelations(updated); // replace if you have updateRelation method
-  }
-
-  const duplicate = relations.some(
-    (rel) =>
-      rel.sourceModel === sourceModel &&
-      rel.targetModel === targetModel &&
-      rel.associationType === associationType &&
-      rel.foreignKey === foreignKey &&
-      rel.throughModel === throughModel &&
-      rel.asValue === asValue
-  );
-
-  if (duplicate) {
-    toast.error("This relationship already exists!");
-    return;
-  }
-
-  addRelation(newRelation);
-  toast.success("Relation saved.");
-  
-};
-
 
   const handleFinalSubmit = async () => {
     if (relations.length === 0) {
       toast.error("No relationships to submit!");
       return;
     }
-    // console.log("User:", user);
+    console.log("User:", user);
 
-    if (!user || !user.user_id) {
+    if (!user || !user.id) {
       toast.error("User not logged in!");
       return;
     }
 
     const payload = {
-      userId: user.user_id,
+      userId: user.id,
       relationships: relations.map((rel) => ({
         fromModel: rel.sourceModel,
         toModel: rel.targetModel,
@@ -267,6 +287,12 @@ useEffect(() => {
 
       if (response.status === 200) {
         toast.success("Relationships submitted successfully!");
+        setSourceModel("");
+        setTargetModel("");
+        setAssociationType("");
+        setForeignKey("");
+        setThroughModel("");
+        setAsValue("");
         clearRelations();
       } else {
         toast.error("Error in submiting relationship");
@@ -283,10 +309,10 @@ useEffect(() => {
         {/* left*/}
         <div className="col-span-1 md:col-span-4 flex flex-col gap-y-2">
           {/* upper box */}
-          <div className="bg-white p-6 rounded-md shadow-sm">
+          <div className="bg-white dark:bg-dark-sec-bg p-6 rounded-md shadow-sm">
             {/* header */}
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-semibold text-blue-600">
+              <h2 className="text-xl font-semibold text-primary">
                 Relationship Mapping
               </h2>
               <div className="flex gap-2">
@@ -294,7 +320,7 @@ useEffect(() => {
                   icon={null}
                   text={"Save"}
                   onClick={handleSave}
-                  className="bg-secondary text-white text-sm"
+                  className="bg-secondary text-white text-sm dark:bg-[#474747]"
                 />
               </div>
             </div>
@@ -381,7 +407,7 @@ useEffect(() => {
         </div>
 
         {/* right */}
-        <div className="col-span-1 bg-white rounded-md shadow-sm h-fit p-3">
+        <div className="col-span-1 bg-white dark:bg-dark-sec-bg rounded-md shadow-sm h-fit p-3">
           <h1 className="text-base text-primary font-semibold">
             Saved Relations
           </h1>
@@ -393,7 +419,7 @@ useEffect(() => {
           <SolidIconBtn
             icon={null}
             text={"Final Submit"}
-            className="w-full bg-secondary text-sm text-white mt-4 hover:bg-[#464646]"
+            className="w-full bg-secondary dark:bg-[#eee] text-sm text-white dark:text-secondary mt-4 hover:bg-[#464646]"
             onClick={() => {
               setPurpose("save");
               setItem("relationship");
