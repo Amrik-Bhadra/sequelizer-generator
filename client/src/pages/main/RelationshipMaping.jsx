@@ -246,24 +246,11 @@ const RelationshipMapping = () => {
 
         setEditRelation(null);
         toast.success("Relation updated successfully.");
-        setSourceModel("");
-        setTargetModel("");
-        setAssociationType("");
-        setForeignKey("");
-        setThroughModel("");
-        setAsValue("");
         return;
       } else {
         addRelation(newRelation);
         toast.success("Relation saved.");
-        setSourceModel("");
-        setTargetModel("");
-        setAssociationType("");
-        setForeignKey("");
-        setThroughModel("");
-        setAsValue("");
       }
-      
     } catch (err) {
       console.log(err);
     }
