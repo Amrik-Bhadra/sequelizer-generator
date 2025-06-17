@@ -303,9 +303,10 @@ const RelationshipMapping = () => {
 
   return (
     <>
-      <div className="min-h-screen max-w-[90vw] mx-auto grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="min-h-screen w-full px-4 sm:px-6 md:px-8 mx-auto grid grid-cols-1 lg:grid-cols-5 gap-4">
+
         {/* left*/}
-        <div className="col-span-1 md:col-span-4 flex flex-col gap-y-2">
+        <div className="col-span-1 lg:col-span-4 flex flex-col gap-y-4">
           {/* upper box */}
           <div className="bg-white dark:bg-dark-sec-bg p-6 rounded-md shadow-sm">
             {/* header */}
@@ -324,7 +325,7 @@ const RelationshipMapping = () => {
             </div>
 
             {/* Dropdowns */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <DropdownComponent
                 label="Select Model 1"
                 selectedValue={sourceModel}
@@ -385,7 +386,7 @@ const RelationshipMapping = () => {
           </div>
 
           {/* lower preview box */}
-          <div className="grid md:grid-cols-2 gap-x-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CodePreviewComponent
               title={"Model 1 Preview"}
               generatedCode={generatedCode.sourceCode}
@@ -402,7 +403,8 @@ const RelationshipMapping = () => {
         </div>
 
         {/* right */}
-        <div className="col-span-1 bg-white dark:bg-dark-sec-bg rounded-md shadow-sm h-fit p-3">
+        
+<div className="col-span-1 lg:col-span-1 bg-white dark:bg-dark-sec-bg rounded-md shadow-sm h-fit p-4">
           <h1 className="text-base text-primary font-semibold">
             Saved Relations
           </h1>

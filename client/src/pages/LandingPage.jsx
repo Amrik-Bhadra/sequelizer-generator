@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaRocket, FaCode, FaDatabase, FaBars, FaTimes } from "react-icons/fa";
-import { motion } from "framer-motion";
+import {motion} from "framer-motion"
 import SolidIconButton from "../components/buttons/SolidIconBtn";
 import { useNavigate } from "react-router-dom";
 import hero_bg from "../assets/hero_bg.svg";
