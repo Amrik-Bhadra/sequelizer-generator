@@ -1,31 +1,30 @@
-
-name: Deploy Server on AWS EC2
+name: Deploy to EC2
 
 on:
   push:
-    branches:
-      - main
     paths:
       - 'server/**'
+    branches:
+      - deployment
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Deploy to EC2
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
-        port: 22
-        script: |
-          cd backend-app
-          git pull origin main
-          cd server
-          npm install
-          pm2 restart all || pm2 start app.js --name backend
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd ~/server
+            git pull origin deployment
+            cd server
+            echo "${{ secrets.ENV_FILE }}" > .env
+            npm install
+            pm2 restart all || pm2 start app.js --name backend
