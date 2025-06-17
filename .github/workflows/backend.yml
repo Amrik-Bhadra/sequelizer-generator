@@ -22,9 +22,11 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
           script: |
-            cd ~/server
+            cd /home/ubuntu/server
             git pull origin deployment
-            cd server
+
+            cd server 
+
             echo "${{ secrets.ENV_FILE }}" > .env
-            npm install
-            pm2 restart all || pm2 start app.js --name backend
+
+            pm2 restart backend || pm2 start app.js --name backend
