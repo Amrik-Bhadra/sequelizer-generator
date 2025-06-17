@@ -313,11 +313,11 @@ const GenerateModel = () => {
 
   return (
     <>
-      <div className="p-3 grid grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
+      <div className="p-4 grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(400px,1fr)] gap-6">
         {/* Left Section */}
         <div>
           {/* Model Name */}
-          <div className="mb-4 p-4 bg-white dark:bg-dark-sec-bg dark:border-none border rounded-md shadow-sm flex items-center gap-4">
+          <div className="mb-4 p-4 bg-white dark:bg-dark-sec-bg dark:border-none border rounded-md shadow-sm flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <label className="text-primary font-semibold text-lg min-w-[100px]">
               Model Name <span className="text-red-500">*</span>
             </label>
@@ -332,7 +332,7 @@ const GenerateModel = () => {
 
           {/* Model Attributes */}
           <div className="mb-4 p-4 bg-white dark:bg-dark-sec-bg dark:border-none border rounded-md shadow-sm flex flex-col">
-            <div className="flex justify-between items-center mb-4 border-b border-gray-300 pb-2">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-4 border-b border-gray-300 pb-2">
               <h2 className="text-primary text-2xl font-semibold mb-4">
                 Model Attributes
               </h2>
@@ -362,7 +362,7 @@ const GenerateModel = () => {
             {fields.map((field) => (
               <div
                 key={field.id}
-                className="relative mb-4 p-4 bg-white dark:bg-dark-ter-bg dark:border-none rounded-md border grid grid-cols-1 md:grid-cols-4 gap-4"
+                className="relative mb-4 p-4 bg-white dark:bg-dark-ter-bg dark:border-none rounded-md border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
               >
                 <button
                   onClick={() => deleteField(field.id)}
@@ -571,7 +571,7 @@ const GenerateModel = () => {
 
         {/* Live Preview */}
         <div className="bg-white dark:bg-dark-sec-bg p-4 rounded shadow-sm w-full max-w-full">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-3">
             <h2 className="text-primary text-xl font-semibold">Preview</h2>
             <div className="flex gap-2">
               <SolidIconBtn

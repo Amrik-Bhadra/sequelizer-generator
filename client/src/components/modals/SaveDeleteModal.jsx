@@ -9,11 +9,12 @@ const SaveDeleteModal = ({ onClick, onClose, purpose, item }) => {
     else return "text-error";
   };
   return (
-    <div className="absolute top-0 left-0 z-10 bg-black/60 h-screen w-screen flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4 py-8 overflow-auto">
       <div
         id="save-container"
-        className="bg-white p-6 rounded-md md:w-[35%] flex flex-col gap-y-3"
+        className="bg-white p-6 rounded-md w-[90%] max-w-[480px] flex flex-col gap-y-4 shadow-md"
       >
+
         <div className={`flex items-center gap-x-3 text-2xl ${getColor()}`}>
           <IoIosWarning className="text-5xl" />{" "}
           <h1 className="font-semibold">
@@ -28,7 +29,7 @@ const SaveDeleteModal = ({ onClick, onClose, purpose, item }) => {
           You can still go back and make changes if you want.
         </p>
 
-        <div className="flex justify-end gap-2 mt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
           <SolidIconBtn
             icon={null}
             text={"Discard"}
