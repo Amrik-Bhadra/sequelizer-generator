@@ -2,11 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const AuthContext = createContext({
-  user: {},
-  setUser: () => {},
-  logout: () => {},
-});
+const AuthContext = createContext();
 
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(() => {

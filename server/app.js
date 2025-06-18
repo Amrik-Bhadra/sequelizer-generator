@@ -30,20 +30,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(cors(corsOption));
 app.use(cookieparser());
 
-// session setup
-app.use(session({
-  secret: 'FJKBWRBRFHB3+3$@%^&fretegVGRG',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: false,        
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 24,
-  }
-}));
-
-
 app.use('/api/auth', authRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/relationship', relationshipRoutes);
