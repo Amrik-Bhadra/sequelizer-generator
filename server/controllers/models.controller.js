@@ -167,7 +167,7 @@ const getAllModels = async (req, res) => {
 };
 
 const getOneModel = async (req, res) => {
-  const userId = req.user.id;
+ const userId = req.user.id;
   const { modelName } = req.params;
 
   try {
