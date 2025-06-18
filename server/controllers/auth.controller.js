@@ -212,5 +212,5 @@ const logout = (req, res) => {
 };
 
 module.exports = {
-    login, register, googleRegister, verifyOtp, forgotPassword, resetPassword, googleLogin, logout, getUserDetails
+    login, register, googleRegister, verifyOtp, forgotPassword, resetPassword, googleLogin, logout
 }
