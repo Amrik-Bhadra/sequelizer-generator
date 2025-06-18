@@ -255,7 +255,7 @@ const RelationshipMapping = () => {
     }
     console.log("User:", user);
 
-    if (!user || !user.id) {
+    if (!user || !user.user_id) {
       toast.error("User not logged in!");
       return;
     }
