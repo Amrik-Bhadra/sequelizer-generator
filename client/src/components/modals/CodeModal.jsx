@@ -37,10 +37,10 @@ const CodeModal = ({ selectedModel, onClose }) => {
   const [selectedTheme, setSelectedTheme] = useState("vscDarkPlus");
   return (
     <div className="absolute top-0 left-0 z-10 bg-black/60 h-screen w-screen flex items-center justify-center">
-      <div id="code-container" className="bg-white p-4 rounded-md md:w-[60%]">
+      <div id="code-container" className="bg-white p-4 rounded-md w-[95%] sm:w-[90%] md:w-[70%] lg:w-[60%] max-h-[90vh] overflow-y-auto">
         <header className="flex items-center justify-between">
           <h1 className="text-xl font-semibold text-primary">Prodct Modal</h1>
-          <div id="button-div" className="flex items-center gap-x-3">
+          <div id="button-div" className="flex flex-wrap gap-2 justify-end">
             <SolidIconBtn
               icon={MdContentCopy}
               text="Copy"

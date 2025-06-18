@@ -20,7 +20,7 @@ const Header = ({ email, name, logout }) => {
           </h1>
         </Link>
 
-        <div className="relative flex gap-4">
+        <div className="relative flex flex-col sm:flex-row gap-2 sm:gap-4 items-end sm:items-center">
           <div className="flex items-center gap-3">
             <span className="h-10 w-10 bg-primary text-white rounded-full flex items-center justify-center text-lg font-semibold">
               {getInitials(name)}
@@ -42,7 +42,7 @@ const Header = ({ email, name, logout }) => {
           </div>
 
           {option && (
-            <div className="absolute -bottom-[7.8rem] right-0 w-full bg-white dark:bg-dark-ter-bg border dark:border dark:border-[#484848] rounded-md shadow-lg z-50 p-3 flex flex-col gap-y-3">
+            <div className="absolute top-full mt-2 right-0 w-48 bg-white dark:bg-dark-ter-bg border dark:border-[#484848] rounded-md shadow-lg z-50 p-3 flex flex-col gap-y-3">
               <ThemeButton />
 
               <SolidIconBtn

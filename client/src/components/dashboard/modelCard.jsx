@@ -20,7 +20,7 @@ const ModelCard = ({
   onDuplicate,
 }) => {
   return (
-    <div className="flex justify-between items-center px-4 py-3 bg-white dark:bg-dark-ter-bg border border-gray-300 dark:border-none rounded-md mb-3 shadow-sm">
+    <div className="flex flex-col md:flex-row md:justify-between gap-4 items-start md:items-center px-4 py-3 bg-white dark:bg-dark-ter-bg border border-gray-300 dark:border-none rounded-md mb-3 shadow-sm">
       {/* Left Side */}
       <div className="flex items-center justify-normal gap-6">
         <div className="border border-primary text-primary bg-primary/10 p-1 rounded-md">
@@ -45,7 +45,7 @@ const ModelCard = ({
       </div>
 
       {/* Right Side: Action Buttons */}
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-2 justify-start md:justify-end">
         <SolidIconBtn
           icon={MdEdit}
           text="Edit"
