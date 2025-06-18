@@ -186,7 +186,12 @@ const RelationshipMapping = () => {
 
   const handleSave = () => {
     try {
-      if (!sourceModel || !targetModel || !associationType || !foreignKey) {
+      if (
+        !sourceModel ||
+        !targetModel ||
+        !associationType ||
+        (!foreignKey && associationType !== "many-to-many")
+      ) {
         toast.error("Please fill in all required fields.");
         return;
       }
@@ -304,7 +309,6 @@ const RelationshipMapping = () => {
   return (
     <>
       <div className="min-h-screen w-full px-4 sm:px-6 md:px-8 mx-auto grid grid-cols-1 lg:grid-cols-5 gap-4">
-
         {/* left*/}
         <div className="col-span-1 lg:col-span-4 flex flex-col gap-y-4">
           {/* upper box */}
@@ -403,8 +407,8 @@ const RelationshipMapping = () => {
         </div>
 
         {/* right */}
-        
-<div className="col-span-1 lg:col-span-1 bg-white dark:bg-dark-sec-bg rounded-md shadow-sm h-fit p-4">
+
+        <div className="col-span-1 lg:col-span-1 bg-white dark:bg-dark-sec-bg rounded-md shadow-sm h-fit p-4">
           <h1 className="text-base text-primary font-semibold">
             Saved Relations
           </h1>
