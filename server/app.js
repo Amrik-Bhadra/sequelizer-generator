@@ -8,11 +8,9 @@ const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
 const relationshipRoutes = require('./routes/relationship.routes');
 
-//let myOrigin = process.env.ENVIRONMENT === 'prod'
-  // ? 'https://sequelizer.netlify.app'
-  // : 'http://localhost:5173';
 
 let myOrigin = 'https://www.devmadeeasy.com';
+
 
 // cors setup
 const corsOption = {
@@ -36,7 +34,7 @@ app.use('/api/relationship', relationshipRoutes);
 
 
 app.get('/', (req, res)=>{
-  res.send('welcome to sequelizer');
+  res.send('welcome to sequelizer generator');
 })
 
 //listen to server

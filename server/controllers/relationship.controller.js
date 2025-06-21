@@ -12,7 +12,7 @@ const updateRelationship = async (req, res) => {
 
       const { forwardMethod, reverseMethod } = mapRelationshipType(relationshipType);
       const isManyToMany = forwardMethod === 'belongsToMany';
-
+      console.log(relation);
       const [rows] = await db.execute(
         `SELECT * FROM models WHERE user_id = ? AND name = ?`,
         [userId, fromModel]
@@ -62,7 +62,7 @@ const updateRelationship = async (req, res) => {
       // Omit foreignKey for many-to-many
       const forwardFK = isManyToMany ? null : foreignKey;
       const reverseFK = isManyToMany ? null : foreignKey;
-      const reverseAs = as ? `reverse_${as}` : null;
+      const reverseAs = as ? `reverse_${as}` : null;
       
       await updateModelAssociation(userId, fromModel, toModel, forwardMethod, forwardFK, as);
       await updateModelAssociation(userId, toModel, fromModel, reverseMethod, reverseFK, reverseAs);
