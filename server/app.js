@@ -34,7 +34,7 @@ app.use('/api/relationship', relationshipRoutes);
 
 
 app.get('/', (req, res)=>{
-  res.send('welcome to sequelizer');
+  res.send('welcome to sequelizer generator');
 })
 
 //listen to server

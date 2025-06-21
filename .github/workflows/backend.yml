@@ -5,7 +5,7 @@ on:
     paths:
       - 'server/**'
     branches:
-      - deployment
+      - main
 
 jobs:
   deploy:
@@ -23,10 +23,8 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/server
-            git pull origin deployment
+            git pull origin main
 
             cd server 
-
-            echo "${{ secrets.ENV_FILE }}" > .env
 
             pm2 restart backend || pm2 start app.js --name backend
