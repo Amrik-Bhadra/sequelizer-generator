@@ -209,7 +209,7 @@ const LandingPage = () => {
             className="px-6 py-3 border-2 border-primary transition rounded-md font-medium text-primary"
             onClick={() => scrollTo("features")}
           >
-            View Demo
+            View Features
           </motion.button>
         </div>
       </section>
