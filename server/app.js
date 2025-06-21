@@ -35,7 +35,7 @@ app.get('/', (req, res) => {
   res.send('Namaste🙏🏻! Apka Humare Platform Pe Swagat hai');
 })
 
-//listen to server
-app.listen(port, () => {
-  console.log(`App is listening at  ${port} ✅`);
+app.listen(port, ()=>{
+    console.log(`App is listening at  ${port} ✅`);
 });
+
