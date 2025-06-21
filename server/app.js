@@ -8,9 +8,7 @@ const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
 const relationshipRoutes = require('./routes/relationship.routes');
 
-
 let myOrigin = 'https://www.devmadeeasy.com';
-
 
 // cors setup
 const corsOption = {
