@@ -15,7 +15,6 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../config/firebase_config";
-import axios from "axios";
 import Loader from "../../components/common_components/Loader";
 import axiosInstance from "../../utils/axiosInstance";
 

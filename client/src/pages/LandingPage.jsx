@@ -209,7 +209,7 @@ const LandingPage = () => {
             className="px-6 py-3 border-2 border-primary transition rounded-md font-medium text-primary"
             onClick={() => scrollTo("features")}
           >
-            Get Started
+            View Features
           </motion.button>
         </div>
       </section>
@@ -265,7 +265,7 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="text-center text-sm text-gray-500 py-8 border-t border-gray-800">
         &copy; {new Date().getFullYear()} Sequelizer. Built for developers, by
-        developers.
+        developers. Team Indigo
       </footer>
     </div>
   );
