@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'server/**'
+      - '.github/workflows/backend.yml'
     branches:
       - main
 
@@ -23,8 +24,18 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /home/ubuntu/server
-            git pull origin main
 
-            cd server 
+            # Force Git to use SSH remote to avoid HTTPS credential prompts
+            git remote set-url origin git@github.com:TeamIndigo4/sequelizer-generator.git
 
+            echo "Current Git Remote URL:"
+            git remote -v
+
+            # Pull latest code
+            git pull origin main --no-rebase
+
+            cd server
+
+            # Restart backend
             pm2 restart backend || pm2 start app.js --name backend
+
