@@ -32,7 +32,7 @@ app.use('/api/relationship', relationshipRoutes);
 
 
 app.get('/', (req, res) => {
-  res.send('welcome to Sequelizer check krte hai chalo');
+  res.send('Namaste🙏🏻! Apka Humare Platform Pe Swagat hai');
 })
 
 //listen to server
