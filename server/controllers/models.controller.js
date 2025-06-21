@@ -132,7 +132,7 @@ const generateModelCode = (modelName, fields) => {
 // CREATE RECORD and MODEL TABLE
 const createRecord = async (req, res) => {
   const { modelName, fields, data } = req.body;
-  const userId = req.session.user.id;
+  const userId = req.user.id;
 
   try {
     // Check if model exists for user
@@ -155,7 +155,7 @@ const createRecord = async (req, res) => {
 
 // READ all models
 const getAllModels = async (req, res) => {
-  const userId = req.session.user.id;
+  const userId = req.user.id;
 
   try {
     const models = await getAllModelsForUser(userId);
@@ -167,7 +167,7 @@ const getAllModels = async (req, res) => {
 };
 
 const getOneModel = async (req, res) => {
-  const userId = req.session.user.id;
+ const userId = req.user.id;
   const { modelName } = req.params;
 
   try {

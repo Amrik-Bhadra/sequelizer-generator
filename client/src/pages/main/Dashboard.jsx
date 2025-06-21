@@ -44,7 +44,7 @@ const Dashboard = () => {
 
   const [models, setModels] = useState([]);
   const [relationships, setRelationships] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const [modelPage, setModelPage] = useState(1);
   const [modelLimit, setModelLimit] = useState(5);
@@ -54,7 +54,7 @@ const Dashboard = () => {
   const [viewCode, setViewCode] = useState("");
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [selectedModel, setModel] = useState(null);
-  const [selectedRelation, setSelectedRelation] = useState(null);
+  const [, setSelectedRelation] = useState(null);
 
   const [saveDeleteModal, setSaveDeleteModal] = useState(false);
   const [selectModel, setSelectModel] = useState("");
@@ -139,9 +139,10 @@ const Dashboard = () => {
   };
 
   const handleRelationshipDelete = async (rel) => {
+ 
     try {
       const response = await axiosInstance.post("/relationship/delete", {
-        userId: user.id,
+        userId: user.user_id,
         fromModel: rel.model1,
         toModel: rel.model2,
         relationshipType: normalizeRelationshipType(rel.relationType),
@@ -233,10 +234,10 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="space-y-6 p-3 max-h-screen h-max overflow-y-auto">
+      <div className="space-y-6 p-3 max-h-screen h-max overflow-y-auto max-w-[100vw]">
         {/* Models */}
         <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
-          <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <h2 className="text-xl font-semibold text-primary">
               Models ({models.length})
             </h2>
@@ -291,7 +292,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
             <div className="text-sm text-gray-600 flex items-center gap-2">
               <span className="dark:text-gray-light2">Display</span>
               <select
@@ -300,7 +301,7 @@ const Dashboard = () => {
                   setModelLimit(parseInt(e.target.value));
                   setModelPage(1);
                 }}
-                className="border rounded px-2 py-1 text-sm"
+                className="border rounded px-2 py-1 text-sm w-[90px]"
               >
                 {ITEMS_PER_PAGE_OPTIONS.map((num) => (
                   <option key={num} value={num}>
@@ -322,7 +323,7 @@ const Dashboard = () => {
 
         {/* Relationships */}
         <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
-          <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <h2 className="text-xl font-semibold text-primary">
               Relationships ({relationships.length})
             </h2>
@@ -389,7 +390,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-4">
             <div className="text-sm text-gray-600 flex items-center gap-2">
               <span className="dark:text-gray-light2">Display</span>
               <select
@@ -398,7 +399,7 @@ const Dashboard = () => {
                   setRelLimit(parseInt(e.target.value));
                   setRelPage(1);
                 }}
-                className="border rounded px-2 py-1 text-sm"
+                className="border rounded px-2 py-1 text-sm w-[90px]"
               >
                 {ITEMS_PER_PAGE_OPTIONS.map((num) => (
                   <option key={num} value={num}>

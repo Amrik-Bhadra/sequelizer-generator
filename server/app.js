@@ -1,13 +1,11 @@
 require('dotenv').config();
 const express = require('express');
-const session = require('express-session');
 const app = express();
 const cors = require('cors');
 const cookieparser = require('cookie-parser');
 
 const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
-console.log('modelRoutes:', typeof modelRoutes);
 const relationshipRoutes = require('./routes/relationship.routes');
 
 let myOrigin = process.env.ENVIRONMENT === 'prod'
@@ -30,20 +28,6 @@ app.use(express.urlencoded({extended: true}));
 app.use(cors(corsOption));
 app.use(cookieparser());
 
-// session setup
-app.use(session({
-  secret: 'FJKBWRBRFHB3+3$@%^&fretegVGRG',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: false,        
-    sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 24,
-  }
-}));
-
-
 app.use('/api/auth', authRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/relationship', relationshipRoutes);
@@ -55,5 +39,5 @@ app.get('/', (req, res)=>{
 
 //listen to server
 app.listen(port, ()=>{
-    console.log(`App is listening to the port ${port} ✅`);
+    console.log(`App is listening at  ${port} ✅`);
 });
