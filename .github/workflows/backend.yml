@@ -24,13 +24,17 @@ jobs:
           script: |
             cd /home/ubuntu/server
 
-            # Ensure Git is using SSH instead of HTTPS (idempotent)
+            # Force Git to use SSH remote to avoid HTTPS credential prompts
             git remote set-url origin git@github.com:TeamIndigo4/sequelizer-generator.git
 
-            # Pull latest changes from GitHub (no credentials needed now)
+            echo "Current Git Remote URL:"
+            git remote -v
+
+            # Pull latest code
             git pull origin main
 
             cd server
 
-            # Restart backend service using PM2
+            # Restart backend
             pm2 restart backend || pm2 start app.js --name backend
+
