@@ -9,7 +9,7 @@ const modelRoutes = require('./routes/models.routes');
 const relationshipRoutes = require('./routes/relationship.routes');
 
 let myOrigin = process.env.ENVIRONMENT === 'prod'
-  ? 'https://sequelizer.netlify.app'
+  ? 'http://sequelizer-bucket.s3-website.ap-south-1.amazonaws.com'
   : 'http://localhost:5173';
 
 // cors setup

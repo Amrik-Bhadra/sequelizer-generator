@@ -265,7 +265,7 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="text-center text-sm text-gray-500 py-8 border-t border-gray-800">
         &copy; {new Date().getFullYear()} Sequelizer. Built for developers, by
-        developers.
+        developers. Team Indigo
       </footer>
     </div>
   );
