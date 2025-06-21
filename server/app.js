@@ -8,9 +8,7 @@ const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
 const relationshipRoutes = require('./routes/relationship.routes');
 
-let myOrigin = process.env.ENVIRONMENT === 'prod'
-  ? 'http://sequelizer-bucket.s3-website.ap-south-1.amazonaws.com'
-  : 'http://localhost:5173';
+let myOrigin = 'https://www.devmadeeasy.com';
 
 // cors setup
 const corsOption = {
