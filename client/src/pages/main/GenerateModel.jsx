@@ -123,68 +123,17 @@ const GenerateModel = () => {
       if (!field.name) return;
 
       schema += `  ${field.name}: {\n`;
-
-      // Map your types to Sequelize DataTypes
-      let sequelizeType;
-      switch (field.type.toLowerCase()) {
-        case "string":
-          sequelizeType = "DataTypes.STRING";
-          break;
-        case "number":
-          sequelizeType = "DataTypes.INTEGER";
-          break;
-        case "boolean":
-          sequelizeType = "DataTypes.BOOLEAN";
-          break;
-        case "date":
-          sequelizeType = "DataTypes.DATE";
-          break;
-        case "array":
-          if (field.arrayType) {
-            let arraySequelizeType;
-            switch (field.arrayType.toLowerCase()) {
-              case "string":
-                arraySequelizeType = "DataTypes.STRING";
-                break;
-              case "number":
-                arraySequelizeType = "DataTypes.INTEGER";
-                break;
-              case "boolean":
-                arraySequelizeType = "DataTypes.BOOLEAN";
-                break;
-              case "date":
-                arraySequelizeType = "DataTypes.DATE";
-                break;
-              case "object":
-                arraySequelizeType = "DataTypes.JSON";
-                break;
-              case "uuid":
-                arraySequelizeType = "DataTypes.UUID";
-                break;
-              default:
-                arraySequelizeType = "DataTypes.STRING";
-            }
-            sequelizeType = `DataTypes.ARRAY(${arraySequelizeType})`;
-          } else {
-            sequelizeType = `DataTypes.ARRAY(DataTypes.STRING)`;
-          }
-          break;
-        case "object":
-          sequelizeType = "DataTypes.JSON";
-          break;
-        case "objectid":
-          sequelizeType = "DataTypes.UUID";
-          break;
-        default:
-          sequelizeType = "DataTypes.STRING";
+      if (field.type === "ARRAY") {
+        schema += `    type: DataTypes.ARRAY(DataTypes.${field.arrayType}),\n`;
+      } else {
+        schema += `    type: DataTypes.${field.type},\n`;
       }
-
-      schema += `    type: ${sequelizeType},\n`;
 
       if (field.primaryKey === "Yes") schema += `    primaryKey: true,\n`;
       if (field.autoIncrement === "Yes") schema += `    autoIncrement: true,\n`;
       if (field.allowNull === "No") schema += `    allowNull: false,\n`;
       if (field.unique === "Yes") schema += `    unique: true,\n`;
+      ``;
 
       if (field.defaultValue) {
         if (
@@ -262,7 +211,7 @@ const GenerateModel = () => {
           toast.error("Failed to update the model.");
         }
       } else {
-        console.log('Model fields: ', fields);
+        console.log("Model fields: ", fields);
         const createResponse = await axiosInstance.post("/models/", {
           modelName,
           fields,
@@ -391,20 +340,21 @@ const GenerateModel = () => {
                     handleFieldChange(field.id, "type", value)
                   }
                   options={[
-                    { value: "String", label: "String" },
-                    { value: "Number", label: "Number" },
-                    { value: "Boolean", label: "Boolean" },
-                    { value: "Date", label: "Date" },
-                    { value: "Array", label: "Array" },
-                    { value: "Object", label: "Object" },
-                    { value: "ObjectId", label: "ObjectId" },
+                    { value: "STRING", label: "String" },
+                    { value: "INTEGER", label: "Integer" },
+                    { value: "DECIMAL", label: "Decimal" },
+                    { value: "FLOAT", label: "Float" },
+                    { value: "BOOLEAN", label: "Boolean" },
+                    { value: "DATE", label: "Date" },
+                    { value: "ARRAY", label: "Array" },
+                    { value: "JSON", label: "JSON Object" },
                   ]}
                   required
                   placeholder="Field Type"
                 />
 
                 {/* Show arrayType dropdown only when type is Array */}
-                {field.type === "Array" && (
+                {field.type === "ARRAY" && (
                   <DropdownComponent
                     label="Array Data Type"
                     name="arrayType"
@@ -413,10 +363,12 @@ const GenerateModel = () => {
                       handleFieldChange(field.id, "arrayType", value)
                     }
                     options={[
-                      { value: "String", label: "String" },
-                      { value: "Number", label: "Number" },
-                      { value: "Boolean", label: "Boolean" },
-                      { value: "Date", label: "Date" },
+                      { value: "STRING", label: "String" },
+                      { value: "INTEGER", label: "Integer" },
+                      { value: "FLOAT", label: "Float" },
+                      { value: "DECIMAL", label: "Decimal" },
+                      { value: "BOOLEAN", label: "Boolean" },
+                      { value: "DATE", label: "Date" },
                     ]}
                     placeholder="Array Data Type"
                   />
@@ -426,9 +378,16 @@ const GenerateModel = () => {
                   label="Primary Key"
                   name="primaryKey"
                   selectedValue={field.primaryKey}
-                  onChange={(value) =>
-                    handleFieldChange(field.id, "primaryKey", value)
-                  }
+                  onChange={(value) => {
+                    handleFieldChange(field.id, "primaryKey", value);
+
+                    if (value === "Yes") {
+                      // Set default values when Primary Key is selected as Yes
+                      handleFieldChange(field.id, "autoIncrement", "Yes");
+                      handleFieldChange(field.id, "allowNull", "No");
+                      handleFieldChange(field.id, "unique", "Yes");
+                    }
+                  }}
                   options={[
                     { value: "No", label: "No" },
                     { value: "Yes", label: "Yes" },
@@ -502,7 +461,6 @@ const GenerateModel = () => {
                 />
                 {field.validate === "len" && (
                   <div className="flex flex-col gap-2 mt-2 w-full">
-                
                     <InputField
                       label={"Min Length"}
                       type="number"

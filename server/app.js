@@ -8,7 +8,7 @@ const authRoutes = require('./routes/auth.routes');
 const modelRoutes = require('./routes/models.routes');
 const relationshipRoutes = require('./routes/relationship.routes');
 
-let myOrigin = 'https://www.devmadeeasy.com';
+let myOrigin = process.env.ENVIRONMENT === 'production' ? 'https://www.devmadeeasy.com' : 'http://localhost:5173';
 
 // cors setup
 const corsOption = {

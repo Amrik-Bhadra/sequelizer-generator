@@ -47,41 +47,45 @@ const generateModelCode = (modelName, fields) => {
   let attrString = '';
   for (const [key, options] of Object.entries(fields)) {
     let sequelizeType;
-    switch (options.type.toLowerCase()) {
-      case "string":
-        sequelizeType = "DataTypes.STRING";
-        break;
-      case "number":
-        sequelizeType = "DataTypes.INTEGER";
-        break;
-      case "boolean":
-        sequelizeType = "DataTypes.BOOLEAN";
-        break;
-      case "date":
-        sequelizeType = "DataTypes.DATE";
-        break;
-      case "array":
-        const base = (options.arrayType || "string").toLowerCase();
-        const map = {
-          string: "DataTypes.STRING",
-          number: "DataTypes.INTEGER",
-          boolean: "DataTypes.BOOLEAN",
-          date: "DataTypes.DATE",
-          object: "DataTypes.JSON",
-          uuid: "DataTypes.UUID",
-        };
-        sequelizeType = `DataTypes.ARRAY(${map[base] || "DataTypes.STRING"})`;
-        break;
-      case "object":
-        sequelizeType = "DataTypes.JSON";
-        break;
-      case "uuid":
-        sequelizeType = "DataTypes.UUID";
-        break;
-      default:
-        sequelizeType = "DataTypes.STRING";
+    // switch (options.type.toLowerCase()) {
+    //   case "string":
+    //     sequelizeType = "DataTypes.STRING";
+    //     break;
+    //   case "number":
+    //     sequelizeType = "DataTypes.INTEGER";
+    //     break;
+    //   case "boolean":
+    //     sequelizeType = "DataTypes.BOOLEAN";
+    //     break;
+    //   case "date":
+    //     sequelizeType = "DataTypes.DATE";
+    //     break;
+    //   case "array":
+    //     const base = (options.arrayType || "string").toLowerCase();
+    //     const map = {
+    //       string: "DataTypes.STRING",
+    //       number: "DataTypes.INTEGER",
+    //       boolean: "DataTypes.BOOLEAN",
+    //       date: "DataTypes.DATE",
+    //       object: "DataTypes.JSON",
+    //       uuid: "DataTypes.UUID",
+    //     };
+    //     sequelizeType = `DataTypes.ARRAY(${map[base] || "DataTypes.STRING"})`;
+    //     break;
+    //   case "object":
+    //     sequelizeType = "DataTypes.JSON";
+    //     break;
+    //   case "uuid":
+    //     sequelizeType = "DataTypes.UUID";
+    //     break;
+    //   default:
+    //     sequelizeType = "DataTypes.STRING";
+    // }
+    if(options.type === "ARRAY"){
+      sequelizeType = `DataTypes.ARRAY(DataTypes.${options.arrayType})`;
+    }else{
+      sequelizeType = `DataTypes.${options.type}`;
     }
-
     let line = `    ${options.name}: {\n      type: ${sequelizeType}`;
     if (options.allowNull !== true && options.allowNull !== "Yes")
       line += ",\n      allowNull: false";
