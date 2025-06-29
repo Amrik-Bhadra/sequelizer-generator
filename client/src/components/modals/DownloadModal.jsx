@@ -11,7 +11,7 @@ const DownloadModal = ({ generatedCode, setDownloadModalClose, modelName }) => {
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4 py-8 overflow-auto">
       <div
         id="download-container"
-        className="bg-white p-6 rounded-md w-[90%] max-w-[500px] flex flex-col gap-y-4 shadow-md"
+        className="bg-white dark:bg-[#333] p-6 rounded-md w-[90%] max-w-[500px] flex flex-col gap-y-4 shadow-md"
       >
 
         <div className="flex gap-x-2 items-center mb-2">
@@ -49,7 +49,7 @@ const DownloadModal = ({ generatedCode, setDownloadModalClose, modelName }) => {
               toast.success(`${fileName}.js donloaded!`);
               setDownloadModalClose(false);
             }}
-            className="bg-secondary text-white text-sm hover:bg-dark-ter-bg "
+            className="bg-secondary dark:bg-[#565656] text-white text-sm hover:bg-dark-ter-bg dark:hover:bg-dark-ter-bg"
           />
         </div>
       </div>

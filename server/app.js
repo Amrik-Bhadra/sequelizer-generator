@@ -32,7 +32,7 @@ app.use('/api/relationship', relationshipRoutes);
 
 
 app.get('/', (req, res) => {
-  res.send('Namaste🙏🏻! Apka Humare Platform Pe Swagat hai');
+  res.send('Su-swagatgam 🙏🏻');
 })
 
 app.listen(port, ()=>{

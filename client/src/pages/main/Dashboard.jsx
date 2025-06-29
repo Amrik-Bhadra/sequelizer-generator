@@ -234,7 +234,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="space-y-6 p-3 max-h-screen h-max overflow-y-auto max-w-[100vw]">
+      <div className="space-y-6 p-3 max-h-screen h-max max-w-[100vw]">
         {/* Models */}
         <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">

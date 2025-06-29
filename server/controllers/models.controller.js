@@ -1,6 +1,7 @@
 // models.controller.js
 
 const db = require('../config/db');
+const { deleteRelationships } = require('../helpers/deleteRelationship');
 
 // SQL Helpers
 const getModelById = async (id) => {
@@ -47,43 +48,10 @@ const generateModelCode = (modelName, fields) => {
   let attrString = '';
   for (const [key, options] of Object.entries(fields)) {
     let sequelizeType;
-    // switch (options.type.toLowerCase()) {
-    //   case "string":
-    //     sequelizeType = "DataTypes.STRING";
-    //     break;
-    //   case "number":
-    //     sequelizeType = "DataTypes.INTEGER";
-    //     break;
-    //   case "boolean":
-    //     sequelizeType = "DataTypes.BOOLEAN";
-    //     break;
-    //   case "date":
-    //     sequelizeType = "DataTypes.DATE";
-    //     break;
-    //   case "array":
-    //     const base = (options.arrayType || "string").toLowerCase();
-    //     const map = {
-    //       string: "DataTypes.STRING",
-    //       number: "DataTypes.INTEGER",
-    //       boolean: "DataTypes.BOOLEAN",
-    //       date: "DataTypes.DATE",
-    //       object: "DataTypes.JSON",
-    //       uuid: "DataTypes.UUID",
-    //     };
-    //     sequelizeType = `DataTypes.ARRAY(${map[base] || "DataTypes.STRING"})`;
-    //     break;
-    //   case "object":
-    //     sequelizeType = "DataTypes.JSON";
-    //     break;
-    //   case "uuid":
-    //     sequelizeType = "DataTypes.UUID";
-    //     break;
-    //   default:
-    //     sequelizeType = "DataTypes.STRING";
-    // }
-    if(options.type === "ARRAY"){
+
+    if (options.type === "ARRAY") {
       sequelizeType = `DataTypes.ARRAY(DataTypes.${options.arrayType})`;
-    }else{
+    } else {
       sequelizeType = `DataTypes.${options.type}`;
     }
     let line = `    ${options.name}: {\n      type: ${sequelizeType}`;
@@ -171,7 +139,7 @@ const getAllModels = async (req, res) => {
 };
 
 const getOneModel = async (req, res) => {
- const userId = req.user.id;
+  const userId = req.user.id;
   const { modelName } = req.params;
 
   try {
@@ -229,8 +197,20 @@ const updateModel = async (req, res) => {
 // DELETE model (metadata only)
 const deleteModel = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   try {
+    const modelData = await getModelById(id);
+    let metadata = typeof modelData.metadata === 'string'
+      ? JSON.parse(modelData.metadata)
+      : modelData.metadata;
+
+    const originalAssociations = metadata.associations || [];
+
+    for (const assoc of originalAssociations) {
+      await deleteRelationships(modelData.name, assoc.target, userId);
+    }
+
     await deleteModelById(id);
     res.status(200).json({ message: 'Model deleted' });
   } catch (err) {

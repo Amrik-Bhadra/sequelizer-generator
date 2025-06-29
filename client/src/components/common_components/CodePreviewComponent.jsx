@@ -23,7 +23,7 @@ import {
   IoMdAdd,
 } from "../../utils/iconsProvider";
 
-const CodePreviewComponent = ({ title, generatedCode, downloadModal, setDownloadModalClose }) => {
+const CodePreviewComponent = ({ title="Preview", generatedCode, downloadModal, setDownloadModalClose }) => {
   const themeOptions = {
     oneDark,
     prism,

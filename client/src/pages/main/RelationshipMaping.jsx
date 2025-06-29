@@ -21,6 +21,7 @@ const associations = [
   { value: "one-to-one", label: "one-to-one" },
   { value: "one-to-many", label: "one-to-many" },
   { value: "many-to-many", label: "many-to-many" },
+
 ];
 
 const RelationshipMapping = () => {
@@ -152,12 +153,12 @@ const RelationshipMapping = () => {
           const fields = model.metadata.fields;
           let primaryKey = "";
 
-          fields.forEach((field) => {
-            if (Object.prototype.hasOwnProperty.call(field, "primaryKey")) {
-              console.log(field);
+          for(let field of fields){
+            if(field.primaryKey === "Yes" || field.primaryKey === "yes"){
               primaryKey = field.name;
+              break;
             }
-          });
+          }
 
           myOb[name] = primaryKey;
         });
@@ -302,9 +303,42 @@ const RelationshipMapping = () => {
 
   useEffect(() => {
     if (sourceModel && modelList[sourceModel]) {
+      console.log(`Dekhu toh kya h!!:   ${modelList}`);
       setForeignKey(modelList[sourceModel]);
     }
   }, [sourceModel, modelList]);
+
+  // Top of your component
+  const [codeWidth, setCodeWidth] = useState(50);
+  const [isDraggingCode, setIsDraggingCode] = useState(false);
+  const [isLargeScreenCode, setIsLargeScreenCode] = useState(
+    window.innerWidth >= 768
+  ); // md breakpoint
+
+  const startDraggingCode = () => setIsDraggingCode(true);
+  const stopDraggingCode = () => setIsDraggingCode(false);
+  const handleDraggingCode = (e) => {
+    if (!isDraggingCode || !isLargeScreenCode) return;
+    const containerWidth = window.innerWidth;
+    const newWidth = (e.clientX / containerWidth) * 100;
+    if (newWidth > 20 && newWidth < 80) {
+      setCodeWidth(newWidth);
+    }
+  };
+
+  useEffect(() => {
+    const updateScreenSize = () => {
+      setIsLargeScreenCode(window.innerWidth >= 768);
+    };
+    window.addEventListener("resize", updateScreenSize);
+    window.addEventListener("mousemove", handleDraggingCode);
+    window.addEventListener("mouseup", stopDraggingCode);
+    return () => {
+      window.removeEventListener("resize", updateScreenSize);
+      window.removeEventListener("mousemove", handleDraggingCode);
+      window.removeEventListener("mouseup", stopDraggingCode);
+    };
+  }, [isDraggingCode]);
 
   return (
     <>
@@ -390,19 +424,49 @@ const RelationshipMapping = () => {
           </div>
 
           {/* lower preview box */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <CodePreviewComponent
-              title={"Model 1 Preview"}
-              generatedCode={generatedCode.sourceCode}
-              downloadModal={downloadModal}
-              setDownloadModalClose={setDownloadModalClose}
-            />
-            <CodePreviewComponent
-              title={"Model 2 Preview"}
-              generatedCode={generatedCode.targetCode}
-              downloadModal={downloadModal}
-              setDownloadModalClose={setDownloadModalClose}
-            />
+          <div>
+            {isLargeScreenCode ? (
+              <div className="flex h-full w-full overflow-hidden">
+                <div style={{ width: `${codeWidth}%` }} className="pr-2">
+                  <CodePreviewComponent
+                    title={"Model 1 Preview"}
+                    generatedCode={generatedCode.sourceCode}
+                    downloadModal={downloadModal}
+                    setDownloadModalClose={setDownloadModalClose}
+                  />
+                </div>
+
+                {/* Draggable divider */}
+                <div
+                  className="w-1 cursor-col-resize bg-gray-300 dark:bg-gray-700 hover:bg-gray-400"
+                  onMouseDown={startDraggingCode}
+                />
+
+                <div style={{ width: `${100 - codeWidth}%` }} className="pl-2">
+                  <CodePreviewComponent
+                    title={"Model 2 Preview"}
+                    generatedCode={generatedCode.targetCode}
+                    downloadModal={downloadModal}
+                    setDownloadModalClose={setDownloadModalClose}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                <CodePreviewComponent
+                  title={"Model 1 Preview"}
+                  generatedCode={generatedCode.sourceCode}
+                  downloadModal={downloadModal}
+                  setDownloadModalClose={setDownloadModalClose}
+                />
+                <CodePreviewComponent
+                  title={"Model 2 Preview"}
+                  generatedCode={generatedCode.targetCode}
+                  downloadModal={downloadModal}
+                  setDownloadModalClose={setDownloadModalClose}
+                />
+              </div>
+            )}
           </div>
         </div>
 
