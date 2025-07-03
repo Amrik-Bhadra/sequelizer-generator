@@ -3,13 +3,11 @@ import SolidIconBtn from "../buttons/SolidIconBtn";
 import { MdDelete } from "../../utils/iconsProvider";
 import { useRelation } from "../../contexts/ModelContext";
 import SaveDeleteModal from "../../components/modals/SaveDeleteModal";
-import { useNavigate } from "react-router-dom";
 
 const AddedRelations = () => {
   const { relations, setRelations, setEditRelation } = useRelation();
   const [showModal, setShowModal] = useState(false);
   const [relationToDelete, setRelationToDelete] = useState(null);
-  const navigate = useNavigate();
 
   const triggerDelete = (id) => {
     setRelationToDelete(id);
