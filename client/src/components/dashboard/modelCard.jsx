@@ -1,5 +1,4 @@
 import React from "react";
-
 import {
   MdEdit,
   FaDatabase,
@@ -18,11 +17,31 @@ const ModelCard = ({
   onView,
   onDownload,
   onDuplicate,
+  selectionMode = false,
+  isChecked = false,
+  onSelectToggle = () => {},
 }) => {
   return (
-    <div className="flex flex-col md:flex-row md:justify-between gap-4 items-start md:items-center px-4 py-3 bg-white dark:bg-dark-ter-bg border border-gray-300 dark:border-none rounded-md mb-3 shadow-sm">
+      <div
+        onClick={selectionMode ? onSelectToggle : undefined}
+        className={`flex flex-col md:flex-row md:justify-between gap-4 items-start md:items-center px-4 py-3 
+          bg-white dark:bg-dark-ter-bg border border-gray-300 dark:border-none rounded-md mb-3 shadow-sm 
+          ${selectionMode && isChecked ? 'border-blue-500 bg-blue-50' : ''} 
+          cursor-pointer`}
+      >     
       {/* Left Side */}
       <div className="flex items-center justify-normal gap-6">
+        {selectionMode && (
+          <input
+            type="checkbox"
+            checked={isChecked}
+            onChange={(e) => {
+              e.stopPropagation(); 
+              onSelectToggle();
+            }}
+            className="w-4 h-4 "
+          />
+        )}
         <div className="border border-primary text-primary bg-primary/10 p-1 rounded-md">
           <FaDatabase className="text-3xl" />
         </div>

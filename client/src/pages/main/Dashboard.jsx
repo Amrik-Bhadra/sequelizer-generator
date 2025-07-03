@@ -14,6 +14,7 @@ import RelationCodeModal from "../../components/modals/RelationCodeModal";
 import { mapRelations } from "../../utils/mapRelationships";
 import JSZip from "jszip";
 import { useAuth } from "../../contexts/AuthContext";
+import { MdDelete, MdDownload } from "react-icons/md";
 
 const ITEMS_PER_PAGE_OPTIONS = [3, 5, 8, 10];
 
@@ -66,6 +67,10 @@ const Dashboard = () => {
   const [model1, setModel1] = useState("");
   const [model2, setModel2] = useState("");
   const [showRelationCodeModal, setShowRelationCodeModal] = useState(false);
+
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedModels, setSelectedModels] = useState([]);
+  
   const { user } = useAuth();
 
   const fetchData = async () => {
@@ -217,6 +222,37 @@ const Dashboard = () => {
     }
   };
 
+  //multiple download
+  const handleDownloadSelectedModels = async () => {
+  const selected = models.filter((m) => selectedModels.includes(m.id));
+
+  if (!selected.length) {
+    toast.error("No models selected");
+    return;
+  }
+
+  try {
+    const zip = new JSZip();
+
+    selected.forEach((model) => {
+      zip.file(`${model.name}.js`, model.code || "// No code available");
+    });
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `selected_models.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast.success("Selected models downloaded!");
+  } catch (err) {
+    console.error("Error generating ZIP:", err);
+    toast.error("Download failed.");
+  }
+};
+
   const modelStart = (modelPage - 1) * modelLimit;
   const relStart = (relPage - 1) * relLimit;
 
@@ -232,38 +268,79 @@ const Dashboard = () => {
   const modelPageCount = Math.ceil(filteredModels.length / modelLimit);
   const relPageCount = Math.ceil(filteredRelationships.length / relLimit);
 
+  const areAllSelected = visibleModels.length > 0 && filteredModels.every((m) => selectedModels.includes(m.id));
+
+
   return (
     <>
       <div className="space-y-6 p-3 max-h-screen h-max max-w-[100vw]">
         {/* Models */}
         <div className="p-6 bg-white dark:bg-dark-sec-bg border dark:border-none rounded-md">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+            
+            <div className="flex items-center gap-3">
+            {selectionMode && (
+              <input
+                type="checkbox"
+                className="w-4 h-4"
+                checked={areAllSelected}
+                onChange={() => {
+                  if (areAllSelected) {
+                    setSelectedModels([]);
+                  } else {
+                    setSelectedModels(filteredModels.map((m) => m.id));
+                  }
+                }}
+              />
+            )}
             <h2 className="text-xl font-semibold text-primary">
               Models ({models.length})
             </h2>
-            <div className="flex gap-2 flex-wrap">
-              <InputField
-                placeholder="Search models..."
-                value={searchTermModel}
-                onChange={setSearchTermModel}
-                className="w-full max-w-xs"
-              />
+          </div>
 
+
+            <div className="flex gap-2 flex-wrap">
+            <InputField
+              placeholder="Search models..."
+              value={searchTermModel}
+              onChange={setSearchTermModel}
+              className="w-full max-w-xs"
+            />
+
+            <SolidIconBtn
+              icon={FaPlus}
+              text={"New Model"}
+              onClick={() => {
+                navigate("/seq/models");
+              }}
+              className="bg-secondary text-white dark:bg-[#fff] dark:text-secondary text-sm"
+            />
+
+            <SolidIconBtn
+              text={selectionMode ? "Cancel Selection" : "Select Models"}
+              onClick={() => {
+                setSelectionMode((prev) => !prev);
+                setSelectedModels([]); 
+              }}
+              className= {`text-white text-sm ${ selectionMode ? "bg-red-500 hover:bg-red-600" : "bg-secondary hover:bg-secondary-dark" }`}
+            />
+
+            {selectionMode && (
               <SolidIconBtn
-                icon={FaPlus}
-                text={"New Model"}
-                onClick={() => {
-                  navigate("/seq/models");
-                }}
-                className="bg-secondary text-white dark:bg-[#fff] dark:text-secondary text-sm"
+                icon={MdDownload}
+                text="Download Selected"
+                onClick={handleDownloadSelectedModels}
+                className="bg-secondary text-white text-sm"
+                disabled={selectedModels.length === 0}
               />
-            </div>
+            )}
+          </div>
+
           </div>
 
           <div className="grid grid-cols-1 gap-2">
             {visibleModels.length > 0 ? (
               visibleModels
-                .slice((modelPage - 1) * modelLimit, modelPage * modelLimit)
                 .map((model, index) => (
                   <ModelCard
                     key={index}
@@ -285,7 +362,18 @@ const Dashboard = () => {
                       setModelName(model.name);
                     }}
                     onDuplicate={handleDuplicate}
+                    selectionMode={selectionMode}
+                    isChecked={selectedModels.includes(model.id)}
+                    onSelectToggle={() => {
+                    if (selectedModels.includes(model.id)) {
+                      setSelectedModels((prev) => prev.filter((id) => id !== model.id));
+                    } else {
+                      setSelectedModels((prev) => [...prev, model.id]);
+                    }
+                  }}
+
                   />
+
                 ))
             ) : (
               <h2 className="dark:text-white">No Models Yet</h2>
